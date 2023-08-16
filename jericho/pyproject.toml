@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "jericho"
+version = "0.1.0"
+description = ""
+authors = ["Arden Chew <achew@grailbio.com>"]
+readme = "README.md"
+packages = [{ include = "**/*" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.101.0"
+uvicorn = {extras = ["standard"], version = "^0.23.2"}
+sqlmodel = "^0.0.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
