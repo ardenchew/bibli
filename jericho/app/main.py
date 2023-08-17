@@ -1,16 +1,14 @@
 from fastapi import FastAPI
-
-from sql.book import book_read
+from src.database import create_db_and_tables
+from src.routers import books, internal
 
 app = FastAPI()
 
 
-@app.get("/health")
-async def health():
-    return {"message": "OK"}
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 
-@app.get("/book/{book_id}")
-async def get_book(book_id: int):
-    return book_read(book_id)
-
+app.include_router(books.router)
+app.include_router(internal.router)

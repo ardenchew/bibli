@@ -1,6 +1,5 @@
-from sql.database import Book, engine
-
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from src.database import Book, engine
+from sqlmodel import Session, select
 
 
 def book_read(book_id: int) -> Book:
