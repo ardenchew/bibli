@@ -1,6 +1,8 @@
-from src.database import Book
-from fastapi import APIRouter
-
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session
+from src.database import get_session
+from src.domain.books import service, schemas
+from sqlalchemy.exc import NoResultFound
 
 # TODO(arden) header dependencies.
 router = APIRouter(
@@ -9,7 +11,10 @@ router = APIRouter(
 )
 
 
-@router.get("/{book_id}", response_model=Book)
-async def get_book(book_id: int):
-    return book_read(book_id)
-
+@router.get("/{book_id}", response_model=schemas.BookRead)
+async def get_book(book_id: int, db: Session = Depends(get_session)):
+    try:
+        book = service.get_book(db, book_id)
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Hero not found")
+    return book
