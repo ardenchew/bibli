@@ -1,8 +1,6 @@
-from typing import Optional
-
+from src.config import pg_url
 from sqlmodel import Field, SQLModel, UniqueConstraint, create_engine
-
-from sql.config import pg_url
+from typing import Optional
 
 
 class Book(SQLModel, table=True):
@@ -21,7 +19,3 @@ engine = create_engine(pg_url, echo=True)
 # TODO(arden) use Alembic migrations.
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
-
-
-if __name__ == "__main__":
-    create_db_and_tables()
