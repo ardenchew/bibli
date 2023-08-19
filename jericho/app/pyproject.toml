@@ -3,7 +3,7 @@ name = "app"
 version = "0.1.0"
 description = ""
 authors = ["Arden Chew <achew@grailbio.com>"]
-readme = "README.md"
+packages = [{ include = "**/*" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -11,6 +11,10 @@ fastapi = "^0.101.1"
 sqlmodel = "^0.0.8"
 uvicorn = "^0.23.2"
 psycopg2 = "^2.9.7"
+requests = "^2.31.0"
+pytest = "^7.4.0"
+pytest-postgresql = "^5.0.0"
+httpx = "^0.24.1"
 
 
 [build-system]
