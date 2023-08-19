@@ -1,16 +1,11 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
-from src.domain.books import schemas
+from src.domain.books import schemas, service
 
 
 def test_get_book(client: TestClient, session: Session):
-    # Insert book into database.
-    book = schemas.Book(title="Demon Copperhead")
-    session.add(book)
-    session.commit()
-
-    book = session.exec(select(schemas.Book)).one()
+    book = service.create_book(session, schemas.Book(title="Demon Copperhead"))
 
     response = client.get(f"/books/{book.id}")
     data = response.json()
