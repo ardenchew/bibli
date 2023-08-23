@@ -17,5 +17,5 @@ async def get_book(book_id: int, session: Session = Depends(get_session)):
     try:
         book = service.get_book(session, book_id)
     except NoResultFound:
-        raise HTTPException(status_code=404, detail="Hero not found")
+        raise HTTPException(status_code=404, detail="book not found")
     return book
