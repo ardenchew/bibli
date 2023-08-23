@@ -1,36 +1,35 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session
 
+from resources.strings import NOT_FOUND_ERROR
 from src.database import get_session
 from src.domain.users import service, schemas
 
 user_router = APIRouter(
     prefix="/user",
     tags=["users"],
+    responses={404: {"descriptions": NOT_FOUND_ERROR}}
 )
 
 
 @user_router.get("/{user_id}", response_model=schemas.User)
 async def get_user(user_id: int, session: Session = Depends(get_session)):
-    try:
-        user = service.get_user(session, user_id)
-    except NoResultFound:
-        raise HTTPException(status_code=404, detail="user not found")
+    user = service.get_user(session, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
     return user
 
 
 @user_router.put("/", response_model=schemas.User)
 async def put_user(user: schemas.UserPut, session: Session = Depends(get_session)):
     db_user = schemas.User.from_orm(user)
-    db_user = service.put_user(session, db_user)
-    return db_user
+    return service.upsert_user(session, db_user)
 
 
-@user_router.delete("/{user_tag}")
+@user_router.delete("/{user_id}")
 async def delete_user(user_id: int, session: Session = Depends(get_session)):
-    try:
-        service.delete_user(session, user_id)
-    except NoResultFound:
-        raise HTTPException(status_code=404, detail="user not found")
+    user = service.get_user(session, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+    service.delete_user(session, user)
     return

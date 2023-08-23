@@ -6,7 +6,7 @@ from src.domain.books import schemas, service
 
 def test_get_book(client: TestClient, session: Session):
     title = "Solito"
-    book = service.create_book(session, schemas.Book(title=title))
+    book = service.upsert_book(session, schemas.Book(title=title))
 
     assert book.id is not None
     assert book.title == title

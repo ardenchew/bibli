@@ -1,39 +1,24 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, update, insert
 
 from src.domain.users import schemas
 
 
 def get_user(session: Session, user_id: int) -> schemas.User:
-    # should this take a requesting user id as well (to display relationship?)
-    statement = select(schemas.User).where(schemas.User.id == user_id)
-    user = session.exec(statement).one()
-    return user
+    return session.get(schemas.User, user_id)
 
 
 # def get_linked_users(session: Session) -> list[schemas.User]:
 #     pass
 
 
-def put_user(session: Session, user: schemas.User) -> schemas.User:
-    # if user.id is None:
-    #     session.add(user)
-    # else:
-    #     db_user = get_user(session, user.id)
-    #     print("user", user)
-    #     print("db_user", db_user)
-    #     for k, v in user.dict().items():
-    #         setattr(db_user, k, v)
-    #     session.add(db_user)
-    print("user", user)
-    session.add(user)
+def upsert_user(session: Session, user: schemas.User) -> schemas.User:
+    user = session.merge(user)
     session.commit()
+    session.refresh(user)
     return user
 
 
-def delete_user(session: Session, user_id: int):
-    statement = select(schemas.User).where(schemas.User.tag == user_id)
-    user = session.exec(statement).one()
-
+def delete_user(session: Session, user: schemas.User):
     session.delete(user)
     session.commit()
     return

@@ -1,11 +1,13 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
+from resources.strings import NOT_FOUND_ERROR
+
 
 def test_get_book(client: TestClient, session: Session):
     from src.domain.books import schemas, service
 
-    book = service.create_book(session, schemas.Book(title="Demon Copperhead"))
+    book = service.upsert_book(session, schemas.Book(title="Demon Copperhead"))
 
     response = client.get(f"/books/{book.id}")
     data = response.json()
@@ -18,7 +20,7 @@ def test_get_book(client: TestClient, session: Session):
     data = response.json()
 
     assert response.status_code == 404
-    assert data["detail"] == "book not found"
+    assert data["detail"] == NOT_FOUND_ERROR
 
 
 def test_crud_user(client: TestClient, session: Session):
@@ -34,7 +36,7 @@ def test_crud_user(client: TestClient, session: Session):
     data = response.json()
 
     assert response.status_code == 404
-    assert data["detail"] == "user not found"
+    assert data["detail"] == NOT_FOUND_ERROR
 
     response = client.put("/user/", json=user.dict())
     data = response.json()
@@ -60,21 +62,27 @@ def test_crud_user(client: TestClient, session: Session):
     assert response.status_code == 200
     assert data["tag"] == user.tag
 
+    response = client.get(f"/user/{user.id}")
+    data = response.json()
 
+    assert response.status_code == 200
+    assert data["id"] == user.id
+    assert data["tag"] == user.tag
+    assert data["name"] == user.name
+    assert data["info"] == user.info
 
-    # response = client.get(f"/users/{user.tag}")
-    # data = response.json()
-    #
-    # assert response.status_code == 200
-    # assert data["id"] == user.id
-    # assert data["tag"] == user.tag
-    # assert data["name"] == user.name
-    # assert data["info"] == user.info
-    #
-    # response = client.get(f"/users/clifford")
-    # data = response.json()
-    #
-    # assert response.status_code == 404
-    # assert data["detail"] == "user not found"
+    response = client.delete(f"/user/{user.id}")
+    assert response.status_code == 200
 
+    response = client.get(f"/user/{user.id}")
+    data = response.json()
+
+    assert response.status_code == 404
+    assert data["detail"] == NOT_FOUND_ERROR
+
+    response = client.delete(f"/user/{user.id}")
+    data = response.json()
+
+    assert response.status_code == 404
+    assert data["detail"] == NOT_FOUND_ERROR
 
