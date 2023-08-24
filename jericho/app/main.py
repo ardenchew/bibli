@@ -28,3 +28,4 @@ def read_openapi_yaml() -> Response:
 app.include_router(books.router)
 app.include_router(internal.router)
 app.include_router(users.user_router)
+app.include_router(users.users_router)

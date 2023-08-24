@@ -7,8 +7,22 @@ def get_user(session: Session, user_id: int) -> schemas.User:
     return session.get(schemas.User, user_id)
 
 
-# def get_linked_users(session: Session) -> list[schemas.User]:
-#     pass
+def get_linked_users(session: Session, q: schemas.LinkedUsersFilter) -> list[schemas.User]:
+    stmt = select(schemas.User)
+    if q.parent_id is not None:
+        stmt = stmt.join(
+            schemas.User.parent_user_links).where(
+            schemas.UserLink.parent_id == q.parent_id).where(
+            schemas.UserLink.relationship_type == q.relationship_type
+        )
+    if q.child_id is not None:
+        stmt = stmt.join(
+            schemas.User.child_user_links).where(
+            schemas.UserLink.child_id == q.child_id).where(
+            schemas.UserLink.relationship_type == q.relationship_type
+        )
+
+    return session.exec(stmt).all()
 
 
 def upsert_user(session: Session, user: schemas.User) -> schemas.User:

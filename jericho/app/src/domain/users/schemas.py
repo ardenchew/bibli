@@ -17,16 +17,42 @@ class UserLink(UserLinkBase, table=True):
     child_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
     relationship_type: str
 
+    parent_user: "User" = Relationship(
+        back_populates="child_user_links",
+        sa_relationship_kwargs=dict(
+            foreign_keys="UserLink.parent_id",
+        )
+    )
 
-class UserLinkPut(SQLModel):
+    child_user: "User" = Relationship(
+        back_populates="parent_user_links",
+        sa_relationship_kwargs=dict(
+            foreign_keys="UserLink.child_id",
+        )
+    )
+
+
+class UserLinkRead(UserLinkBase):
     parent_id: int
     child_id: int
     relationship_type: UserLinkType
 
 
-class UserLinkDelete(SQLModel):
+class UserLinkPut(UserLinkBase):
     parent_id: int
     child_id: int
+    relationship_type: UserLinkType
+
+
+class UserLinkDelete(UserLinkBase):
+    parent_id: int
+    child_id: int
+
+
+class LinkedUsersFilter(SQLModel):
+    parent_id: Optional[int]
+    child_id: Optional[int]
+    relationship_type: UserLinkType
 
 
 class UserBase(SQLModel):
@@ -39,20 +65,16 @@ class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     tag: str = Field(default=None, unique=True, index=True)
 
-    parent_users: List["User"] = Relationship(
-        back_populates="child_users",
-        link_model=UserLink,
+    parent_user_links: List[UserLink] = Relationship(
+        back_populates="child_user",
         sa_relationship_kwargs=dict(
-            primaryjoin="User.id==UserLink.child_id",
-            secondaryjoin="User.id==UserLink.parent_id",
+            foreign_keys="UserLink.child_id",
         ),
     )
-    child_users: List["User"] = Relationship(
-        back_populates="parent_users",
-        link_model=UserLink,
+    child_user_links: List[UserLink] = Relationship(
+        back_populates="parent_user",
         sa_relationship_kwargs=dict(
-            primaryjoin="User.id==UserLink.parent_id",
-            secondaryjoin="User.id==UserLink.child_id",
+            foreign_keys="UserLink.parent_id",
         ),
     )
 
