@@ -1,4 +1,4 @@
-from sqlmodel import Session, select, update, insert
+from sqlmodel import Session, select
 
 from src.domain.users import schemas
 
@@ -12,6 +12,7 @@ def get_user(session: Session, user_id: int) -> schemas.User:
 
 
 def upsert_user(session: Session, user: schemas.User) -> schemas.User:
+    # TODO(achew) add regex tag validation and gracefully handle tag collisions.
     user = session.merge(user)
     session.commit()
     session.refresh(user)
@@ -24,19 +25,21 @@ def delete_user(session: Session, user: schemas.User):
     return
 
 
-# def put_user_link(session: Session, user_link: schemas.UserLink) -> schemas.UserLink:
-#     session.add(user_link)
-#     session.commit()
-#     return user_link
-#
-#
-# def delete_user_relationship(session: Session, from_user_id: int, to_user_id: int):
-#     statement = select(schemas.UserLink).where(
-#         schemas.UserLink.from_user_id == from_user_id,
-#         schemas.UserLink.to_user_id == to_user_id,
-#     )
-#     user_link = session.exec(statement).one()
-#
-#     session.delete(user_link)
-#     session.commit()
-#     return
+def get_user_link(session: Session, parent_user_id: int, child_user_id: int) -> schemas.UserLink:
+    stmt = select(schemas.UserLink).where(
+        schemas.UserLink.parent_id == parent_user_id,
+        schemas.UserLink.child_id == child_user_id,
+    )
+    return session.exec(stmt).one()
+
+
+def upsert_user_link(session: Session, user_link: schemas.UserLink) -> schemas.UserLink:
+    session.merge(user_link)
+    session.commit()
+    return user_link
+
+
+def delete_user_link(session: Session, user_link: schemas.UserLink):
+    session.delete(user_link)
+    session.commit()
+    return

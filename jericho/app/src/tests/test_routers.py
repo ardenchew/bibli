@@ -23,7 +23,7 @@ def test_get_book(client: TestClient, session: Session):
     assert data["detail"] == NOT_FOUND_ERROR
 
 
-def test_crud_user(client: TestClient, session: Session):
+def test_crud_user(client: TestClient):
     from src.domain.users import schemas
 
     user = schemas.User(

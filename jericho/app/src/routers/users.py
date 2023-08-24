@@ -33,3 +33,18 @@ async def delete_user(user_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
     service.delete_user(session, user)
     return
+
+
+@user_router.put("/link/", response_model=schemas.UserLink)
+async def put_user_link(user_link: schemas.UserLinkPut, session: Session = Depends(get_session)):
+    db_user_link = schemas.UserLink.from_orm(user_link)
+    return service.upsert_user_link(session, db_user_link)
+
+
+@user_router.delete("/link/{parent_user_id}/{child_user_id}")
+async def delete_user_link(parent_user_id: int, child_user_id: int, session: Session = Depends(get_session)):
+    user_link = service.get_user_link(session, parent_user_id, child_user_id)
+    if not user_link:
+        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+    service.delete_user_link(session, user_link)
+    return
