@@ -42,17 +42,17 @@ def test_crud_user_link(session: Session):
     link_input = schemas.UserLink(
         parent_id=user1.id,
         child_id=user2.id,
-        relationship_type=schemas.UserLinkType.FOLLOW,
+        type=schemas.UserLinkType.FOLLOW,
     )
 
     link = service.upsert_user_link(session, link_input)
     assert link.parent_id == link_input.parent_id
     assert link.child_id == link_input.child_id
-    assert link.relationship_type == link_input.relationship_type
+    assert link.type == link_input.type
 
     q = schemas.LinkedUsersFilter(
         parent_id=link_input.parent_id,
-        relationship_type=link_input.relationship_type,
+        type=link_input.type,
     )
 
     users = service.get_linked_users(session, q)

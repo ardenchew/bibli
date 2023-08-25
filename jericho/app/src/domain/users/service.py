@@ -13,13 +13,13 @@ def get_linked_users(session: Session, q: schemas.LinkedUsersFilter) -> list[sch
         stmt = stmt.join(
             schemas.User.parent_user_links).where(
             schemas.UserLink.parent_id == q.parent_id).where(
-            schemas.UserLink.relationship_type == q.relationship_type
+            schemas.UserLink.type == q.type
         )
     if q.child_id is not None:
         stmt = stmt.join(
             schemas.User.child_user_links).where(
             schemas.UserLink.child_id == q.child_id).where(
-            schemas.UserLink.relationship_type == q.relationship_type
+            schemas.UserLink.type == q.type
         )
 
     return session.exec(stmt).all()

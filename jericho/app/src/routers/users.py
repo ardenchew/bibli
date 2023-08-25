@@ -45,7 +45,6 @@ users_router = APIRouter(
 
 @users_router.get("/linked", response_model=List[schemas.UserRead])
 async def get_linked_users(q: schemas.LinkedUsersFilter = Depends(), session: Session = Depends(get_session)):
-    print("ARDEN", q)
     return service.get_linked_users(session, q)
 
 
