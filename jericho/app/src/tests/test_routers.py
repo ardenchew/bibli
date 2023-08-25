@@ -5,6 +5,7 @@ from resources.strings import NOT_FOUND_ERROR
 
 
 def test_get_book(client: TestClient, session: Session):
+    # pylint: disable=C0415
     from src.domain.books import schemas, service
 
     book = service.upsert_book(session, schemas.Book(title="Demon Copperhead"))
@@ -23,26 +24,28 @@ def test_get_book(client: TestClient, session: Session):
     assert data["detail"] == NOT_FOUND_ERROR
 
 
-# def test_get_author(client: TestClient, session: Session):
-#     from src.domain.books import schemas, service
-#
-#     book = service.upsert_book(session, schemas.Book(title="Demon Copperhead"))
-#
-#     response = client.get(f"/book/{book.id}")
-#     data = response.json()
-#
-#     assert response.status_code == 200
-#     assert data["id"] == book.id
-#     assert data["title"] == book.title
-#
-#     response = client.get(f"/book/{book.id + 1}")
-#     data = response.json()
-#
-#     assert response.status_code == 404
-#     assert data["detail"] == NOT_FOUND_ERROR
+def test_get_author(client: TestClient, session: Session):
+    # pylint: disable=C0415
+    from src.domain.books import schemas, service
+
+    author = service.upsert_author(session, schemas.Author(name="Javier Zamora"))
+
+    response = client.get(f"/author/{author.id}")
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data["id"] == author.id
+    assert data["name"] == author.name
+
+    response = client.get(f"/author/{author.id + 1}")
+    data = response.json()
+
+    assert response.status_code == 404
+    assert data["detail"] == NOT_FOUND_ERROR
 
 
 def test_crud_user(client: TestClient):
+    # pylint: disable=C0415
     from src.domain.users import schemas
 
     user = schemas.User(
@@ -51,7 +54,7 @@ def test_crud_user(client: TestClient):
         info="A waggin\' doggo that loves Emily Dickinson and Clifford."
     )
 
-    response = client.get(f"/user/1")
+    response = client.get("/user/1")
     data = response.json()
 
     assert response.status_code == 404
@@ -101,6 +104,7 @@ def test_crud_user(client: TestClient):
 
 
 def test_crud_user_link(client: TestClient, session: Session):
+    # pylint: disable=C0415
     from src.domain.users import schemas, service
 
     user1 = schemas.User(tag="first", name="first")
@@ -123,12 +127,12 @@ def test_crud_user_link(client: TestClient, session: Session):
     assert data["child_id"] == link.child_id
     assert data["type"] == link.type
 
-    q = {
+    user_filter = {
         "parent_id": user1.id,
         "type": "follow",
     }
 
-    response = client.get("/users/linked", params=q)
+    response = client.get("/users/linked", params=user_filter)
     data = response.json()
 
     assert response.status_code == 200
@@ -143,7 +147,7 @@ def test_crud_user_link(client: TestClient, session: Session):
     assert response.status_code == 200
     assert data is None
 
-    response = client.get("/users/linked", params=q)
+    response = client.get("/users/linked", params=user_filter)
     data = response.json()
 
     assert response.status_code == 200

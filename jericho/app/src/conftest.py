@@ -4,19 +4,17 @@ from psycopg import Connection
 from sqlmodel import Session, SQLModel, create_engine
 
 from main import app
-from src.database import get_session, generate_db_connection_url
+from src.database import get_session
 
 
 @pytest.fixture(name="session")
 def session_fixture(postgresql: Connection):
-    url = generate_db_connection_url(
-        user=postgresql.info.user,
-        password=postgresql.info.password,
-        host=postgresql.info.host,
-        protocol="postgresql+psycopg2",
-        port=postgresql.info.port,
-        database=postgresql.info.dbname,
-    )
+    url = (f"postgresql+psycopg2://"
+           f"{postgresql.info.user}:"
+           f"{postgresql.info.password}@"
+           f"{postgresql.info.host}:"
+           f"{postgresql.info.port}/"
+           f"{postgresql.info.dbname}")
     engine = create_engine(url)
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:

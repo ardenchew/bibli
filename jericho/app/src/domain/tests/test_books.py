@@ -29,9 +29,9 @@ def test_crud_author(session: Session):
 
     author_input = schemas.Author(
         name="Virginia Woolfe",
-        summary="""Adeline Virginia Woolf was an English writer. 
-        She is considered one of the most important modernist 
-        20th-century authors and a pioneer in the use of 
+        summary="""Adeline Virginia Woolf was an English writer.
+        She is considered one of the most important modernist
+        20th-century authors and a pioneer in the use of
         stream of consciousness as a narrative device.""",
     )
     author = service.upsert_author(session, author_input)
@@ -41,10 +41,9 @@ def test_crud_author(session: Session):
     author = service.get_author(session, author.id)
     assert author is not None
 
-    author.name = "Virginia Woolf",
+    author.name = "Virginia Woolf"
     author = service.upsert_author(session, author)
     assert author is not None
     author = service.get_author(session, author.id)
     assert author is not None
     assert author.name != author_input.name
-

@@ -1,7 +1,8 @@
 from datetime import date
 from enum import Enum
-from sqlmodel import Boolean, Column, Date, Field, Relationship, SQLModel
 from typing import List, Optional
+
+from sqlmodel import Boolean, Column, Date, Field, Relationship, SQLModel
 
 
 class TagBase(SQLModel):

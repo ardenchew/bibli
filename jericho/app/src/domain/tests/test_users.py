@@ -50,12 +50,12 @@ def test_crud_user_link(session: Session):
     assert link.child_id == link_input.child_id
     assert link.type == link_input.type
 
-    q = schemas.LinkedUsersFilter(
+    user_filter = schemas.LinkedUsersFilter(
         parent_id=link_input.parent_id,
         type=link_input.type,
     )
 
-    users = service.get_linked_users(session, q)
+    users = service.get_linked_users(session, user_filter)
     assert users is not None
     assert len(users) == 1
     assert users[0].id == user2.id
@@ -66,5 +66,5 @@ def test_crud_user_link(session: Session):
     assert link is not None
 
     service.delete_user_link(session, link)
-    users = service.get_linked_users(session, q)
+    users = service.get_linked_users(session, user_filter)
     assert len(users) == 0
