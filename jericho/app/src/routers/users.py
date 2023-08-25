@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session
 from typing import List
+
+from sqlmodel import Session
+from fastapi import APIRouter, Depends, HTTPException
 
 from resources.strings import NOT_FOUND_ERROR
 from src.database import get_session
@@ -44,9 +45,11 @@ users_router = APIRouter(
 
 
 @users_router.get("/linked", response_model=List[schemas.UserRead])
-async def get_linked_users(q: schemas.LinkedUsersFilter = Depends(), session: Session = Depends(get_session)):
-    print("ARDEN", q)
-    return service.get_linked_users(session, q)
+async def get_linked_users(
+        users_filter: schemas.LinkedUsersFilter = Depends(),
+        session: Session = Depends(get_session),
+):
+    return service.get_linked_users(session, users_filter)
 
 
 @users_router.put("/link", response_model=schemas.UserLinkRead)
@@ -56,7 +59,11 @@ async def put_user_link(user_link: schemas.UserLinkPut, session: Session = Depen
 
 
 @users_router.delete("/link/{parent_user_id}/{child_user_id}")
-async def delete_user_link(parent_user_id: int, child_user_id: int, session: Session = Depends(get_session)):
+async def delete_user_link(
+        parent_user_id: int,
+        child_user_id: int,
+        session: Session = Depends(get_session),
+):
     user_link = service.get_user_link(session, parent_user_id, child_user_id)
     if not user_link:
         raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)

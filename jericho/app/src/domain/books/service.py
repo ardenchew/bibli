@@ -12,3 +12,14 @@ def upsert_book(session: Session, book: schemas.Book) -> schemas.Book:
     session.commit()
     session.refresh(book)
     return book
+
+
+def get_author(session: Session, author_id: int) -> schemas.Author:
+    return session.get(schemas.Author, author_id)
+
+
+def upsert_author(session: Session, author: schemas.Author) -> schemas.Author:
+    author = session.merge(author)
+    session.commit()
+    session.refresh(author)
+    return author

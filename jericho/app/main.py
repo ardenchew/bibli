@@ -1,8 +1,9 @@
-from fastapi import FastAPI
-from fastapi.responses import Response
 import functools
 import io
 import yaml
+
+from fastapi import FastAPI
+from fastapi.responses import Response
 
 from src.database import create_db_and_tables
 from src.routers import books, internal, users
