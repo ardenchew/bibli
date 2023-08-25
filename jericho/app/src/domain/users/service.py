@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlmodel import Session, select
 
 from src.domain.users import schemas
@@ -10,7 +12,7 @@ def get_user(session: Session, user_id: int) -> schemas.User:
 def get_linked_users(
         session: Session,
         users_filter: schemas.LinkedUsersFilter,
-) -> list[schemas.User]:
+) -> List[schemas.User]:
     stmt = select(schemas.User)
     if users_filter.parent_id is not None:
         stmt = stmt.join(

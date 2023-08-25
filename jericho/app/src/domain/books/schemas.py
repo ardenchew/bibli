@@ -38,6 +38,7 @@ class BookBase(SQLModel):
     summary: Optional[str]
     publication_date: Optional[date] = Field(sa_column=Column(Date))
     pages: Optional[int] = None
+    # TODO(arden) add ISBN.
 
 
 class Book(BookBase, table=True):

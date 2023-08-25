@@ -19,7 +19,7 @@ async def get_book(book_id: int, session: Session = Depends(get_session)):
     return book
 
 
-@router.get("/author/{author_id}", response_model=schemas.AuthorRead, tags=["authors"])
+@router.get("/author/{author_id}", response_model=schemas.AuthorRead)
 async def get_author(author_id: int, session: Session = Depends(get_session)):
     author = service.get_author(session, author_id)
     if not author:
