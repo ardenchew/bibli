@@ -10,6 +10,19 @@ class Reaction(str, Enum):
     NEUTRAL = 'neutral'
 
 
+class Interval:
+    def __init__(self, low: float, high: float):
+        self.low = low
+        self.high = high
+
+
+REACTION_INTERVAL = {
+    Reaction.NEGATIVE: Interval(0.0, 10.0 / 3),
+    Reaction.NEUTRAL: Interval(10.0 / 3, 20.0 / 3),
+    Reaction.POSITIVE: Interval(20.0 / 3, 10.0),
+}
+
+
 class ReviewBase(SQLModel):
     user_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
     book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
@@ -17,29 +30,27 @@ class ReviewBase(SQLModel):
 
 
 class Review(ReviewBase, table=True):
-    rating: Optional[float] = None
-    reaction: Optional[str] = None
+    rating: float = Field(default=None, index=True)
+    hidden: bool = Field(default=False)
+    reaction: str
+    rank: Optional[int] = Field(default=None)
 
 
 class ReviewRead(ReviewBase):
-    rating: Optional[float] = None
+    rating: float
     reaction: Optional[Reaction] = None
+    hidden: bool
+    # Include book object for comparison searching here.
 
 
 class ReviewPut(ReviewBase):
-    reaction: Optional[Reaction] = None
-
-
-class ComparisonOperator(str, Enum):
-    EQ = '='
-    GT = '>'
-    LT = '<'
+    reaction: Reaction
 
 
 class Comparison(SQLModel):
-    left_id: int
-    right_id: int
-    operator: ComparisonOperator
+    less_than_id: Optional[int] = None
+    equal_to_id: Optional[int] = None
+    greater_than_id: Optional[int] = None
 
 
 class ReviewsFilter(SQLModel):
