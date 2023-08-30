@@ -69,7 +69,7 @@ def test_crud_user(client: TestClient):
     assert data["info"] == user.info
     assert data["id"] is not None
 
-    user.id = data["id"]
+    user.id = data["id"]  # pylint: disable=C0103
     user.tag = "archer_the_naughty_boi"
 
     response = client.put("/user", json=user.dict())
