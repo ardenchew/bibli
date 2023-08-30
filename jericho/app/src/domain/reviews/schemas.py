@@ -1,3 +1,4 @@
+from collections import namedtuple
 from enum import Enum
 from typing import Optional
 
@@ -10,10 +11,7 @@ class Reaction(str, Enum):
     NEUTRAL = 'neutral'
 
 
-class Interval:
-    def __init__(self, low: float, high: float):
-        self.low = low
-        self.high = high
+Interval = namedtuple('Interval', ['low', 'high'])
 
 
 REACTION_INTERVAL = {
@@ -31,15 +29,15 @@ class ReviewBase(SQLModel):
 
 class Review(ReviewBase, table=True):
     rating: float = Field(default=None, index=True)
-    hidden: bool = Field(default=False)
+    hide_rank: bool = Field(default=False)
+    rank: int = Field(default=None)
     reaction: str
-    rank: Optional[int] = Field(default=None)
 
 
 class ReviewRead(ReviewBase):
     rating: float
-    reaction: Optional[Reaction] = None
-    hidden: bool
+    reaction: Reaction
+    hide_rank: bool
     # Include book object for comparison searching here.
 
 
@@ -51,6 +49,12 @@ class Comparison(SQLModel):
     less_than_id: Optional[int] = None
     equal_to_id: Optional[int] = None
     greater_than_id: Optional[int] = None
+
+
+class ComparisonReviews(SQLModel):
+    less_than: Optional[Review]
+    equal_to: Optional[Review]
+    greater_than: Optional[Review]
 
 
 class ReviewsFilter(SQLModel):

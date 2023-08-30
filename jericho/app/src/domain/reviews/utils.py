@@ -1,7 +1,5 @@
-from typing import Optional
-
-from sqlalchemy import func, update
-from sqlmodel import Session, col, select, update
+from sqlalchemy import func
+from sqlmodel import Session, col, select
 
 from src.domain.reviews import constants, schemas
 
@@ -24,33 +22,56 @@ def generate_query_statement(
     return stmt
 
 
-def validate_comparisons(
+def get_review_or_none(
+        session: Session,
+        user_id: int,
+        book_id: int,
+) -> schemas.Review:
+    stmt = select(schemas.Review).where(
+        schemas.Review.user_id == user_id,
+        schemas.Review.book_id == book_id,
+        )
+    return session.exec(stmt).first()
+
+
+def get_comparison_reviews(
+        session: Session,
+        user_id: int,
+        comparison: schemas.Comparison
+) -> schemas.ComparisonReviews:
+    return schemas.ComparisonReviews(
+        less_than=get_review_or_none(session, user_id, comparison.less_than_id),
+        equal_to=get_review_or_none(session, user_id, comparison.equal_to_id),
+        greater_than = get_review_or_none(session, user_id, comparison.greater_than_id)
+    )
+
+
+def validate_comparisons(  # pylint: disable=R0912
         new: schemas.Review,
+        reviews: schemas.ComparisonReviews,
         max_rank: int = None,
-        left: schemas.Review = None,
-        equal: schemas.Review = None,
-        right: schemas.Review = None,
 ):
-    if equal and (left or right):
+    if reviews.equal_to and (reviews.less_than or reviews.greater_than):
         raise ValueError
 
-    if equal:
-        if new.reaction != equal.reaction:
+    if reviews.equal_to:
+        if new.reaction != reviews.equal_to.reaction:
             raise ValueError
-    elif left and right:
-        if right.rank - left.rank != 1:
+    elif reviews.less_than and reviews.greater_than:
+        if reviews.greater_than.rank - reviews.less_than.rank != 1:
             raise ValueError
-        if (left.reaction != new.reaction) or (right.reaction != new.reaction):
+        if ((reviews.less_than.reaction != new.reaction)
+                or (reviews.greater_than.reaction != new.reaction)):
             raise ValueError
-    elif left:
-        if left.reaction != new.reaction:
+    elif reviews.less_than:
+        if reviews.less_than.reaction != new.reaction:
             raise ValueError
-        if left.rank != max_rank:
+        if reviews.less_than.rank != max_rank:
             raise ValueError
-    elif right:
-        if right.reaction != new.reaction:
+    elif reviews.greater_than:
+        if reviews.greater_than.reaction != new.reaction:
             raise ValueError
-        if right.rank != 1:
+        if reviews.greater_than.rank != 1:
             raise ValueError
     else:
         if max_rank and max_rank != 0:
@@ -72,7 +93,17 @@ def get_max_rank(
     return rank if rank else 0
 
 
-def sync_hidden(
+def merge_equal_to_review(
+        new: schemas.Review,
+        equal_to: schemas.Review
+) -> schemas.Review:
+    new.rank = equal_to.rank
+    new.rating = equal_to.rating
+    new.hide_rank = equal_to.hide_rank
+    return new
+
+
+def sync_hide_rank(
         session: Session,
         user_id: int,
 ):
@@ -86,11 +117,11 @@ def sync_hidden(
 
     reviews_to_update = session.exec(select(schemas.Review).where(
         schemas.Review.user_id == user_id,
-        schemas.Review.hidden != should_hide,
+        schemas.Review.hide_rank != should_hide,
     )).all()
 
     for review in reviews_to_update:
-        review.hidden = should_hide
+        review.hide_rank = should_hide
         session.merge(review)
 
 
@@ -140,7 +171,7 @@ def delete_review_sync_ratings(
     if len(equal_ranked_reviews) > 1:
         session.delete(review)
         return
-    elif len(equal_ranked_reviews) == 0:
+    if len(equal_ranked_reviews) == 0:
         raise ValueError
 
     interval = schemas.REACTION_INTERVAL[review.reaction]

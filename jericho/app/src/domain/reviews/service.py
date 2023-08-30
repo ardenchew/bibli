@@ -1,8 +1,8 @@
 from typing import List
 
-from sqlmodel import Session, select, update
+from sqlmodel import Session, select
 
-from src.domain.reviews import constants, schemas, utils
+from src.domain.reviews import schemas, utils
 
 
 def get_review(
@@ -13,7 +13,7 @@ def get_review(
     stmt = select(schemas.Review).where(
         schemas.Review.user_id == user_id,
         schemas.Review.book_id == book_id,
-        )
+    )
     return session.exec(stmt).one()
 
 
@@ -28,7 +28,7 @@ def upsert_review(
         session: Session,
         review: schemas.Review,
         comparison: schemas.Comparison,
-):
+) -> schemas.Review:
     # if review has no reaction add without rank
 
     existing_review = session.exec(select(schemas.Review).where(
@@ -39,38 +39,26 @@ def upsert_review(
     if existing_review:
         utils.delete_review_sync_ratings(session, existing_review)
 
-    left_review = None
-    if comparison.less_than_id:
-        left_review = get_review(session, review.user_id, comparison.less_than_id)
-
-    equal_review = None
-    if comparison.equal_to_id:
-        equal_review = get_review(session, review.user_id, comparison.equal_to_id)
-
-    right_review = None
-    if comparison.greater_than_id:
-        right_review = get_review(session, review.user_id, comparison.greater_than_id)
-
+    comparison_reviews = utils.get_comparison_reviews(session, review.user_id, comparison)
     max_rank = utils.get_max_rank(session, review.user_id, review.reaction)
 
     utils.validate_comparisons(
         review,
+        comparison_reviews,
         max_rank=max_rank,
-        left=left_review,
-        equal=equal_review,
-        right=right_review,
     )
 
-    if equal_review:
-        review.rank = equal_review.rank
-        review.rating = equal_review.rating
-        review.hidden = equal_review.hidden
+    if comparison_reviews.equal_to:
+        review = utils.merge_equal_to_review(review, comparison_reviews.equal_to)
         review = session.merge(review)
     else:
-        review.rank = right_review.rank if right_review else max_rank + 1
+        if comparison_reviews.greater_than:
+            review.rank = comparison_reviews.greater_than.rank
+        else:
+            review.rank = max_rank + 1
         utils.add_review_sync_ratings(session, review)
 
-    utils.sync_hidden(session, review.user_id)
+    utils.sync_hide_rank(session, review.user_id)
 
     session.commit()
 
@@ -80,5 +68,5 @@ def upsert_review(
 def delete_review(session: Session, review: schemas.Review):
     user_id = review.user_id
     utils.delete_review_sync_ratings(session, review)
-    utils.sync_hidden(session, user_id)
+    utils.sync_hide_rank(session, user_id)
     session.commit()
