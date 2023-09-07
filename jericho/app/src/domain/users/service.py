@@ -2,6 +2,7 @@ from typing import List
 
 from sqlmodel import Session, select
 
+from src.domain import collections
 from src.domain.users import schemas
 
 
@@ -31,14 +32,18 @@ def get_linked_users(
 
 
 def upsert_user(session: Session, user: schemas.User) -> schemas.User:
-    # TODO(achew) add regex tag validation and gracefully handle tag collisions.
+    new_user = user.id is None
+    # TODO(arden) add regex tag validation and gracefully handle tag collisions.
     user = session.merge(user)
+    if new_user:
+        collections.utils.insert_default_collections(session, user.id)
     session.commit()
     session.refresh(user)
     return user
 
 
 def delete_user(session: Session, user: schemas.User):
+    # TODO(arden) on delete cascade.
     session.delete(user)
     session.commit()
 
