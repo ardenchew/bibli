@@ -1,13 +1,13 @@
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
 
 class CollectionType(str, Enum):
-    SAVED = 'saved'
-    ACTIVE = 'active'
-    COMPLETE = 'complete'
+    SAVED = "saved"
+    ACTIVE = "active"
+    COMPLETE = "complete"
 
 
 DEFAULT_COLLECTION_TO_NAME = {
@@ -18,7 +18,9 @@ DEFAULT_COLLECTION_TO_NAME = {
 
 
 class CollectionBookLink(SQLModel, table=True):
-    collection_id: int = Field(default=None, primary_key=True, foreign_key="collection.id")
+    collection_id: int = Field(
+        default=None, primary_key=True, foreign_key="collection.id"
+    )
     book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
 
 
@@ -31,7 +33,9 @@ class Collection(CollectionBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     type: Optional[str] = None
 
-    user: Optional["User"] = Relationship(back_populates="collections")
+    user: Optional["User"] = Relationship(  # noqa:F821
+        back_populates="collections",
+    )
 
 
 class CollectionRead(CollectionBase):

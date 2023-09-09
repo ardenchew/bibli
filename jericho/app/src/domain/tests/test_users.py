@@ -10,7 +10,7 @@ def test_crud_user(session: Session):
     user_input = schemas.User(
         name="Archer",
         tag="archer_the_good_boi",
-        info="A waggin\' doggo that loves Emily Dickinson and Clifford."
+        info="A waggin' doggo that loves Emily Dickinson and Clifford.",
     )
 
     user = service.upsert_user(session, user_input)

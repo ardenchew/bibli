@@ -1,6 +1,6 @@
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.config import pg_user, pg_password, pg_host
+from src.config import pg_host, pg_password, pg_user
 
 
 def get_session():
