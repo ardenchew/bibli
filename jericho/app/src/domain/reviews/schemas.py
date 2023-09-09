@@ -6,12 +6,12 @@ from sqlmodel import Field, SQLModel
 
 
 class Reaction(str, Enum):
-    POSITIVE = 'positive'
-    NEGATIVE = 'negative'
-    NEUTRAL = 'neutral'
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
 
 
-Interval = namedtuple('Interval', ['low', 'high'])
+Interval = namedtuple("Interval", ["low", "high"])
 
 
 REACTION_INTERVAL = {

@@ -5,13 +5,21 @@ from sqlmodel import Field, Relationship, SQLModel
 
 
 class UserLinkType(str, Enum):
-    FOLLOW = 'follow'
-    BLOCK = 'block'
+    FOLLOW = "follow"
+    BLOCK = "block"
 
 
 class UserLinkBase(SQLModel):
-    parent_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
-    child_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
+    parent_id: int = Field(
+        default=None,
+        primary_key=True,
+        foreign_key="user.id",
+    )
+    child_id: int = Field(
+        default=None,
+        primary_key=True,
+        foreign_key="user.id",
+    )
 
 
 class UserLink(UserLinkBase, table=True):
@@ -28,7 +36,7 @@ class UserLink(UserLinkBase, table=True):
         back_populates="parent_user_links",
         sa_relationship_kwargs={
             "foreign_keys": "UserLink.child_id",
-        }
+        },
     )
 
 
@@ -72,6 +80,9 @@ class User(UserBase, table=True):
         sa_relationship_kwargs={
             "foreign_keys": "UserLink.parent_id",
         },
+    )
+    collections: List["Collection"] = Relationship(  # noqa: F821
+        back_populates="user",
     )
 
 

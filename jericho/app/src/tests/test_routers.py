@@ -51,7 +51,7 @@ def test_crud_user(client: TestClient):
     user = schemas.User(
         name="Archer",
         tag="archer_the_good_boi",
-        info="A waggin\' doggo that loves Emily Dickinson and Clifford."
+        info="A waggin' doggo that loves Emily Dickinson and Clifford.",
     )
 
     response = client.get("/user/1")

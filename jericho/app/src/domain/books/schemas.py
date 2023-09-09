@@ -17,14 +17,22 @@ class Tag(TagBase, table=True):
 
 
 class BookAuthorLinkType(str, Enum):
-    PRIMARY = 'primary'
-    TRANSLATOR = 'translator'
-    READER = 'reader'
+    PRIMARY = "primary"
+    TRANSLATOR = "translator"
+    READER = "reader"
 
 
 class BookAuthorLinkBase(SQLModel):
-    book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
-    author_id: int = Field(default=None, primary_key=True, foreign_key="author.id")
+    book_id: int = Field(
+        default=None,
+        primary_key=True,
+        foreign_key="book.id",
+    )
+    author_id: int = Field(
+        default=None,
+        primary_key=True,
+        foreign_key="author.id",
+    )
     type: Optional[str] = None
 
 

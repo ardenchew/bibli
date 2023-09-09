@@ -3,7 +3,7 @@ from sqlmodel import Session
 
 from resources.strings import NOT_FOUND_ERROR
 from src.database import get_session
-from src.domain.books import service, schemas
+from src.domain.books import schemas, service
 
 # TODO(arden) header dependencies.
 router = APIRouter(
