@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from src.domain.collections import schemas, utils
 
@@ -36,6 +36,19 @@ def delete_collection(
 ):
     session.delete(collection)  # TODO(arden) sqlalchemy cascade on delete.
     session.commit()
+
+
+def get_collection_book_link(
+        session: Session,
+        collection_id: int,
+        book_id: int,
+) -> schemas.CollectionBookLink:
+    stmt = select(schemas.CollectionBookLink).where(
+        schemas.CollectionBookLink.collection_id == collection_id,
+    ).where(
+        schemas.CollectionBookLink.book_id == book_id,
+    )
+    return session.exec(stmt).one()
 
 
 def insert_collection_book_link(

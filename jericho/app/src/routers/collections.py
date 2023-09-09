@@ -30,11 +30,11 @@ async def get_collections(
 
 
 @router.put("/collection", response_model=schemas.CollectionRead)
-async def put_review(
-        review: schemas.CollectionPut,
+async def put_collection(
+        collection: schemas.CollectionPut,
         session: Session = Depends(get_session),
 ):
-    db_collection = schemas.Collection.from_orm(review)
+    db_collection = schemas.Collection.from_orm(collection)
     return service.upsert_collection(session, db_collection)
 
 
@@ -60,12 +60,12 @@ async def post_collection_book_link(
 
 
 @router.patch("/collection_book_link", response_model=schemas.CollectionBookLink)
-async def post_collection_book_link(
+async def patch_collection_book_link(
         current_link: schemas.CollectionBookLink,
         new_link: schemas.CollectionBookLink,
         session: Session = Depends(get_session)
 ):
-    db_current_link = schemas.CollectionBookLink.from_orm(current_link)
+    db_current_link = service.get_collection_book_link(session, current_link.collection_id, current_link.book_id)
     db_new_link = schemas.CollectionBookLink.from_orm(new_link)
     return service.patch_collection_book_link(session, db_current_link, db_new_link)
 
@@ -75,5 +75,6 @@ async def delete_collection_book_link(
         link: schemas.CollectionBookLink,
         session: Session = Depends(get_session),
 ):
-    service.delete_collection_book_link(session, link)
+    db_link = service.get_collection_book_link(session, link.collection_id, link.book_id)
+    service.delete_collection_book_link(session, db_link)
     return

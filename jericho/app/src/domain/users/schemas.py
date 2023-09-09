@@ -73,6 +73,9 @@ class User(UserBase, table=True):
             "foreign_keys": "UserLink.parent_id",
         },
     )
+    collections: List["Collection"] = Relationship(
+        back_populates="user"
+    )
 
 
 class UserRead(UserBase):

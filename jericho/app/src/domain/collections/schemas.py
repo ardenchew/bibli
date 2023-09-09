@@ -5,15 +5,15 @@ from sqlmodel import Field, Relationship, SQLModel
 
 
 class CollectionType(str, Enum):
-    BOOKMARKED = 'bookmarked'
-    READING = 'reading'
-    FINISHED = 'finished'
+    SAVED = 'saved'
+    ACTIVE = 'active'
+    COMPLETE = 'complete'
 
 
 DEFAULT_COLLECTION_TO_NAME = {
-    CollectionType.BOOKMARKED: "Bookmarked",
-    CollectionType.READING: "Reading",
-    CollectionType.FINISHED: "Finished",
+    CollectionType.SAVED: "Saved",
+    CollectionType.ACTIVE: "Active",
+    CollectionType.COMPLETE: "Complete",
 }
 
 
@@ -30,14 +30,13 @@ class CollectionBase(SQLModel):
 class Collection(CollectionBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     type: Optional[str] = None
-    # # TODO(arden) probably don't want each book to load every collection its on.
-    # books: List["Book"] = Relationship(back_populates="collections")
+
+    user: Optional["User"] = Relationship(back_populates="collections")
 
 
 class CollectionRead(CollectionBase):
     id: int
     type: Optional[CollectionType]
-    # books: List["BookRead"]
 
 
 class CollectionPut(CollectionBase):

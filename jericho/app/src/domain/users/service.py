@@ -36,7 +36,7 @@ def upsert_user(session: Session, user: schemas.User) -> schemas.User:
     # TODO(arden) add regex tag validation and gracefully handle tag collisions.
     user = session.merge(user)
     if new_user:
-        collections.utils.insert_default_collections(session, user.id)
+        collections.utils.insert_default_collections(session, user)
     session.commit()
     session.refresh(user)
     return user

@@ -1,15 +1,14 @@
-from sqlalchemy import func
-from sqlmodel import Session, col, select
+from sqlmodel import Session, select
 
 from src.domain.collections import schemas
+from src.domain.users.schemas import User
 
 
 def generate_query_statement(
         collections_filter: schemas.CollectionsFilter,
         limit: int = None,
-        count: bool = False,
 ):
-    stmt = select(schemas.Collection) if not count else select(func.count(schemas.Review.book_id))
+    stmt = select(schemas.Collection)
     if collections_filter.user_id is not None:
         stmt = stmt.where(schemas.Collection.user_id == collections_filter.user_id)
     if collections_filter.type is not None:
@@ -21,12 +20,12 @@ def generate_query_statement(
 
 def insert_default_collections(
         session: Session,
-        user_id: int,
+        user: User,
 ):
-    for default_type, default_type_name in schemas.DEFAULT_COLLECTION_TO_NAME:
+    for default_type, default_type_name in schemas.DEFAULT_COLLECTION_TO_NAME.items():
         collection = schemas.Collection(
             name=default_type_name,
             type=default_type,
-            user_id=user_id,
+            user=user,
         )
         session.add(collection)
