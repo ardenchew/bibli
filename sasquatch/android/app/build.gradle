@@ -76,6 +76,7 @@ android {
     namespace "com.sasquatch"
     defaultConfig {
         applicationId "com.sasquatch"
+        manifestPlaceholders = [auth0Domain: "dev-xlrahc2qy1wqddf8.us.auth0.com", auth0Scheme: "${applicationId}.auth0"]
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
