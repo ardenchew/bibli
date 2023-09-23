@@ -1,7 +1,7 @@
 import React from 'react';
 import {PaperProvider} from 'react-native-paper';
 import {Auth0Provider} from 'react-native-auth0';
-import {HomeScreen} from './src/screens';
+import Router from './src';
 
 const App = () => {
   return (
@@ -9,7 +9,7 @@ const App = () => {
       domain={'dev-xlrahc2qy1wqddf8.us.auth0.com'}
       clientId={'bM3WrVIqXJmrBkEty0ofS8RyBvrM14Pl'}>
       <PaperProvider>
-        <HomeScreen />
+        <Router />
       </PaperProvider>
     </Auth0Provider>
   );

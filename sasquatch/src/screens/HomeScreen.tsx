@@ -8,7 +8,11 @@ const LoginButton = () => {
 
   const onPress = async () => {
     try {
-      await authorize();
+      await authorize({
+        additionalParameters: {
+          prompt: 'login',
+        },
+      });
     } catch (e) {
       console.log(e);
     }
