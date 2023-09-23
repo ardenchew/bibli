@@ -8,11 +8,7 @@ const LoginButton = () => {
 
   const onPress = async () => {
     try {
-      await authorize({
-        additionalParameters: {
-          prompt: 'login',
-        },
-      });
+      await authorize({additionalParameters: {prompt: 'login'}});
     } catch (e) {
       console.log(e);
     }
@@ -22,12 +18,12 @@ const LoginButton = () => {
 };
 
 const LogoutButton = () => {
-  const {clearSession} = useAuth0();
+  const {clearCredentials} = useAuth0();
 
   const onPress = async () => {
     console.log('LogoutButton hello what the fuck');
     try {
-      await clearSession();
+      await clearCredentials();
     } catch (e) {
       console.log(e);
     }
