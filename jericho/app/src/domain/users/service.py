@@ -10,6 +10,11 @@ def get_user(session: Session, user_id: int) -> schemas.User:
     return session.get(schemas.User, user_id)
 
 
+def get_user_by_tag(session: Session, tag: str) -> schemas.User:
+    stmt = select(schemas.User).where(schemas.User.tag == tag)
+    return session.exec(stmt).first()
+
+
 def get_linked_users(
     session: Session,
     users_filter: schemas.LinkedUsersFilter,

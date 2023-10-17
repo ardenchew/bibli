@@ -1,33 +1,54 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
-from resources.strings import NOT_FOUND_ERROR
+from resources.exceptions import NotFoundException
+from src.routers.authorization import authorize_request_user_action
+from src.auth.middleware import auth0_middleware
 from src.database import get_session
 from src.domain.users import schemas, service
+
 
 user_router = APIRouter(
     prefix="/user",
     tags=["users"],
-    responses={404: {"descriptions": NOT_FOUND_ERROR}},
+    responses={NotFoundException.status_code: {"description": NotFoundException.detail}},
+    dependencies=[Depends(auth0_middleware)],
 )
 
 
-@user_router.get("/{user_id}", response_model=schemas.UserRead)
-async def get_user(user_id: int, session: Session = Depends(get_session)):
-    user = service.get_user(session, user_id)
+@user_router.get("/{tag}", response_model=schemas.UserRead)
+async def get_user(
+    tag: str,
+    session: Session = Depends(get_session),
+):
+    user = service.get_user_by_tag(session, tag)
     if not user:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     return user
 
 
 @user_router.put("", response_model=schemas.UserRead)
 async def put_user(
+    request: Request,
     user: schemas.UserPut,
     session: Session = Depends(get_session),
 ):
-    db_user = schemas.User.from_orm(user)
+    print("request", request.state.user.tag)
+    print("userput", user)
+    # Clean this up to handle errors.
+    if request.state.user.tag and user.tag:
+        authorize_request_user_action(request, user.tag)
+
+    # Create translation layer.
+    # Check that this doesn't erase foreign relationships.
+    # Given tight relationship between API and db models consider sub to id linkage table.
+    db_user = schemas.User(
+        name=user.name,
+        tag=user.tag,
+        sub=request.state.user.sub
+    )
     return service.upsert_user(session, db_user)
 
 
@@ -35,7 +56,7 @@ async def put_user(
 async def delete_user(user_id: int, session: Session = Depends(get_session)):
     user = service.get_user(session, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     service.delete_user(session, user)
     return
 
@@ -43,7 +64,8 @@ async def delete_user(user_id: int, session: Session = Depends(get_session)):
 users_router = APIRouter(
     prefix="/users",
     tags=["users"],
-    responses={404: {"descriptions": NOT_FOUND_ERROR}},
+    responses={NotFoundException.status_code: {"description": NotFoundException.detail}},
+    dependencies=[Depends(auth0_middleware)],
 )
 
 
@@ -71,6 +93,6 @@ async def delete_user_link(
 ):
     user_link = service.get_user_link(session, parent_user_id, child_user_id)
     if not user_link:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     service.delete_user_link(session, user_link)
     return
