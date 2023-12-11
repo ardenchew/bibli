@@ -67,7 +67,6 @@ class UserBase(SQLModel):
 # https://github.com/tiangolo/sqlmodel/issues/89
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-
     sub: str = Field(unique=True, index=True)
 
     parent_user_links: List[UserLink] = Relationship(

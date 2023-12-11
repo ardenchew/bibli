@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import Request
 
 from resources.exceptions import NotAuthorizedException
@@ -6,7 +8,7 @@ from src.auth.user import RequestUser
 
 def authorize_request_user_action(
         request: Request,
-        tag: str,
+        user_id: Optional[int],
 ):
     try:
         request.state.__getattr__("user")
@@ -16,5 +18,7 @@ def authorize_request_user_action(
     if not isinstance(request.state.user, RequestUser):
         raise NotAuthorizedException
 
-    if request.state.user.tag != tag:
+    print(vars(request.state.user))
+
+    if request.state.user.id != user_id:
         raise NotAuthorizedException

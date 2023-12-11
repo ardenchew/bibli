@@ -1767,16 +1767,88 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Get User
+         * @summary Get User By Id
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserByIdUserUserIdGet: async (userId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getUserByIdUserUserIdGet', 'userId', userId)
+            const localVarPath = `/user/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get User By Tag
          * @param {string} tag 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserUserTagGet: async (tag: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getUserByTagUserTagTagGet: async (tag: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tag' is not null or undefined
-            assertParamExists('getUserUserTagGet', 'tag', tag)
-            const localVarPath = `/user/{tag}`
+            assertParamExists('getUserByTagUserTagTagGet', 'tag', tag)
+            const localVarPath = `/user/tag/{tag}`
                 .replace(`{${"tag"}}`, encodeURIComponent(String(tag)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get User
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserUserCurrentGet: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/user/current`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1931,13 +2003,34 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get User
+         * @summary Get User By Id
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserByIdUserUserIdGet(userId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserByIdUserUserIdGet(userId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get User By Tag
          * @param {string} tag 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getUserUserTagGet(tag: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserRead>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserUserTagGet(tag, options);
+        async getUserByTagUserTagTagGet(tag: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserByTagUserTagTagGet(tag, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get User
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserUserCurrentGet(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserUserCurrentGet(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -2007,13 +2100,32 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get User
+         * @summary Get User By Id
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserByIdUserUserIdGet(userId: number, options?: any): AxiosPromise<UserRead> {
+            return localVarFp.getUserByIdUserUserIdGet(userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get User By Tag
          * @param {string} tag 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserUserTagGet(tag: string, options?: any): AxiosPromise<UserRead> {
-            return localVarFp.getUserUserTagGet(tag, options).then((request) => request(axios, basePath));
+        getUserByTagUserTagTagGet(tag: string, options?: any): AxiosPromise<UserRead> {
+            return localVarFp.getUserByTagUserTagTagGet(tag, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get User
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserUserCurrentGet(options?: any): AxiosPromise<UserRead> {
+            return localVarFp.getUserUserCurrentGet(options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2086,14 +2198,37 @@ export class UsersApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get User
+     * @summary Get User By Id
+     * @param {number} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public getUserByIdUserUserIdGet(userId: number, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).getUserByIdUserUserIdGet(userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get User By Tag
      * @param {string} tag 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UsersApi
      */
-    public getUserUserTagGet(tag: string, options?: AxiosRequestConfig) {
-        return UsersApiFp(this.configuration).getUserUserTagGet(tag, options).then((request) => request(this.axios, this.basePath));
+    public getUserByTagUserTagTagGet(tag: string, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).getUserByTagUserTagTagGet(tag, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get User
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public getUserUserCurrentGet(options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).getUserUserCurrentGet(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

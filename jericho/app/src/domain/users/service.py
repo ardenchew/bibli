@@ -36,8 +36,12 @@ def get_linked_users(
     return session.exec(stmt).all()
 
 
-def upsert_user(session: Session, user: schemas.User) -> schemas.User:
+def upsert_user(
+    session: Session,
+    user: schemas.User,
+) -> schemas.User:
     new_user = user.id is None
+
     # TODO(arden) add regex tag validation and handle tag collisions.
     user = session.merge(user)
     if new_user:

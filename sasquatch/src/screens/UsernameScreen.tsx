@@ -55,7 +55,7 @@ const UserText = () => {
   useEffect(() => {
     console.log('this is my api', usersApi);
     usersApi
-      .getUserUserTagGet('ardenchew')
+      .getUserUserCurrentGet()
       .then(response => {
         const userData: UserRead = response.data;
         setBibliUser(userData);

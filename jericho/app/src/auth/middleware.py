@@ -1,13 +1,11 @@
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt import decode, get_unverified_header
-from jwt.exceptions import DecodeError
-from sqlmodel import Session, select
+from sqlmodel import Session
 
-from src.auth.user import RequestUser
+from src.auth.user import get_request_user_by_sub
 from src.config import auth0_audience, auth0_domain
 from src.database import get_session
-from src.domain.users import schemas
 from src.auth.auth0 import get_rsa_public_key, jwk_to_pem
 
 
@@ -39,24 +37,7 @@ async def auth0_middleware(
             audience=auth0_audience,
             issuer=auth0_domain,
         )
-        print(payload)
-    except DecodeError:
+    except Exception:
         raise credentials_exception
 
-    request_user = RequestUser(sub=payload['sub'])
-
-    stmt = select(schemas.User).where(schemas.User.sub == request_user.sub)
-    db_user = session.exec(stmt).first()
-
-    if db_user:
-        inject_request_user(request_user, db_user)
-
-    request.state.user = request_user
-
-
-def inject_request_user(
-    request_user: RequestUser,
-    db_user: schemas.User,
-):
-    request_user.id = db_user.id
-    request_user.tag = db_user.tag
+    request.state.user = get_request_user_by_sub(session, payload['sub'])

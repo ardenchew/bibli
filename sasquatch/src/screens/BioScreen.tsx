@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Text, TextInput} from 'react-native-paper';
 import Button from '../components/Button/Button';
 import {useAuth0} from 'react-native-auth0';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {UserContext} from '../context';
 
 interface Props {
   navigation: NativeStackNavigationProp<any>;
@@ -23,11 +24,12 @@ const FinishButton = ({navigation}: Props) => {
 
 const BioScreen = ({navigation}: Props) => {
   const {user} = useAuth0();
+  const {user: bibliUser} = useContext(UserContext);
 
   return (
     <View style={styles.container}>
       <Text variant="headlineSmall" style={styles.headline}>
-        Thanks! A few last things
+        Hey there @{bibliUser?.tag}
       </Text>
       <View style={styles.textInputView}>
         <Text variant="titleMedium">What shall we call you?</Text>

@@ -18,10 +18,35 @@ user_router = APIRouter(
 )
 
 
-@user_router.get("/{tag}", response_model=schemas.UserRead)
+# TODO consider the collision of current against user_id below.
+@user_router.get("/current", response_model=schemas.UserRead)
 async def get_user(
-    tag: str,
+        request: Request,
+        session: Session = Depends(get_session),
+):
+    print("request", request.state.user.sub)
+    if request.state.user.id:
+        user = service.get_user(session, request.state.user.id)
+        if user:
+            return user
+    raise NotFoundException
+
+
+@user_router.get("/{user_id}", response_model=schemas.UserRead)
+async def get_user_by_id(
+    user_id: int,
     session: Session = Depends(get_session),
+):
+    user = service.get_user(session, user_id)
+    if not user:
+        raise NotFoundException
+    return user
+
+
+@user_router.get("/tag/{tag}", response_model=schemas.UserRead)
+async def get_user_by_tag(
+        tag: str,
+        session: Session = Depends(get_session),
 ):
     user = service.get_user_by_tag(session, tag)
     if not user:
@@ -35,25 +60,29 @@ async def put_user(
     user: schemas.UserPut,
     session: Session = Depends(get_session),
 ):
-    print("request", request.state.user.tag)
-    print("userput", user)
     # Clean this up to handle errors.
-    if request.state.user.tag and user.tag:
-        authorize_request_user_action(request, user.tag)
+    authorize_request_user_action(request, user.id)
 
     # Create translation layer.
     # Check that this doesn't erase foreign relationships.
-    # Given tight relationship between API and db models consider sub to id linkage table.
     db_user = schemas.User(
+        sub=request.state.user.sub,
+        id=user.id,
         name=user.name,
         tag=user.tag,
-        sub=request.state.user.sub
     )
     return service.upsert_user(session, db_user)
 
 
 @user_router.delete("/{user_id}")
-async def delete_user(user_id: int, session: Session = Depends(get_session)):
+async def delete_user(
+    request: Request,
+    user_id: int,
+    session: Session = Depends(get_session),
+):
+    # Clean this up to handle errors.
+    authorize_request_user_action(request, user_id)
+
     user = service.get_user(session, user_id)
     if not user:
         raise NotFoundException

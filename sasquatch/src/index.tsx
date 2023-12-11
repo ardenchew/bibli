@@ -3,11 +3,69 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {BioScreen, LoginScreen, UsernameScreen} from './screens';
 import {useAuth0} from 'react-native-auth0';
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {UserPut, UserRead} from './generated/jericho';
 import {usersApi} from './api';
+import {UserContext, UserContextInterface} from './context';
 
 const Stack = createNativeStackNavigator();
+
+function LoggedInRouter() {
+  const {user} = useAuth0();
+  const {user: bibliUser, setUser: setBibliUser} = useContext(UserContext);
+
+  // Use effect query and set user here.
+  // should be dependent on the auth0 user so a stale user is not saved on re-login.
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        const response = await usersApi.getUserUserCurrentGet();
+        setBibliUser(response.data);
+      } catch (error) {
+        // User does not exist, create a new user
+        console.log('No user found:', error);
+
+        const newUser: UserPut = {};
+
+        usersApi
+          .putUserUserPut(newUser)
+          .then(response => {
+            const createdUser: UserRead = response.data;
+            setBibliUser(createdUser);
+            console.log('User created:', createdUser);
+          })
+          .catch(createError => {
+            console.error('Error creating user:', createError);
+          });
+      }
+    };
+    initializeUser().catch(error => console.log(error));
+  }, [setBibliUser, user]);
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Username">
+        {!bibliUser?.tag ? (
+          <>
+            <Stack.Screen
+              options={{title: ''}}
+              name="Username"
+              component={UsernameScreen}
+            />
+          </>
+        ) : (
+          <>
+            <Stack.Screen
+              options={{title: ''}}
+              name="Biography"
+              component={BioScreen}
+            />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
 /*
 If not signed in go to login screen
@@ -20,73 +78,18 @@ export default function Router() {
   const {user} = useAuth0();
   const [bibliUser, setBibliUser] = useState<UserRead | null>(null);
 
-  // Function to fetch a user by ID
-  const fetchUser = async (userTag: string) => {
-    try {
-      const response = await usersApi.getUserUserTagGet(userTag);
-      setBibliUser(response.data);
-    } catch (error) {
-      // User does not exist, create a new user
-      console.log('User not found:', error);
-
-      const newUser: UserPut = {
-        // Define the properties for the new user
-        name: 'Arden Chew',
-        // Add other properties as needed
-        tag: userTag,
-      };
-
-      usersApi
-        .putUserUserPut(newUser)
-        .then(response => {
-          const createdUser: UserRead = response.data;
-          setBibliUser(createdUser);
-          console.log('User created:', createdUser);
-        })
-        .catch(createError => {
-          console.error('Error creating user:', createError);
-        });
-    }
+  const bibliUserContext: UserContextInterface = {
+    user: bibliUser,
+    setUser: setBibliUser,
   };
 
-  useEffect(() => {
-    const userTagToGet = 'ardenchew';
-
-    // Try to fetch the user with ID 2
-    fetchUser(userTagToGet).catch(error => console.log(error));
-  }, [user]);
-
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Username">
-        {user ? (
-          !bibliUser?.tag ? (
-            <>
-              <Stack.Screen
-                options={{title: ''}}
-                name="Username"
-                component={UsernameScreen}
-              />
-            </>
-          ) : (
-            <>
-              <Stack.Screen
-                options={{title: ''}}
-                name="Biography"
-                component={BioScreen}
-              />
-            </>
-          )
-        ) : (
-          <>
-            <Stack.Screen
-              options={{headerShown: false}}
-              name="Login"
-              component={LoginScreen}
-            />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+  // TODO removing navigation container causes abrupt transition when logging in.
+  return user ? (
+    // TODO fix provider and logged in router to fit navigation mechanism.
+    <UserContext.Provider value={bibliUserContext}>
+      <LoggedInRouter />
+    </UserContext.Provider>
+  ) : (
+    <LoginScreen />
   );
 }
