@@ -1,49 +1,109 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
-from resources.strings import NOT_FOUND_ERROR
+from resources.exceptions import NotFoundException
+from src.routers.authorization import authorize_request_user_action
+from src.auth.middleware import auth0_middleware
 from src.database import get_session
 from src.domain.users import schemas, service
+
 
 user_router = APIRouter(
     prefix="/user",
     tags=["users"],
-    responses={404: {"descriptions": NOT_FOUND_ERROR}},
+    responses={NotFoundException.status_code: {"description": NotFoundException.detail}},
+    dependencies=[Depends(auth0_middleware)],
 )
 
 
+# TODO consider the collision of current against user_id below.
+@user_router.get("/current", response_model=schemas.UserRead)
+async def get_user(
+        request: Request,
+        session: Session = Depends(get_session),
+):
+    print("request", request.state.user.sub)
+    if request.state.user.id:
+        user = service.get_user(session, request.state.user.id)
+        if user:
+            return user
+    # Initialize user with sub if no user found. This is lazy.
+    return service.upsert_user(session, schemas.User(sub=request.state.user.sub))
+
+
 @user_router.get("/{user_id}", response_model=schemas.UserRead)
-async def get_user(user_id: int, session: Session = Depends(get_session)):
+async def get_user_by_id(
+    user_id: int,
+    session: Session = Depends(get_session),
+):
     user = service.get_user(session, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
+    return user
+
+
+@user_router.get("/tag/{tag}", response_model=schemas.UserRead)
+async def get_user_by_tag(
+        tag: str,
+        session: Session = Depends(get_session),
+):
+    user = service.get_user_by_tag(session, tag)
+    if not user:
+        raise NotFoundException
     return user
 
 
 @user_router.put("", response_model=schemas.UserRead)
 async def put_user(
+    request: Request,
     user: schemas.UserPut,
     session: Session = Depends(get_session),
 ):
-    db_user = schemas.User.from_orm(user)
+    # Clean this up to handle errors.
+    authorize_request_user_action(request, user.id)
+
+    # Create translation layer.
+    # Check that this doesn't erase foreign relationships.
+    db_user = schemas.User(
+        sub=request.state.user.sub,
+        id=user.id,
+        name=user.name,
+        tag=user.tag,
+    )
     return service.upsert_user(session, db_user)
 
 
 @user_router.delete("/{user_id}")
-async def delete_user(user_id: int, session: Session = Depends(get_session)):
+async def delete_user(
+    request: Request,
+    user_id: int,
+    session: Session = Depends(get_session),
+):
+    # Clean this up to handle errors.
+    authorize_request_user_action(request, user_id)
+
     user = service.get_user(session, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     service.delete_user(session, user)
     return
+
+
+@user_router.get("/validate/tag", response_model=schemas.TagValidation)
+async def validate_tag(
+        tag: str,
+        session: Session = Depends(get_session),
+):
+    return service.validate_new_tag(session, tag)
 
 
 users_router = APIRouter(
     prefix="/users",
     tags=["users"],
-    responses={404: {"descriptions": NOT_FOUND_ERROR}},
+    responses={NotFoundException.status_code: {"description": NotFoundException.detail}},
+    dependencies=[Depends(auth0_middleware)],
 )
 
 
@@ -71,6 +131,6 @@ async def delete_user_link(
 ):
     user_link = service.get_user_link(session, parent_user_id, child_user_id)
     if not user_link:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     service.delete_user_link(session, user_link)
     return

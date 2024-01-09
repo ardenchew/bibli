@@ -59,15 +59,15 @@ class LinkedUsersFilter(SQLModel):
 
 
 class UserBase(SQLModel):
-    name: str
-    tag: str = Field(default=None, unique=True, index=True)
-    info: Optional[str] = None
+    name: Optional[str]
+    tag: Optional[str] = Field(default=None, unique=True, index=True)
 
 
 # Uses the many-to-many self referencing feedback here:
 # https://github.com/tiangolo/sqlmodel/issues/89
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    sub: str = Field(unique=True, index=True)
 
     parent_user_links: List[UserLink] = Relationship(
         back_populates="child_user",
@@ -92,3 +92,8 @@ class UserRead(UserBase):
 
 class UserPut(UserBase):
     id: Optional[int] = None
+
+
+class TagValidation(SQLModel):
+    valid: bool
+    warning: Optional[str]

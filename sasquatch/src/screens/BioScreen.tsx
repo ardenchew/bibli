@@ -1,21 +1,64 @@
-import React from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Text, TextInput} from 'react-native-paper';
-import Button from '../components/Button/Button';
+import LogoutButton from '../components/header/Logout';
+import Button from '../components/button/Button';
 import {useAuth0} from 'react-native-auth0';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {UserContext} from '../context';
+import {useUsersApi} from '../api';
+import {UserPut, UserRead} from '../generated/jericho';
 
 interface Props {
   navigation: NativeStackNavigationProp<any>;
 }
 
-const FinishButton = ({navigation}: Props) => {
-  const onPress = () => {
-    navigation.navigate('Username');
+interface FinishButtonProps {
+  firstName: string;
+  lastName: string;
+}
+
+const FinishButton = ({firstName, lastName}: FinishButtonProps) => {
+  const usersApi = useUsersApi();
+  const {user: bibliUser, setUser: setBibliUser} = useContext(UserContext);
+
+  const fetchUser = async () => {
+    try {
+      const response = await usersApi.getUserUserCurrentGet();
+      setBibliUser(response.data);
+    } catch (error) {
+      console.log('No user found:', error);
+    }
+  };
+
+  const setDisplayName = async (first: string, last: string) => {
+    const displayName = last !== '' ? `${first} ${last}` : first;
+    const updatedUser: UserPut = {
+      name: displayName,
+      tag: bibliUser?.tag,
+      id: bibliUser?.id,
+    };
+    usersApi
+      .putUserUserPut(updatedUser)
+      .then(response => {
+        const responseUser: UserRead = response.data;
+        setBibliUser(responseUser);
+        console.log('User updated:', responseUser);
+      })
+      .catch(createError => {
+        console.error('Error creating user:', createError);
+      });
+  };
+
+  const onPress = async () => {
+    await fetchUser().catch(error => console.log(error));
+    await setDisplayName(firstName, lastName).catch(error =>
+      console.log(error),
+    );
   };
 
   return (
-    <Button onPress={onPress} mode="contained" style={styles.finishButton}>
+    <Button onPress={onPress} mode="contained" disabled={firstName === ''} style={styles.finishButton}>
       Finish
     </Button>
   );
@@ -23,30 +66,52 @@ const FinishButton = ({navigation}: Props) => {
 
 const BioScreen = ({navigation}: Props) => {
   const {user} = useAuth0();
+  const {user: bibliUser} = useContext(UserContext);
+  const [firstName, setFirstName] = useState(
+    user?.givenName ? user.givenName : '',
+  );
+  const [lastName, setLastName] = useState(
+    user?.familyName ? user.familyName : '',
+  );
+  const [firstNameWarn, setFirstNameWarn] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => <LogoutButton />,
+    });
+  }, [navigation]);
+
+  const handleFirstNameChange = (newFirstName: string) => {
+    setFirstName(newFirstName);
+    setFirstNameWarn(newFirstName === '');
+  };
 
   return (
     <View style={styles.container}>
       <Text variant="headlineSmall" style={styles.headline}>
-        Thanks! A few last things
+        Hey there @{bibliUser?.tag}
       </Text>
       <View style={styles.textInputView}>
         <Text variant="titleMedium">What shall we call you?</Text>
         <TextInput
-          label={'First name'}
+          label={'First name*'}
           textContentType="name"
           mode="outlined"
-          defaultValue={user?.givenName}
+          defaultValue={firstName}
           maxLength={20}
+          error={firstNameWarn}
+          onChangeText={handleFirstNameChange}
         />
         <TextInput
           label={'Last name'}
           textContentType="name"
           mode="outlined"
-          defaultValue={user?.familyName}
+          defaultValue={lastName}
           maxLength={20}
+          onChangeText={newText => setLastName(newText)}
         />
       </View>
-      <FinishButton navigation={navigation} />
+      <FinishButton firstName={firstName} lastName={lastName} />
     </View>
   );
 };

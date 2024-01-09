@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from resources.strings import NOT_FOUND_ERROR
+from resources.exceptions import NotFoundException
 from src.database import get_session
 from src.domain.books import schemas, service
 
@@ -15,7 +15,7 @@ router = APIRouter(
 async def get_book(book_id: int, session: Session = Depends(get_session)):
     book = service.get_book(session, book_id)
     if not book:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     return book
 
 
@@ -23,5 +23,5 @@ async def get_book(book_id: int, session: Session = Depends(get_session)):
 async def get_author(author_id: int, session: Session = Depends(get_session)):
     author = service.get_author(session, author_id)
     if not author:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     return author

@@ -1,10 +1,11 @@
 import React from 'react';
-import Button from '../components/Button/Button';
+import Button from '../components/button/Button';
 import {Image, ImageBackground, StyleSheet, View} from 'react-native';
 import {useAuth0} from 'react-native-auth0';
 import {Text, useTheme} from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import {LightTheme} from '../styles/themes/LightTheme';
+import config from '../config';
 
 const LoginButton = () => {
   const {authorize} = useAuth0();
@@ -12,6 +13,7 @@ const LoginButton = () => {
   const onPress = async () => {
     try {
       await authorize({
+        audience: config.jerichoApiAuth0Audience,
         additionalParameters: {
           prompt: 'login',
         },
@@ -34,6 +36,7 @@ const SignUpButton = () => {
   const onPress = async () => {
     try {
       await authorize({
+        audience: config.jerichoApiAuth0Audience,
         additionalParameters: {
           prompt: 'login',
           screen_hint: 'signup',

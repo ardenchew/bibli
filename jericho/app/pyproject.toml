@@ -20,6 +20,10 @@ pylint = "^2.17.5"
 isort = "^5.12.0"
 black = "^23.9.0"
 flake8 = "^6.1.0"
+pyjwt = {extras = ["crypto"], version = "^2.8.0"}
+cryptography = "^41.0.4"
+six = "^1.16.0"
+python-usernames = "^1.0.0"
 
 
 [build-system]

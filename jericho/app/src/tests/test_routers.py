@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from resources.strings import NOT_FOUND_ERROR
+from resources.exceptions import NotFoundException
 
 
 def test_get_book(client: TestClient, session: Session):
@@ -20,8 +20,8 @@ def test_get_book(client: TestClient, session: Session):
     response = client.get(f"/book/{book.id + 1}")
     data = response.json()
 
-    assert response.status_code == 404
-    assert data["detail"] == NOT_FOUND_ERROR
+    assert response.status_code == NotFoundException.status_code
+    assert data["detail"] == NotFoundException.detail
 
 
 def test_get_author(client: TestClient, session: Session):
@@ -40,8 +40,8 @@ def test_get_author(client: TestClient, session: Session):
     response = client.get(f"/author/{author.id + 1}")
     data = response.json()
 
-    assert response.status_code == 404
-    assert data["detail"] == NOT_FOUND_ERROR
+    assert response.status_code == NotFoundException.status_code
+    assert data["detail"] == NotFoundException.detail
 
 
 def test_crud_user(client: TestClient):
@@ -57,8 +57,8 @@ def test_crud_user(client: TestClient):
     response = client.get("/user/1")
     data = response.json()
 
-    assert response.status_code == 404
-    assert data["detail"] == NOT_FOUND_ERROR
+    assert response.status_code == NotFoundException.status_code
+    assert data["detail"] == NotFoundException.detail
 
     response = client.put("/user", json=user.dict())
     data = response.json()
@@ -93,14 +93,14 @@ def test_crud_user(client: TestClient):
     response = client.get(f"/user/{user.id}")
     data = response.json()
 
-    assert response.status_code == 404
-    assert data["detail"] == NOT_FOUND_ERROR
+    assert response.status_code == NotFoundException.status_code
+    assert data["detail"] == NotFoundException.detail
 
     response = client.delete(f"/user/{user.id}")
     data = response.json()
 
-    assert response.status_code == 404
-    assert data["detail"] == NOT_FOUND_ERROR
+    assert response.status_code == NotFoundException.status_code
+    assert data["detail"] == NotFoundException.detail
 
 
 def test_crud_user_link(client: TestClient, session: Session):

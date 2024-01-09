@@ -3,13 +3,15 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from resources.strings import NOT_FOUND_ERROR
+from src.auth.middleware import auth0_middleware
+from resources.exceptions import NotFoundException
 from src.database import get_session
 from src.domain.collections import schemas, service
 
 # TODO(arden) header dependencies.
 router = APIRouter(
     tags=["collections"],
+    dependencies=[Depends(auth0_middleware)],
 )
 
 
@@ -23,7 +25,7 @@ async def get_collection(
 ):
     collection = service.get_collection(session, collection_id)
     if not collection:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     return collection
 
 
@@ -51,7 +53,7 @@ async def delete_collection(
 ):
     collection = service.get_collection(session, collection_id)
     if not collection:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_ERROR)
+        raise NotFoundException
     service.delete_collection(session, collection)
     return
 
