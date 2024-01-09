@@ -92,3 +92,8 @@ class UserRead(UserBase):
 
 class UserPut(UserBase):
     id: Optional[int] = None
+
+
+class TagValidation(SQLModel):
+    valid: bool
+    warning: Optional[str]

@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../components/Button/Button';
+import Button from '../components/button/Button';
 import {Image, ImageBackground, StyleSheet, View} from 'react-native';
 import {useAuth0} from 'react-native-auth0';
 import {Text, useTheme} from 'react-native-paper';

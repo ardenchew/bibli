@@ -29,7 +29,8 @@ async def get_user(
         user = service.get_user(session, request.state.user.id)
         if user:
             return user
-    raise NotFoundException
+    # Initialize user with sub if no user found. This is lazy.
+    return service.upsert_user(session, schemas.User(sub=request.state.user.sub))
 
 
 @user_router.get("/{user_id}", response_model=schemas.UserRead)
@@ -88,6 +89,14 @@ async def delete_user(
         raise NotFoundException
     service.delete_user(session, user)
     return
+
+
+@user_router.get("/validate/tag", response_model=schemas.TagValidation)
+async def validate_tag(
+        tag: str,
+        session: Session = Depends(get_session),
+):
+    return service.validate_new_tag(session, tag)
 
 
 users_router = APIRouter(

@@ -361,6 +361,25 @@ export interface TagBase {
 /**
  * 
  * @export
+ * @interface TagValidation
+ */
+export interface TagValidation {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof TagValidation
+     */
+    'valid': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof TagValidation
+     */
+    'warning'?: string;
+}
+/**
+ * 
+ * @export
  * @interface UserLinkPut
  */
 export interface UserLinkPut {
@@ -1955,6 +1974,47 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Validate Tag
+         * @param {string} tag 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        validateTagUserValidateTagGet: async (tag: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tag' is not null or undefined
+            assertParamExists('validateTagUserValidateTagGet', 'tag', tag)
+            const localVarPath = `/user/validate/tag`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (tag !== undefined) {
+                localVarQueryParameter['tag'] = tag;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2055,6 +2115,17 @@ export const UsersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.putUserUserPut(userPut, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @summary Validate Tag
+         * @param {string} tag 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async validateTagUserValidateTagGet(tag: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TagValidation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.validateTagUserValidateTagGet(tag, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -2146,6 +2217,16 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         putUserUserPut(userPut: UserPut, options?: any): AxiosPromise<UserRead> {
             return localVarFp.putUserUserPut(userPut, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Validate Tag
+         * @param {string} tag 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        validateTagUserValidateTagGet(tag: string, options?: any): AxiosPromise<TagValidation> {
+            return localVarFp.validateTagUserValidateTagGet(tag, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2253,6 +2334,18 @@ export class UsersApi extends BaseAPI {
      */
     public putUserUserPut(userPut: UserPut, options?: AxiosRequestConfig) {
         return UsersApiFp(this.configuration).putUserUserPut(userPut, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Validate Tag
+     * @param {string} tag 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public validateTagUserValidateTagGet(tag: string, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).validateTagUserValidateTagGet(tag, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

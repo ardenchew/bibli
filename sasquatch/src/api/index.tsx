@@ -1,10 +1,39 @@
+import {useEffect, useState} from 'react';
 import {Configuration, UsersApi} from '../generated/jericho';
+import {useAuth0} from 'react-native-auth0';
 import config from '../config';
 
-export const apiConfig = new Configuration({
-  basePath: config.jerichoApiHost,
-  accessToken:
-    'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJNbnpCVGNXQ205SjAtZkR5WG1JNSJ9.eyJpc3MiOiJodHRwczovL2Rldi14bHJhaGMycXkxd3FkZGY4LnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExMTc3NjY4NjEwNjgwODcxNDcyOSIsImF1ZCI6WyJodHRwczovL2plcmljaG8uZGV2LmNvbSIsImh0dHBzOi8vZGV2LXhscmFoYzJxeTF3cWRkZjgudXMuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY5NzQxMjk0NCwiZXhwIjoxNjk3NDk5MzQ0LCJhenAiOiJiTTNXclZJcVhKbXJCa0V0eTBvZlM4UnlCdnJNMTRQbCIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwifQ.BlehsynoolLZL5piat-VIOZfPQvuWn-snGoU05sDZoqfwgsthHih7DERSvoaDf24VhDgY7fHr8aCKpIE_b3IpPpYOuOZCtVF6JGZ-ADWKNrM8Mqsu0J50RB5GhxUbaCNbdMkToZ_GROOk2GzebS7piJt7DVmVQTMNXxktJPWuANFzeXn7tn4fHj9H1bVqWY8ZNpJt5N4WuaBg247UdzO67xFIg5WxKhLxkMelP79l3hUbukygM53WfNK3ZwefagWmL59ucPUCwEXLsS-eJ7-i4OK4hOm_qI9QQcjoXEuXJT2AOqcyXKY-aXoTfy84AGgbodyywk5K_e8S71t5VeLBQ',
-});
+// Setup instructions here -> https://auth0.com/docs/quickstart/spa/react/02-calling-an-api?_ga=2.183422190.932252088.1621856610-1595415333.1607347674&_gac=1.187692250.1620663261.Cj0KCQjws-OEBhCkARIsAPhOkIbhK13acrxZIWhKyPE4GlpGf7ZKmKpxtmuQbD_VcaLmyScFgvNZcmAaAntFEALw_wcB&_gl=1*3dk1lt*_gcl_au*MTYyMTQ0MzM1NS4xNzAyMDc2Mzk4*_ga*MjA2OTIwNTgyOS4xNzAyMDc2Mzk5*_ga_QKMSDV5369*MTcwMzIxOTQ4Ni4zLjEuMTcwMzIyMjU0Ni4yNS4wLjA.
+// getAccessTokenSilently() renews access and id tokens using refresh tokens.
 
-export const usersApi = new UsersApi(apiConfig);
+// TODO create an api context to replace this functional call.
+export const useUsersApi = () => {
+  const {getCredentials} = useAuth0();
+  const defaultApiConfig = new Configuration({
+    basePath: config.jerichoApiHost,
+  });
+  const [usersApi, setUsersApi] = useState<UsersApi>(
+    new UsersApi(defaultApiConfig),
+  );
+
+  useEffect(() => {
+    const fetchCredentialsAndInitializeApi = async () => {
+      try {
+        const credentials = await getCredentials();
+        const apiConfig = new Configuration({
+          basePath: config.jerichoApiHost,
+          accessToken: credentials ? credentials.accessToken : '',
+        });
+        // console.log(apiConfig);
+        setUsersApi(new UsersApi(apiConfig));
+      } catch (error) {
+        console.error('Error fetching credentials:', error);
+        // Handle the error as appropriate
+      }
+    };
+
+    fetchCredentialsAndInitializeApi();
+  }, [getCredentials]);
+
+  return usersApi;
+};

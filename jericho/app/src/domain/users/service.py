@@ -1,9 +1,13 @@
+import re
 from typing import List
 
+from python_usernames import is_safe_username
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from src.domain import collections
 from src.domain.users import schemas
+from resources.exceptions import InvalidArgumentException
 
 
 def get_user(session: Session, user_id: int) -> schemas.User:
@@ -16,8 +20,8 @@ def get_user_by_tag(session: Session, tag: str) -> schemas.User:
 
 
 def get_linked_users(
-    session: Session,
-    users_filter: schemas.LinkedUsersFilter,
+        session: Session,
+        users_filter: schemas.LinkedUsersFilter,
 ) -> List[schemas.User]:
     stmt = select(schemas.User)
     if users_filter.parent_id is not None:
@@ -37,12 +41,15 @@ def get_linked_users(
 
 
 def upsert_user(
-    session: Session,
-    user: schemas.User,
+        session: Session,
+        user: schemas.User,
 ) -> schemas.User:
     new_user = user.id is None
 
-    # TODO(arden) add regex tag validation and handle tag collisions.
+    if user.tag:
+        if not validate_tag(user.tag).valid:
+            return InvalidArgumentException
+
     user = session.merge(user)
     if new_user:
         collections.utils.insert_default_collections(session, user)
@@ -58,7 +65,7 @@ def delete_user(session: Session, user: schemas.User):
 
 
 def get_user_link(
-    session: Session, parent_user_id: int, child_user_id: int
+        session: Session, parent_user_id: int, child_user_id: int
 ) -> schemas.UserLink:
     stmt = select(schemas.UserLink).where(
         schemas.UserLink.parent_id == parent_user_id,
@@ -68,8 +75,8 @@ def get_user_link(
 
 
 def upsert_user_link(
-    session: Session,
-    user_link: schemas.UserLink,
+        session: Session,
+        user_link: schemas.UserLink,
 ) -> schemas.UserLink:
     session.merge(user_link)
     session.commit()
@@ -79,3 +86,52 @@ def upsert_user_link(
 def delete_user_link(session: Session, user_link: schemas.UserLink):
     session.delete(user_link)
     session.commit()
+
+
+TAG_WARNING_UNSAFE = "Username does not meet community standards."
+TAG_WARNING_CHAR = "Username may only use a-z and 0-9."
+TAG_WARNING_DUPLICATE = "Username is already taken."
+
+
+def validate_tag(tag: str) -> schemas.TagValidation:
+    if tag == "":
+        return schemas.TagValidation(
+            valid=False,
+            warning="",
+        )
+
+    tag_regex = "^[a-z0-9]+$"
+    if not re.search(tag_regex, tag):
+        return schemas.TagValidation(
+            valid=False,
+            warning=TAG_WARNING_CHAR,
+        )
+
+    if not is_safe_username(tag):
+        return schemas.TagValidation(
+            valid=False,
+            warning=TAG_WARNING_UNSAFE,
+        )
+
+    return schemas.TagValidation(
+        valid=True,
+    )
+
+
+def validate_new_tag(session: Session, tag: str) -> schemas.TagValidation:
+    valid_tag = validate_tag(tag)
+    if not valid_tag.valid:
+        return valid_tag
+
+    stmt = select(func.count(schemas.User.id)).where(schemas.User.tag == tag)
+    count = session.exec(stmt).one()
+
+    if count != 0:
+        return schemas.TagValidation(
+            valid=False,
+            warning=TAG_WARNING_DUPLICATE,
+        )
+
+    return schemas.TagValidation(
+        valid=True,
+    )

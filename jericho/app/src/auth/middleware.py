@@ -37,7 +37,9 @@ async def auth0_middleware(
             audience=auth0_audience,
             issuer=auth0_domain,
         )
-    except Exception:
+    except Exception as e:
+        print(f"Credential Exception: {e}")
         raise credentials_exception
 
     request.state.user = get_request_user_by_sub(session, payload['sub'])
+    print(f"User: {request.state.user}")

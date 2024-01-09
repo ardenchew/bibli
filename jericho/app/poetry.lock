@@ -924,6 +924,17 @@ pytest = ">=6.2"
 setuptools = "*"
 
 [[package]]
+name = "python-usernames"
+version = "1.0.0"
+description = "Python library to validate usernames suitable for use in public facing applications."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python_usernames-1.0.0-py3-none-any.whl", hash = "sha256:59fd41670d8ee550f93be1db25fb0112591b0566c44069d6d42ad26a5c71b474"},
+    {file = "python_usernames-1.0.0.tar.gz", hash = "sha256:82c68b9dccb6d0571eded31fe47b91ebca4b25e530a8703e8c06ebd9198f3f4f"},
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.1"
 description = "YAML parser and emitter for Python"
@@ -1307,4 +1318,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "cd1bc11a4cb43864d44e6ee58098a04bbd408839b727960b343af17c25c9350f"
+content-hash = "6ec8f945ce8e1e5863d3b1efbe657b67ca389dfc593e66663d734ba5a6f5feef"
