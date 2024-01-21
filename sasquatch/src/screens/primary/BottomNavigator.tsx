@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {BottomNavigation} from 'react-native-paper';
-import FeedScreen from './FeedScreen';
-import SearchScreen from './SearchScreen';
-import ProfileScreen from './ProfileScreen';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {StyleSheet} from 'react-native';
+import ProfileTab from './Profile';
+import FeedTab from './Feed';
+import SearchTab from './Search';
 
-const MyComponent = () => {
+export const Home = () => {
   const [index, setIndex] = React.useState(2);
   const [routes] = React.useState([
     {
@@ -30,9 +30,9 @@ const MyComponent = () => {
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
-    feed: FeedScreen,
-    search: SearchScreen,
-    profile: ProfileScreen,
+    feed: FeedTab,
+    search: SearchTab,
+    profile: ProfileTab,
   });
 
   return (
@@ -45,8 +45,6 @@ const MyComponent = () => {
     />
   );
 };
-
-export default MyComponent;
 
 const styles = StyleSheet.create({
   bar: {

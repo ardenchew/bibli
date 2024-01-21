@@ -1,6 +1,3 @@
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-
 import React from 'react';
 import {BottomNavigator} from './screens/primary';
 import {BioScreen, LoginScreen, UsernameScreen} from './screens/setup';
@@ -9,6 +6,9 @@ import {useEffect, useState} from 'react';
 import {UserRead} from './generated/jericho';
 import {useUsersApi} from './api';
 import {UserContext, UserContextInterface} from './context';
+import {NavigationLightTheme} from './styles/themes/NavigationLightTheme';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
 

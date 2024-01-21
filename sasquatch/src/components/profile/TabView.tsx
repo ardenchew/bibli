@@ -149,7 +149,7 @@ const SocialRoute = () => {
 };
 
 const ActivityRoute = () => (
-  <View style={{backgroundColor: 'green', flex: 1}} />
+  <View style={{backgroundColor: LightTheme.colors.background, flex: 1}} />
 );
 
 const renderScene = SceneMap({

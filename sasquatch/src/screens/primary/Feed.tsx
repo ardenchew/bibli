@@ -3,6 +3,7 @@ import {UserContext} from '../../context';
 import {StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import LogoutButton from '../../components/header/Logout';
+import {SharedNavigator} from './Shared';
 
 const FeedScreen = () => {
   const {user: bibliUser} = useContext(UserContext);
@@ -19,6 +20,10 @@ const FeedScreen = () => {
   );
 };
 
+const FeedTab = SharedNavigator(FeedScreen);
+
+export default FeedTab;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -28,5 +33,3 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 });
-
-export default FeedScreen;

@@ -4,6 +4,8 @@ import {StyleProp, ViewStyle, View, StyleSheet, TextStyle} from 'react-native';
 import {useContext, useState} from 'react';
 import {UserLinkRead, UserRead} from '../../generated/jericho';
 import {UserContext} from '../../context';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
 
 interface ProfileButtonProps {
   style?: StyleProp<ViewStyle>;
@@ -26,6 +28,8 @@ const DiscoverButton = ({style, labelStyle}: ProfileButtonProps) => {
 };
 
 const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
   return (
     <Button
       mode={'outlined'}
@@ -33,7 +37,7 @@ const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
       icon={'pencil'}
       style={style}
       labelStyle={labelStyle}
-      onPress={() => {}}>
+      onPress={() => navigation.push('EditProfile')}>
       Edit
     </Button>
   );
@@ -77,14 +81,14 @@ const BlockButton = ({style, labelStyle, link}: ProfileButtonProps) => {
 
 interface Props {
   style: StyleProp<ViewStyle>;
-  profile: UserRead;
+  user: UserRead;
   link?: UserLinkRead;
 }
 
 // Profile button container - dynamically allow for different profile buttons.
-export const TitleButtons = ({profile, style, link}: Props) => {
+export const TitleButtons = ({user, style, link}: Props) => {
   const {user: bibliUser} = useContext(UserContext);
-  const isCurrentUser = bibliUser?.id === profile.id;
+  const isCurrentUser = bibliUser?.id === user.id;
 
   return (
     <View style={style}>
