@@ -6,3 +6,6 @@ else
     echo "Unsupported shell, using an undefined value for variable $BIBLI which may cause unexpected behavior"
 fi
 export BIBLI
+
+source $BIBLI/jericho/env.bash
+source $BIBLI/sasquatch/env.bash

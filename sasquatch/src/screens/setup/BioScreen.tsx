@@ -1,13 +1,13 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Text, TextInput} from 'react-native-paper';
-import LogoutButton from '../components/header/Logout';
-import Button from '../components/button/Button';
+import LogoutButton from '../../components/header/Logout';
+import Button from '../../components/button/Button';
 import {useAuth0} from 'react-native-auth0';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {UserContext} from '../context';
-import {useUsersApi} from '../api';
-import {UserPut, UserRead} from '../generated/jericho';
+import {UserContext} from '../../context';
+import {useUsersApi} from '../../api';
+import {UserPut, UserRead} from '../../generated/jericho';
 
 interface Props {
   navigation: NativeStackNavigationProp<any>;
@@ -58,7 +58,11 @@ const FinishButton = ({firstName, lastName}: FinishButtonProps) => {
   };
 
   return (
-    <Button onPress={onPress} mode="contained" disabled={firstName === ''} style={styles.finishButton}>
+    <Button
+      onPress={onPress}
+      mode="contained"
+      disabled={firstName === ''}
+      style={styles.finishButton}>
       Finish
     </Button>
   );

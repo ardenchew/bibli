@@ -8,7 +8,7 @@ import config from '../config';
 
 // TODO create an api context to replace this functional call.
 export const useUsersApi = () => {
-  const {getCredentials} = useAuth0();
+  const {getCredentials, user} = useAuth0();
   const defaultApiConfig = new Configuration({
     basePath: config.jerichoApiHost,
   });
@@ -33,7 +33,7 @@ export const useUsersApi = () => {
     };
 
     fetchCredentialsAndInitializeApi();
-  }, [getCredentials]);
+  }, [user, getCredentials]);
 
   return usersApi;
 };

@@ -1,13 +1,13 @@
 import React, {useContext, useEffect, useState} from 'react';
-import Button from '../components/button/Button';
-import LogoutButton from '../components/header/Logout';
+import Button from '../../components/button/Button';
+import LogoutButton from '../../components/header/Logout';
 import {StyleSheet, View} from 'react-native';
 import {useAuth0} from 'react-native-auth0';
 import {Text, TextInput, HelperText} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useUsersApi} from '../api';
-import {UserPut, UserRead} from '../generated/jericho';
-import {UserContext} from '../context';
+import {useUsersApi} from '../../api';
+import {UserPut, UserRead} from '../../generated/jericho';
+import {UserContext} from '../../context';
 
 interface Props {
   navigation: NativeStackNavigationProp<any>;
@@ -27,7 +27,7 @@ const ContinueButton = ({username, valid}: ContinueButtonProps) => {
       const response = await usersApi.getUserUserCurrentGet();
       setBibliUser(response.data);
     } catch (error) {
-      console.log('No user found:', error);
+      console.log('DNo user found:', error);
     }
   };
 

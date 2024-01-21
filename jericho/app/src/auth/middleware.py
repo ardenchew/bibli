@@ -27,6 +27,8 @@ async def auth0_middleware(
     rsa_key = get_rsa_public_key(token_header)
     pem_key = jwk_to_pem(rsa_key)
 
+    print(token_header)
+
     try:
         payload = decode(
             credentials.credentials,
