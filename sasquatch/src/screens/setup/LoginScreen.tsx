@@ -1,11 +1,11 @@
 import React from 'react';
-import Button from '../components/button/Button';
+import Button from '../../components/button/Button';
 import {Image, ImageBackground, StyleSheet, View} from 'react-native';
 import {useAuth0} from 'react-native-auth0';
 import {Text, useTheme} from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
-import {LightTheme} from '../styles/themes/LightTheme';
-import config from '../config';
+import {LightTheme} from '../../styles/themes/LightTheme';
+import config from '../../config';
 
 const LoginButton = () => {
   const {authorize} = useAuth0();
@@ -60,7 +60,7 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('../../assets/login-background.png')}
+        source={require('../../../assets/login-background.png')}
         style={styles.imageBackground}
       />
       <LinearGradient
@@ -69,7 +69,7 @@ const LoginScreen = () => {
         style={styles.linearGradient}>
         <View style={styles.logoContainer}>
           <Image
-            source={require('../../assets/logo-whited.png')}
+            source={require('../../../assets/logo-whited.png')}
             style={styles.logoImage}
           />
           <Text style={styles.logoBlurb} variant="headlineSmall">
