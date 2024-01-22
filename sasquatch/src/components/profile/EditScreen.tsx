@@ -44,7 +44,7 @@ const SubmitButton = ({updateUser, disabled}: SubmitButtonProps) => {
 };
 
 const EditScreen = () => {
-  const usersApi = useUsersApi();
+  const {usersApi} = useApi();
   const {user: bibliUser} = useContext(UserContext);
 
   const [updateUser, setUpdateUser] = useState<UserPut>({

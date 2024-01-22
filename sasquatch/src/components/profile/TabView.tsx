@@ -9,7 +9,7 @@ import {
 import {TabBar, TabView} from 'react-native-tab-view';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {Button, SegmentedButtons, Text} from 'react-native-paper';
-import {CollectionRead, UserRead} from '../../generated/jericho';
+import {CollectionRead, UserLinkType, UserRead} from '../../generated/jericho';
 import {default as CollectionsList} from '../collection/List';
 import UserList from '../social/List';
 import {Dispatch, SetStateAction, useState} from 'react';
@@ -136,7 +136,22 @@ const CollectionsRoute = ({
   );
 };
 
-const SocialRoute = () => {
+interface SocialProps {
+  user: UserRead;
+  following: UserRead[];
+  setFollowing: Dispatch<SetStateAction<UserRead[]>>;
+  followers: UserRead[];
+  setFollowers: Dispatch<SetStateAction<UserRead[]>>;
+}
+
+const SocialRoute = ({
+  user,
+  following,
+  setFollowing,
+  followers,
+  setFollowers,
+}: SocialProps) => {
+  const {usersApi} = useApi();
   const layout = useWindowDimensions();
   const socialSegments = [
     {
@@ -150,8 +165,34 @@ const SocialRoute = () => {
   ];
   const [segment, setSegment] = React.useState(socialSegments[0].value);
 
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const followingResponse = await usersApi.getLinkedUsersUsersLinkedGet(
+        UserLinkType.Follow,
+        user.id,
+      );
+      setFollowing(followingResponse.data);
+      const followersResponse = await usersApi.getLinkedUsersUsersLinkedGet(
+        UserLinkType.Follow,
+        undefined,
+        user.id,
+      );
+      setFollowers(followersResponse.data);
+    } catch (error) {
+      console.log('Error fetching socials for user ${user.tag}:', error);
+    }
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView style={styles.routeContainer}>
+    <ScrollView
+      style={styles.routeContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
       <SafeAreaView style={styles.socialSegmentsContainer}>
         <SegmentedButtons
           density={'small'}
@@ -169,11 +210,11 @@ const SocialRoute = () => {
       </SafeAreaView>
       {segment === 'following' ? (
         <>
-          <UserList users={mockFollowing} />
+          <UserList users={following} />
         </>
       ) : (
         <>
-          <UserList users={mockFollowers} />
+          <UserList users={followers} />
         </>
       )}
     </ScrollView>
@@ -188,9 +229,21 @@ interface Props {
   user: UserRead;
   collections: CollectionRead[];
   setCollections: Dispatch<SetStateAction<CollectionRead[]>>;
+  following: UserRead[];
+  setFollowing: Dispatch<SetStateAction<UserRead[]>>;
+  followers: UserRead[];
+  setFollowers: Dispatch<SetStateAction<UserRead[]>>;
 }
 
-export const UserTabView = ({user, collections, setCollections}: Props) => {
+export const UserTabView = ({
+  user,
+  collections,
+  setCollections,
+  following,
+  setFollowing,
+  followers,
+  setFollowers,
+}: Props) => {
   const renderScene = ({route}: {route: {key: string}}) => {
     switch (route.key) {
       case 'first':
@@ -202,7 +255,15 @@ export const UserTabView = ({user, collections, setCollections}: Props) => {
           />
         );
       case 'second':
-        return <SocialRoute />;
+        return (
+          <SocialRoute
+            user={user}
+            following={following}
+            setFollowing={setFollowing}
+            followers={followers}
+            setFollowers={setFollowers}
+          />
+        );
       case 'third':
         return <ActivityRoute />;
       default:
