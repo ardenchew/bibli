@@ -6,7 +6,7 @@ import Button from '../../components/button/Button';
 import {useAuth0} from 'react-native-auth0';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {UserContext} from '../../context';
-import {useUsersApi} from '../../api';
+import {useApi} from '../../api';
 import {UserPut, UserRead} from '../../generated/jericho';
 
 interface Props {
@@ -19,7 +19,7 @@ interface FinishButtonProps {
 }
 
 const FinishButton = ({firstName, lastName}: FinishButtonProps) => {
-  const usersApi = useUsersApi();
+  const {usersApi} = useApi();
   const {user: bibliUser, setUser: setBibliUser} = useContext(UserContext);
 
   const fetchUser = async () => {

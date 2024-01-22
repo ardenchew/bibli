@@ -4,14 +4,16 @@ import {
   useWindowDimensions,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
+  ScrollView, RefreshControl,
 } from 'react-native';
-import {TabBar, TabView, SceneMap} from 'react-native-tab-view';
+import {TabBar, TabView} from 'react-native-tab-view';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {Button, SegmentedButtons, Text} from 'react-native-paper';
 import {CollectionRead, UserRead} from '../../generated/jericho';
-import CollectionsList from '../collection/List';
+import {default as CollectionsList} from '../collection/List';
 import UserList from '../social/List';
+import {Dispatch, SetStateAction, useState} from 'react';
+import {useApi} from '../../api';
 
 const mockCollections: CollectionRead[] = [
   {
@@ -82,11 +84,41 @@ const mockFollowers: UserRead[] = [
   },
 ];
 
-const CollectionsRoute = () => {
+interface CollectionsProps {
+  user: UserRead;
+  collections: CollectionRead[];
+  setCollections: Dispatch<SetStateAction<CollectionRead[]>>;
+}
+
+const CollectionsRoute = ({
+  user,
+  collections,
+  setCollections,
+}: CollectionsProps) => {
+  const {collectionsApi} = useApi();
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const response = await collectionsApi.getCollectionsCollectionsGet(
+        user.id,
+      );
+      setCollections(response.data);
+    } catch (error) {
+      console.log('Error fetching collections for user ${user.tag}:', error);
+    }
+    setRefreshing(false);
+  };
+
   return (
     <View style={{flex: 1}}>
-      <ScrollView style={styles.routeContainer}>
-        <CollectionsList collections={mockCollections} />
+      <ScrollView
+        style={styles.routeContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <CollectionsList collections={collections} />
       </ScrollView>
       <Button
         compact={true}
@@ -152,15 +184,33 @@ const ActivityRoute = () => (
   <View style={{backgroundColor: LightTheme.colors.background, flex: 1}} />
 );
 
-const renderScene = SceneMap({
-  first: CollectionsRoute,
-  second: SocialRoute,
-  third: ActivityRoute,
-});
+interface Props {
+  user: UserRead;
+  collections: CollectionRead[];
+  setCollections: Dispatch<SetStateAction<CollectionRead[]>>;
+}
 
-export const UserTabView = () => {
+export const UserTabView = ({user, collections, setCollections}: Props) => {
+  const renderScene = ({route}: {route: {key: string}}) => {
+    switch (route.key) {
+      case 'first':
+        return (
+          <CollectionsRoute
+            user={user}
+            collections={collections}
+            setCollections={setCollections}
+          />
+        );
+      case 'second':
+        return <SocialRoute />;
+      case 'third':
+        return <ActivityRoute />;
+      default:
+        return null;
+    }
+  };
+
   const layout = useWindowDimensions();
-
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     {key: 'first', title: 'Collections'},

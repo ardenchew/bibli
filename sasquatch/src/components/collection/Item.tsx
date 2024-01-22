@@ -1,18 +1,31 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
-import {Card, Title, Paragraph, Avatar} from 'react-native-paper';
+import {Card, Avatar} from 'react-native-paper';
 import {CollectionRead} from '../../generated/jericho';
-import {LightTheme} from '../../styles/themes/LightTheme'; // Adjust the import path
+import {LightTheme} from '../../styles/themes/LightTheme';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack'; // Adjust the import path
 
-interface CollectionItemProps {
+interface Props {
   collection: CollectionRead;
 }
 
-const CollectionItem: React.FC<CollectionItemProps> = ({collection}) => {
+const CardPress = (collection: CollectionRead) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  return () => {
+    navigation.push('Collection', {
+      collection: collection,
+    });
+  };
+};
+
+const Item = ({collection}: Props) => {
   return (
     <Card
       mode={'contained'}
       style={styles.container}
+      onPress={CardPress(collection)}
       theme={{
         colors: {surfaceVariant: LightTheme.colors.surface},
       }}>
@@ -33,4 +46,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CollectionItem;
+export default Item;

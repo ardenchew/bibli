@@ -5,7 +5,7 @@ import {StyleSheet, View} from 'react-native';
 import {useAuth0} from 'react-native-auth0';
 import {Text, TextInput, HelperText} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useUsersApi} from '../../api';
+import {useApi} from '../../api';
 import {UserPut, UserRead} from '../../generated/jericho';
 import {UserContext} from '../../context';
 
@@ -19,7 +19,7 @@ interface ContinueButtonProps {
 }
 
 const ContinueButton = ({username, valid}: ContinueButtonProps) => {
-  const usersApi = useUsersApi();
+  const {usersApi} = useApi();
   const {user: bibliUser, setUser: setBibliUser} = useContext(UserContext);
 
   const fetchUser = async () => {
@@ -27,7 +27,7 @@ const ContinueButton = ({username, valid}: ContinueButtonProps) => {
       const response = await usersApi.getUserUserCurrentGet();
       setBibliUser(response.data);
     } catch (error) {
-      console.log('DNo user found:', error);
+      console.log('No user found:', error);
     }
   };
 

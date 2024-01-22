@@ -1,12 +1,13 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import {Screen} from '../../components/profile';
+import {Screen as ProfileScreen} from '../../components/profile';
+import {Screen as CollectionScreen} from '../../components/collection';
 import EditScreen from '../../components/profile/EditScreen';
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import {UserRead} from '../../generated/jericho';
+import {CollectionRead, UserRead} from '../../generated/jericho';
 import {NavigationLightTheme} from '../../styles/themes/NavigationLightTheme';
 import {NavigationContainer} from '@react-navigation/native';
 
@@ -15,20 +16,33 @@ export type RootStackParamList = {
   Profile: {
     profile: UserRead;
   };
+  Collection: {
+    collection: CollectionRead;
+  };
   EditProfile: undefined;
 };
 
 const defaultStackScreenOptions = {
-  title: '',
+  headerTitleStyle: {color: 'transparent'},
   headerBackTitleVisible: false,
 };
 
-const ProfileScreen = ({
+const Profile = ({
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Profile'>) => {
   return (
     <View style={styles.container}>
-      <Screen user={route.params.profile} />
+      <ProfileScreen user={route.params.profile} />
+    </View>
+  );
+};
+
+const Collection = ({
+  route,
+}: NativeStackScreenProps<RootStackParamList, 'Collection'>) => {
+  return (
+    <View style={styles.container}>
+      <CollectionScreen collection={route.params.collection} />
     </View>
   );
 };
@@ -47,7 +61,12 @@ export const SharedNavigator = (home: any) => {
           />
           <Stack.Screen
             name="Profile"
-            component={ProfileScreen}
+            component={Profile}
+            options={defaultStackScreenOptions}
+          />
+          <Stack.Screen
+            name="Collection"
+            component={Collection}
             options={defaultStackScreenOptions}
           />
           <Stack.Screen

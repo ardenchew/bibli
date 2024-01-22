@@ -1,16 +1,15 @@
 import React from 'react';
 import {View} from 'react-native';
-import CollectionItem from './Item';
+import Item from './Item';
 import {CollectionRead} from '../../generated/jericho';
 import {Divider} from 'react-native-paper';
 
-// Example usage in a component
-const CollectionsList = ({collections}: {collections: CollectionRead[]}) => {
+const List = ({collections}: {collections: CollectionRead[]}) => {
   return (
     <View>
       {collections.map((item, index) => (
         <View key={item.id.toString()}>
-          <CollectionItem collection={item} />
+          <Item collection={item} />
           {index !== collections.length - 1 && <Divider bold={true} />}
         </View>
       ))}
@@ -18,4 +17,4 @@ const CollectionsList = ({collections}: {collections: CollectionRead[]}) => {
   );
 };
 
-export default CollectionsList;
+export default List;

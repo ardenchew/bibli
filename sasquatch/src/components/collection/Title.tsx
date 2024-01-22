@@ -1,23 +1,22 @@
 import * as React from 'react';
 import {Avatar, Card, IconButton} from 'react-native-paper';
 import {StyleProp, ViewStyle} from 'react-native';
-import {UserRead} from '../../generated/jericho';
+import {CollectionRead} from '../../generated/jericho';
 
 interface Props {
   style: StyleProp<ViewStyle>;
-  user: UserRead;
-  isCurrentUser: boolean;
+  collection: CollectionRead;
 }
 
-export const Title = ({style, user}: Props) => {
+export const Title = ({style, collection}: Props) => {
   return (
     <Card.Title
       style={style}
-      title={user?.name}
+      title={collection.name}
       titleVariant={'headlineMedium'}
-      subtitle={user?.tag}
+      subtitle={`Owned by ${collection?.user_id}`}
       subtitleVariant={'labelLarge'}
-      left={props => <Avatar.Icon {...props} icon="account" />}
+      left={props => <Avatar.Icon {...props} icon="book" />}
       right={props => (
         <IconButton {...props} icon="dots-horizontal" onPress={() => {}} />
       )}

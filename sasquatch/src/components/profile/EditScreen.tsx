@@ -3,7 +3,7 @@ import {ScrollView, StyleSheet, View} from 'react-native';
 import {HelperText, Text, TextInput} from 'react-native-paper';
 import Button from '../../components/button/Button';
 import {UserContext} from '../../context';
-import {useUsersApi} from '../../api';
+import {useApi} from '../../api';
 import {UserPut, UserRead} from '../../generated/jericho';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -14,7 +14,7 @@ interface SubmitButtonProps {
 }
 
 const SubmitButton = ({updateUser, disabled}: SubmitButtonProps) => {
-  const usersApi = useUsersApi();
+  const {usersApi} = useApi();
   const {setUser: setBibliUser} = useContext(UserContext);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
