@@ -1,5 +1,4 @@
 from datetime import date
-from enum import Enum
 from typing import List, Optional
 
 from sqlmodel import Boolean, Column, Date, Field, Relationship, SQLModel
@@ -16,62 +15,37 @@ class Tag(TagBase, table=True):
     book: "Book" = Relationship(back_populates="tags")
 
 
-class BookAuthorLinkType(str, Enum):
-    PRIMARY = "primary"
-    TRANSLATOR = "translator"
-    READER = "reader"
-
-
-class BookAuthorLinkBase(SQLModel):
-    book_id: int = Field(
-        default=None,
-        primary_key=True,
-        foreign_key="book.id",
-    )
-    author_id: int = Field(
-        default=None,
-        primary_key=True,
-        foreign_key="author.id",
-    )
-    type: Optional[str] = None
-
-
-class BookAuthorLink(BookAuthorLinkBase, table=True):
-    book: "Book" = Relationship(back_populates="author_links")
-    author: "Author" = Relationship(back_populates="book_links")
-
-
-class BookBase(SQLModel):
-    title: str
-    summary: Optional[str]
-    publication_date: Optional[date] = Field(sa_column=Column(Date))
-    pages: Optional[int] = None
-    # TODO(arden) add ISBN.
-
-
-class Book(BookBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-
-    author_links: List[BookAuthorLink] = Relationship(back_populates="book")
-    tags: List[Tag] = Relationship(back_populates="book")
-
-
-class BookRead(BookBase):
-    id: int
-    author_links: List[BookAuthorLinkBase]
-    tags: List[TagBase]
-
-
 class AuthorBase(SQLModel):
     name: str
     summary: Optional[str] = None
+    olid: Optional[str]
+    cover_link: Optional[str]
 
 
 class Author(AuthorBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
-    book_links: List[BookAuthorLink] = Relationship(back_populates="author")
-
 
 class AuthorRead(AuthorBase):
-    id: int
+    id: Optional[int]
+
+
+class BookBase(SQLModel):
+    title: str
+    subtitle: Optional[str]
+    summary: Optional[str]
+    publication_date: Optional[date] = Field(sa_column=Column(Date))
+    pages: Optional[int] = None
+    cover_link: Optional[str]
+    olid: Optional[str] = Field(default=None, unique=True)
+
+
+class Book(BookBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    tags: List[Tag] = Relationship(back_populates="book")
+
+
+class BookRead(BookBase):
+    id: Optional[int]
+    tags: Optional[List[TagBase]]
+    authors: List[AuthorRead]
