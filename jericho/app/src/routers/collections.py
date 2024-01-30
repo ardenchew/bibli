@@ -3,10 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 
-from src.auth.middleware import auth0_middleware
+import src.db.schema as schema
 from resources.exceptions import NotFoundException
+from src.auth.middleware import auth0_middleware
 from src.database import get_session
-from src.domain.collections import schemas, service
+from src.domain.service import collections
 
 # TODO(arden) header dependencies.
 router = APIRouter(
@@ -17,33 +18,33 @@ router = APIRouter(
 
 @router.get(
     "/collection/{collection_id}",
-    response_model=schemas.CollectionRead,
+    response_model=schema.collections.CollectionRead,
 )
 async def get_collection(
     collection_id: int,
     session: Session = Depends(get_session),
 ):
-    collection = service.get_collection(session, collection_id)
+    collection = collections.get_collection(session, collection_id)
     if not collection:
         raise NotFoundException
     return collection
 
 
-@router.get("/collections", response_model=List[schemas.CollectionRead])
+@router.get("/collections", response_model=List[schema.collections.CollectionRead])
 async def get_collections(
-    collection_filter: schemas.CollectionsFilter = Depends(),
+    collection_filter: schema.collections.CollectionsFilter = Depends(),
     session: Session = Depends(get_session),
 ):
-    return service.get_collections(session, collection_filter)
+    return collections.get_collections(session, collection_filter)
 
 
-@router.put("/collection", response_model=schemas.CollectionRead)
+@router.put("/collection", response_model=schema.collections.CollectionRead)
 async def put_collection(
-    collection: schemas.CollectionPut,
+    collection: schema.collections.CollectionPut,
     session: Session = Depends(get_session),
 ):
-    db_collection = schemas.Collection.from_orm(collection)
-    return service.upsert_collection(session, db_collection)
+    db_collection = schema.collections.Collection.from_orm(collection)
+    return collections.upsert_collection(session, db_collection)
 
 
 @router.delete("/collection/{collection_id}")
@@ -51,38 +52,38 @@ async def delete_collection(
     collection_id: int,
     session: Session = Depends(get_session),
 ):
-    collection = service.get_collection(session, collection_id)
+    collection = collections.get_collection(session, collection_id)
     if not collection:
         raise NotFoundException
-    service.delete_collection(session, collection)
+    collections.delete_collection(session, collection)
     return
 
 
 @router.post(
     "/collection_book_link",
-    response_model=schemas.CollectionBookLink,
+    response_model=schema.collections.CollectionBookLink,
 )
 async def post_collection_book_link(
-    link: schemas.CollectionBookLink, session: Session = Depends(get_session)
+    link: schema.collections.CollectionBookLink, session: Session = Depends(get_session)
 ):
-    db_link = schemas.CollectionBookLink.from_orm(link)
-    return service.insert_collection_book_link(session, db_link)
+    db_link = schema.collections.CollectionBookLink.from_orm(link)
+    return collections.insert_collection_book_link(session, db_link)
 
 
 @router.patch(
     "/collection_book_link",
-    response_model=schemas.CollectionBookLink,
+    response_model=schema.collections.CollectionBookLink,
 )
 async def patch_collection_book_link(
-    current_link: schemas.CollectionBookLink,
-    new_link: schemas.CollectionBookLink,
+    current_link: schema.collections.CollectionBookLink,
+    new_link: schema.collections.CollectionBookLink,
     session: Session = Depends(get_session),
 ):
-    db_current_link = service.get_collection_book_link(
+    db_current_link = collections.get_collection_book_link(
         session, current_link.collection_id, current_link.book_id
     )
-    db_new_link = schemas.CollectionBookLink.from_orm(new_link)
-    return service.patch_collection_book_link(
+    db_new_link = schema.collections.CollectionBookLink.from_orm(new_link)
+    return collections.patch_collection_book_link(
         session,
         db_current_link,
         db_new_link,
@@ -91,11 +92,11 @@ async def patch_collection_book_link(
 
 @router.delete("/collection_book_link")
 async def delete_collection_book_link(
-    link: schemas.CollectionBookLink,
+    link: schema.collections.CollectionBookLink,
     session: Session = Depends(get_session),
 ):
-    db_link = service.get_collection_book_link(
+    db_link = collections.get_collection_book_link(
         session, link.collection_id, link.book_id
     )
-    service.delete_collection_book_link(session, db_link)
+    collections.delete_collection_book_link(session, db_link)
     return

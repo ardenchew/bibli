@@ -20,12 +20,7 @@ class AuthorResults:
         """An aggregate OpenLibrary Work summarizing all Editions of an Author"""
 
         def __init__(
-            self,
-            key,
-            name: str = "",
-            bio="",
-            photos: List[int] = [],
-            **kwargs
+            self, key, name: str = "", bio="", photos: List[int] = [], **kwargs
         ):
             """
             Args:
@@ -36,9 +31,9 @@ class AuthorResults:
             self.key = key
             self.name = name
             self.bio = bio
-            self.cover = f'https://covers.openlibrary.org/a/olid/{key}-M.jpg'
+            self.cover = f"https://covers.openlibrary.org/a/olid/{key}-M.jpg"
             if len(photos) > 0:
-                self.cover = f'https://covers.openlibrary.org/a/id/{photos[0]}-M.jpg'
+                self.cover = f"https://covers.openlibrary.org/a/id/{photos[0]}-M.jpg"
 
         def to_author(self):
             """Converts an OpenLibrary Search API Results Document to a
@@ -50,4 +45,3 @@ class AuthorResults:
                 bio=self.bio,
                 cover=self.cover,
             )
-

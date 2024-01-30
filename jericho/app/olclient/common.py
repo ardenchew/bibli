@@ -6,14 +6,14 @@ from typing import List
 from olclient.utils import rm_punctuation
 
 VALID_IDENTIFIERS = (
-    'olid',
-    'oclc',
-    'isbn_10',
-    'isbn_13',
-    'isbns',
-    'lccn',
-    'goodreads',
-    'librarything',
+    "olid",
+    "oclc",
+    "isbn_10",
+    "isbn_13",
+    "isbns",
+    "lccn",
+    "goodreads",
+    "librarything",
 )
 
 
@@ -56,7 +56,7 @@ class Entity:
         return self.identifiers
 
     def __repr__(self):
-        return f'<{str(self.__class__)[1:-1]} {self.__dict__}>'
+        return f"<{str(self.__class__)[1:-1]} {self.__dict__}>"
 
 
 class Author(Entity):
@@ -69,7 +69,9 @@ class Author(Entity):
     TODO: Consider moving to own file
     """
 
-    def __init__(self, name, identifiers=None, olid=None, bio=None, cover=None, **kwargs):
+    def __init__(
+        self, name, identifiers=None, olid=None, bio=None, cover=None, **kwargs
+    ):
         super().__init__(identifiers=identifiers)
         self._validate_name(name)
         self.name = name
@@ -81,18 +83,18 @@ class Author(Entity):
             setattr(self, kwarg, kwargs[kwarg])
 
     def __repr__(self):
-        return f'<{str(self.__class__)[1:-1]} {self.__dict__}>'
+        return f"<{str(self.__class__)[1:-1]} {self.__dict__}>"
 
     @staticmethod
     def _validate_name(name):
-        if ',' in name:
+        if "," in name:
             raise ValueError(
                 f"{name} is not a valid Author name - No commas allowed (first last)"
             )
 
     @classmethod
     def set_cover(cls, photo_id):
-        cls.cover = f'https://covers.openlibrary.org/a/id/{photo_id}-M.jpg'
+        cls.cover = f"https://covers.openlibrary.org/a/id/{photo_id}-M.jpg"
 
 
 class Book(Entity):
@@ -102,16 +104,16 @@ class Book(Entity):
     """
 
     def __init__(
-            self,
-            title,
-            subtitle="",
-            identifiers=None,
-            number_of_pages=None,
-            authors=None,
-            publisher=None,
-            publish_date="",
-            cover="",
-            **kwargs,
+        self,
+        title,
+        subtitle="",
+        identifiers=None,
+        number_of_pages=None,
+        authors=None,
+        publisher=None,
+        publish_date="",
+        cover="",
+        **kwargs,
     ):
         """
         Args:
@@ -140,7 +142,7 @@ class Book(Entity):
             setattr(self, kwarg, kwargs[kwarg])
 
     def __repr__(self):
-        return f'<{str(self.__class__)[1:-1]} {self.__dict__}>'
+        return f"<{str(self.__class__)[1:-1]} {self.__dict__}>"
 
     @property
     def canonical_title(self):
@@ -168,29 +170,29 @@ class Book(Entity):
     @classmethod
     def xisbn_to_isbns(cls, xisbn):
         isbns = []
-        editions = xisbn.get('list', [])
+        editions = xisbn.get("list", [])
         for ed in editions:
-            isbns.extend(ed.get('isbn', []))
+            isbns.extend(ed.get("isbn", []))
         return isbns
 
     @classmethod
     def xisbn_to_books(cls, xisbn):
         books = []
-        editions = xisbn.get('list', [])
+        editions = xisbn.get("list", [])
         for ed in editions:
-            isbns = ed.get('isbn', [])
+            isbns = ed.get("isbn", [])
             book = cls(
-                title=ed.get('title', ''),
-                authors=[Author(name=ed.get('author', ''))],
-                publisher=ed.get('publisher', ''),
+                title=ed.get("title", ""),
+                authors=[Author(name=ed.get("author", ""))],
+                publisher=ed.get("publisher", ""),
                 identifiers={
-                    'oclc': ed.get('oclcnum', []),
-                    'lccn': ed.get('lccn', []),
+                    "oclc": ed.get("oclcnum", []),
+                    "lccn": ed.get("lccn", []),
                 },
-                language=ed.get('lang', ''),
-                publish_date=ed.get('year', None),
+                language=ed.get("lang", ""),
+                publish_date=ed.get("year", None),
             )
             for isbn in isbns:
-                book.add_id(f'isbn_{len(isbn)}', isbn)
+                book.add_id(f"isbn_{len(isbn)}", isbn)
             books.append(book)
         return books

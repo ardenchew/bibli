@@ -7,8 +7,8 @@ from src.auth.user import RequestUser
 
 
 def authorize_request_user_action(
-        request: Request,
-        user_id: Optional[int],
+    request: Request,
+    user_id: Optional[int],
 ):
     try:
         request.state.__getattr__("user")

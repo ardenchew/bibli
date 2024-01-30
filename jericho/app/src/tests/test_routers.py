@@ -6,9 +6,10 @@ from resources.exceptions import NotFoundException
 
 def test_get_book(client: TestClient, session: Session):
     # pylint: disable=C0415
-    from src.domain.books import schemas, service
+    from src.domain.service import books
+    import src.db.schema as schema
 
-    book = service.upsert_book(session, schemas.Book(title="Demon Copperhead"))
+    book = books.upsert_book(session, schema.books.Book(title="Demon Copperhead"))
 
     response = client.get(f"/book/{book.id}")
     data = response.json()
@@ -26,9 +27,10 @@ def test_get_book(client: TestClient, session: Session):
 
 def test_get_author(client: TestClient, session: Session):
     # pylint: disable=C0415
-    from src.domain.books import schemas, service
+    from src.domain.service import books
+    import src.db.schema as schema
 
-    author = service.upsert_author(session, schemas.Author(name="Javier Zamora"))
+    author = books.upsert_author(session, schema.books.Author(name="Javier Zamora"))
 
     response = client.get(f"/author/{author.id}")
     data = response.json()
@@ -46,9 +48,10 @@ def test_get_author(client: TestClient, session: Session):
 
 def test_crud_user(client: TestClient):
     # pylint: disable=C0415
-    from src.domain.users import schemas
+    from src.domain.service import users
+    import src.db.schema as schema
 
-    user = schemas.User(
+    user = schema.users.User(
         name="Archer",
         tag="archer_the_good_boi",
         info="A waggin' doggo that loves Emily Dickinson and Clifford.",
@@ -105,18 +108,19 @@ def test_crud_user(client: TestClient):
 
 def test_crud_user_link(client: TestClient, session: Session):
     # pylint: disable=C0415
-    from src.domain.users import schemas, service
+    from src.domain.service import users
+    import src.db.schema as schema
 
-    user1 = schemas.User(tag="first", name="first")
-    user1 = service.upsert_user(session, user1)
+    user1 = schema.users.User(tag="first", name="first")
+    user1 = users.upsert_user(session, user1)
 
-    user2 = schemas.User(tag="second", name="second")
-    user2 = service.upsert_user(session, user2)
+    user2 = schema.users.User(tag="second", name="second")
+    user2 = users.upsert_user(session, user2)
 
-    link = schemas.UserLinkPut(
+    link = schema.users.UserLinkPut(
         parent_id=user1.id,
         child_id=user2.id,
-        type=schemas.UserLinkType.FOLLOW,
+        type=schema.users.UserLinkType.FOLLOW,
     )
 
     response = client.put("/users/link", json=link.dict())

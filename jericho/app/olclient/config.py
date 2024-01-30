@@ -30,14 +30,14 @@ def getdef(self, section, option, default_value):
         return default_value
 
 
-Credentials = namedtuple('Credentials', ['access', 'secret'])
+Credentials = namedtuple("Credentials", ["access", "secret"])
 
 
 class Config:
 
     """Manages configurations for the Python OpenLibrary API Client"""
 
-    DEFAULTS = {'s3': {'access': '', 'secret': ''}}
+    DEFAULTS = {"s3": {"access": "", "secret": ""}}
 
     @classmethod
     def get_config_parser(cls):
@@ -61,10 +61,10 @@ class Config:
         """If no config_file name is specified, returns a valid, canonical
         filepath where the config file can live.
         """
-        config_dir = os.path.expanduser('~/.config')
+        config_dir = os.path.expanduser("~/.config")
         if not os.path.isdir(config_dir):
-            return os.path.expanduser('~/.ol')
-        return f'{config_dir}/ol.ini'
+            return os.path.expanduser("~/.ol")
+        return f"{config_dir}/ol.ini"
 
     def update(self, config):
         """Updates the config defaults by updating it with config dict values
@@ -84,7 +84,7 @@ class Config:
 
         self.config = config_parser
 
-        with open(self.config_file, 'w') as config_file:
+        with open(self.config_file, "w") as config_file:
             self.config.write(config_file)
 
     def create_default_config(self):
@@ -97,7 +97,7 @@ class Config:
                 self.config.set(section, key, default)
 
         if not os.path.exists(self.config_file):
-            with open(self.config_file, 'w') as fh:
+            with open(self.config_file, "w") as fh:
                 os.chmod(self.config_file, 0o600)
                 self.config.write(fh)
 
@@ -114,7 +114,7 @@ class Config:
         contents as a dict
         """
         config = self._get_config()
-        access = config['s3'].pop('access')
-        secret = config['s3'].pop('secret')
-        config['s3'] = Credentials(access, secret) if access and secret else None
+        access = config["s3"].pop("access")
+        secret = config["s3"].pop("secret")
+        config["s3"] = Credentials(access, secret) if access and secret else None
         return config

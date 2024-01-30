@@ -1,47 +1,26 @@
 from sqlalchemy import func
-from sqlmodel import Session, col, select
+from sqlmodel import Session, select
 
-from src.domain.reviews import constants, schemas
-
-
-def generate_query_statement(
-    reviews_filter: schemas.ReviewsFilter,
-    order_by: bool = False,
-    limit: int = None,
-    count: bool = False,
-):
-    stmt = (
-        select(schemas.Review)
-        if not count
-        else select(func.count(schemas.Review.book_id))
-    )
-    if reviews_filter.user_id is not None:
-        stmt = stmt.where(schemas.Review.user_id == reviews_filter.user_id)
-    if reviews_filter.book_id is not None:
-        stmt = stmt.where(schemas.Review.book_id == reviews_filter.book_id)
-    if order_by:
-        stmt = stmt.order_by(col(schemas.Review.rating).desc())
-    if limit:
-        stmt = stmt.limit(limit)
-    return stmt
+import src.db.schema as schema
+from src.domain.utils.constants import HIDE_REVIEW_THRESHOLD
 
 
 def get_review_or_none(
     session: Session,
     user_id: int,
     book_id: int,
-) -> schemas.Review:
-    stmt = select(schemas.Review).where(
-        schemas.Review.user_id == user_id,
-        schemas.Review.book_id == book_id,
+) -> schema.reviews.Review:
+    stmt = select(schema.reviews.Review).where(
+        schema.reviews.Review.user_id == user_id,
+        schema.reviews.Review.book_id == book_id,
     )
     return session.exec(stmt).first()
 
 
 def get_comparison_reviews(
-    session: Session, user_id: int, comparison: schemas.Comparison
-) -> schemas.ComparisonReviews:
-    return schemas.ComparisonReviews(
+    session: Session, user_id: int, comparison: schema.reviews.Comparison
+) -> schema.reviews.ComparisonReviews:
+    return schema.reviews.ComparisonReviews(
         less_than=get_review_or_none(
             session,
             user_id,
@@ -61,8 +40,8 @@ def get_comparison_reviews(
 
 
 def validate_comparisons(  # pylint: disable=R0912
-    new: schemas.Review,
-    reviews: schemas.ComparisonReviews,
+    new: schema.reviews.Review,
+    reviews: schema.reviews.ComparisonReviews,
     max_rank: int = None,
 ):
     if reviews.equal_to and (reviews.less_than or reviews.greater_than):
@@ -98,9 +77,9 @@ def get_max_rank(
     user_id: int,
     reaction: str,
 ) -> int:
-    stmt = select(func.max(schemas.Review.rank)).where(
-        schemas.Review.user_id == user_id,
-        schemas.Review.reaction == reaction,
+    stmt = select(func.max(schema.reviews.Review.rank)).where(
+        schema.reviews.Review.user_id == user_id,
+        schema.reviews.Review.reaction == reaction,
     )
 
     rank = session.exec(stmt).first()
@@ -109,8 +88,8 @@ def get_max_rank(
 
 
 def merge_equal_to_review(
-    new: schemas.Review, equal_to: schemas.Review
-) -> schemas.Review:
+    new: schema.reviews.Review, equal_to: schema.reviews.Review
+) -> schema.reviews.Review:
     new.rank = equal_to.rank
     new.rating = equal_to.rating
     new.hide_rank = equal_to.hide_rank
@@ -122,17 +101,17 @@ def sync_hide_rank(
     user_id: int,
 ):
     total_count = session.exec(
-        select(func.count(schemas.Review.book_id)).where(
-            schemas.Review.user_id == user_id,
+        select(func.count(schema.reviews.Review.book_id)).where(
+            schema.reviews.Review.user_id == user_id,
         ),
     ).one()
 
-    should_hide = total_count < constants.HIDE_REVIEW_THRESHOLD
+    should_hide = total_count < HIDE_REVIEW_THRESHOLD
 
     reviews_to_update = session.exec(
-        select(schemas.Review).where(
-            schemas.Review.user_id == user_id,
-            schemas.Review.hide_rank != should_hide,
+        select(schema.reviews.Review).where(
+            schema.reviews.Review.user_id == user_id,
+            schema.reviews.Review.hide_rank != should_hide,
         )
     ).all()
 
@@ -144,24 +123,24 @@ def sync_hide_rank(
 def generate_rating(
     rank: int,
     max_rank: int,
-    interval: schemas.Interval,
+    interval: schema.reviews.Interval,
 ):
     return ((rank * (interval.high - interval.low)) / max_rank) + interval.low
 
 
 def add_review_sync_ratings(
     session: Session,
-    review: schemas.Review,
+    review: schema.reviews.Review,
 ):
-    interval = schemas.REACTION_INTERVAL[review.reaction]
+    interval = schema.reviews.REACTION_INTERVAL[review.reaction]
 
     current_max_rank = get_max_rank(session, review.user_id, review.reaction)
     max_rank = current_max_rank + 1 if current_max_rank else 1
 
     reviews_to_update = session.exec(
-        select(schemas.Review).where(
-            schemas.Review.user_id == review.user_id,
-            schemas.Review.reaction == review.reaction,
+        select(schema.reviews.Review).where(
+            schema.reviews.Review.user_id == review.user_id,
+            schema.reviews.Review.reaction == review.reaction,
         )
     ).all()
 
@@ -180,13 +159,13 @@ def add_review_sync_ratings(
 
 def delete_review_sync_ratings(
     session: Session,
-    review: schemas.Review,
+    review: schema.reviews.Review,
 ):
     equal_ranked_reviews = session.exec(
-        select(schemas.Review).where(
-            schemas.Review.user_id == review.user_id,
-            schemas.Review.reaction == review.reaction,
-            schemas.Review.rank == review.rank,
+        select(schema.reviews.Review).where(
+            schema.reviews.Review.user_id == review.user_id,
+            schema.reviews.Review.reaction == review.reaction,
+            schema.reviews.Review.rank == review.rank,
         )
     ).all()
 
@@ -196,7 +175,7 @@ def delete_review_sync_ratings(
     if len(equal_ranked_reviews) == 0:
         raise ValueError
 
-    interval = schemas.REACTION_INTERVAL[review.reaction]
+    interval = schema.reviews.REACTION_INTERVAL[review.reaction]
 
     current_max_rank = get_max_rank(session, review.user_id, review.reaction)
 
@@ -208,9 +187,9 @@ def delete_review_sync_ratings(
     rank_threshold = review.rank
 
     reviews_to_update = session.exec(
-        select(schemas.Review).where(
-            schemas.Review.user_id == review.user_id,
-            schemas.Review.reaction == review.reaction,
+        select(schema.reviews.Review).where(
+            schema.reviews.Review.user_id == review.user_id,
+            schema.reviews.Review.reaction == review.reaction,
         )
     ).all()
 

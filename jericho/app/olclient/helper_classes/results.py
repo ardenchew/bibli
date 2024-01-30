@@ -41,7 +41,7 @@ class Results:
             id_librarything=None,
             cover_i=None,
             cover_edition_key=None,
-            **kwargs
+            **kwargs,
         ):
             """
             Args:
@@ -83,9 +83,11 @@ class Results:
             self.language = language
             self.cover = ""
             if cover_i:
-                self.cover = f'https://covers.openlibrary.org/b/id/{cover_i}-M.jpg'
+                self.cover = f"https://covers.openlibrary.org/b/id/{cover_i}-M.jpg"
             elif cover_edition_key:
-                self.cover = f'https://covers.openlibrary.org/b/olid/{cover_edition_key}-M.jpg'
+                self.cover = (
+                    f"https://covers.openlibrary.org/b/olid/{cover_edition_key}-M.jpg"
+                )
 
             # These keys all map to [lists] of (usually one) unicode ids
             self.identifiers = {

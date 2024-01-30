@@ -8,10 +8,10 @@
     :license: see LICENSE for more details.
 """
 
-__title__ = 'olclient'
-__version__ = '0.0.31'
-__author__ = 'Internet Archive'
+__title__ = "olclient"
+__version__ = "0.0.31"
+__author__ = "Internet Archive"
 
 
+from olclient.common import Author, Book
 from olclient.openlibrary import OpenLibrary
-from olclient.common import Book, Author

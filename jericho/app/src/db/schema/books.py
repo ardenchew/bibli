@@ -49,3 +49,10 @@ class BookRead(BookBase):
     id: Optional[int]
     tags: Optional[List[TagBase]]
     authors: List[AuthorRead]
+
+
+class BookFilter(SQLModel):
+    q: Optional[str] = None
+    offset: Optional[int] = None
+    limit: Optional[int] = None
+    user_id: Optional[int] = None

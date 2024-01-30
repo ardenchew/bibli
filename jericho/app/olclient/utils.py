@@ -5,7 +5,7 @@ import datetime
 import re
 from typing import Union
 
-ALPHANUMERICS_RE = re.compile(r'([^\s\w])+')
+ALPHANUMERICS_RE = re.compile(r"([^\s\w])+")
 
 
 def has_unicode(text):
@@ -42,7 +42,7 @@ def chunks(seq, chunk_size):
             except StopIteration:
                 return
 
-    if not hasattr(seq, 'next'):
+    if not hasattr(seq, "next"):
         seq = iter(seq)
     while True:
         x = list(take(seq, chunk_size))
@@ -54,7 +54,7 @@ def chunks(seq, chunk_size):
 
 def rm_punctuation(text):
     """Strips anything that is not an alphanumeric or space"""
-    return ALPHANUMERICS_RE.sub('', text)
+    return ALPHANUMERICS_RE.sub("", text)
 
 
 def parse_datetime(value):
@@ -65,7 +65,7 @@ def parse_datetime(value):
     if isinstance(value, datetime.datetime):
         return value
     else:
-        tokens = re.split(r'-|T|:|\.| ', value)
+        tokens = re.split(r"-|T|:|\.| ", value)
         return datetime.datetime(*map(int, tokens))
 
 
@@ -88,7 +88,7 @@ def get_text_value(text):
     Used for Work/Edition 'notes' and 'description' and Author 'bio'.
     """
     try:
-        return text.get('value')
+        return text.get("value")
     except AttributeError:
         return text
 
@@ -110,7 +110,7 @@ def extract_olid_from_url(url, url_type):
         >>> _extract_olid_from_url(url, u"books")
             u"OL25943366M"
     """
-    ol_url_pattern = r'[/]%s[/]([0-9a-zA-Z]+)' % url_type
+    ol_url_pattern = r"[/]%s[/]([0-9a-zA-Z]+)" % url_type
     try:
         return re.search(ol_url_pattern, url).group(1)
     except AttributeError:
@@ -118,4 +118,4 @@ def extract_olid_from_url(url, url_type):
 
 
 def get_approval_from_cli(message: str) -> bool:
-    return input(message).strip().lower() in ('y', 'yes')
+    return input(message).strip().lower() in ("y", "yes")
