@@ -28,7 +28,7 @@ export const Screen = ({user}: ScreenProps) => {
         );
         setCollections(response.data);
       } catch (error) {
-        console.log('Error fetching collections for user ${user.tag}:', error);
+        console.log(`Error fetching collections for user ${user.tag}:`, error);
       }
     };
     initializeCollections().catch(error => console.log(error));
@@ -43,7 +43,7 @@ export const Screen = ({user}: ScreenProps) => {
         );
         setFollowing(response.data);
       } catch (error) {
-        console.log('Error fetching following for user ${user.tag}:', error);
+        console.log(`Error fetching following for user ${user.tag}:`, error);
       }
     };
     initializeFollowing().catch(error => console.log(error));
@@ -59,7 +59,7 @@ export const Screen = ({user}: ScreenProps) => {
         );
         setFollowers(response.data);
       } catch (error) {
-        console.log('Error fetching followers for user ${user.tag}:', error);
+        console.log(`Error fetching followers for user ${user.tag}:`, error);
       }
     };
     initializeFollowers().catch(error => console.log(error));

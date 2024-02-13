@@ -207,7 +207,7 @@ def get_work_helper_class(ol_context):
         @classmethod
         def q(
             cls, q: str, offset: int | None = None, limit: int | None = None
-        ) -> List[Book]:
+        ) -> Results:
             url = f"{cls.OL.base_url}/search.json?q={q}"
             if offset:
                 url += f"&offset={offset}"
@@ -224,8 +224,8 @@ def get_work_helper_class(ol_context):
                 return cls.OL.session.get(ol_url)
 
             response = _get_books_by_metadata(url)
-            results = Results(**response.json())
+            return Results(**response.json())
 
-            return [i.to_book() for i in results.docs]
+            # return [i.to_book() for i in results.docs]
 
     return Work

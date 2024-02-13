@@ -1,20 +1,20 @@
 import React from 'react';
 import {View} from 'react-native';
 import Item from './Item';
-import {BookRead} from '../../generated/jericho';
+import {UserBookRead} from '../../generated/jericho';
 import {Divider} from 'react-native-paper';
 
 interface Props {
-  books: BookRead[];
+  userBooks: UserBookRead[];
 }
 
-const List = ({books}: Props) => {
+const List = ({userBooks}: Props) => {
   return (
     <View>
-      {books.map((item, index) => (
-        <View key={item.id.toString()}>
-          <Item book={item} />
-          {index !== books.length - 1 && <Divider bold={true} />}
+      {userBooks.map((item, index) => (
+        <View key={item.book.id.toString()}>
+          <Item userBook={item} />
+          {index !== userBooks.length - 1 && <Divider bold={true} />}
         </View>
       ))}
     </View>

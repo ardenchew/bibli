@@ -3,6 +3,9 @@ from typing import List, Optional
 
 from sqlmodel import Boolean, Column, Date, Field, Relationship, SQLModel
 
+from src.db.schema.reviews import ReviewRead
+from src.db.schema.collections import CollectionRead
+
 
 class TagBase(SQLModel):
     name: str = Field(default=None, primary_key=True)
@@ -46,13 +49,25 @@ class Book(BookBase, table=True):
 
 
 class BookRead(BookBase):
-    id: Optional[int]
+    id: int
     tags: Optional[List[TagBase]]
-    authors: List[AuthorRead]
 
 
-class BookFilter(SQLModel):
-    q: Optional[str] = None
+class UserBookRead(SQLModel):
+    user_id: int
+    book: BookRead
+    review: Optional[ReviewRead]
+    collections: Optional[List[CollectionRead]]
+    # TODO use AuthorRead object as BookRead attribute.
+    authors: List[str] = []
+
+
+class OmniBookFilter(SQLModel):
+    q: str
     offset: Optional[int] = None
     limit: Optional[int] = None
-    user_id: Optional[int] = None
+
+
+class SearchBookPage(SQLModel):
+    total_count: int
+    books: List[UserBookRead] = []

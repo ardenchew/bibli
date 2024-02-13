@@ -41,37 +41,37 @@ const mockCollections: CollectionRead[] = [
 const mockFollowing: UserRead[] = [
   {
     name: 'Emily',
-    id: 1,
+    id: 8,
     tag: 'emily',
   },
   {
     name: 'Mesther',
-    id: 2,
+    id: 9,
     tag: 'cat_in_the_hat_enthusiast',
   },
   {
     name: 'Adam Grail',
-    id: 3,
+    id: 10,
     tag: 'builtdifferent',
   },
   {
     name: 'Michelle',
-    id: 4,
+    id: 11,
     tag: 'pursegorl',
   },
   {
     name: 'Drew Leonard',
-    id: 5,
+    id: 12,
     tag: 'chef-welly',
   },
   {
     name: 'George William Peter Horrell The Fifth',
-    id: 6,
+    id: 13,
     tag: 'brit',
   },
   {
     name: 'Arielle Grail',
-    id: 7,
+    id: 14,
     tag: 'taylorswiftmegafan69420',
   },
 ];
@@ -106,7 +106,7 @@ const CollectionsRoute = ({
       );
       setCollections(response.data);
     } catch (error) {
-      console.log('Error fetching collections for user ${user.tag}:', error);
+      console.log(`Error fetching collections for user ${user.tag}:`, error);
     }
     setRefreshing(false);
   };

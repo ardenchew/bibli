@@ -3,30 +3,73 @@ import {View, useWindowDimensions, StyleSheet, ScrollView} from 'react-native';
 import {TabBar, TabView, SceneMap} from 'react-native-tab-view';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {Button, Text} from 'react-native-paper';
-import {BookRead, UserRead} from '../../generated/jericho';
+import {UserBookRead, UserRead} from '../../generated/jericho';
 import {default as BooksList} from '../book/List';
 import UserList from '../social/List';
 
-const mockBooks: BookRead[] = [
+const mockBooks: UserBookRead[] = [
   {
-    title: 'Demon Copperhead',
-    id: 'Barbara Kingsolver',
+    user_id: 6,
+    book: {
+      title: 'Demon Copperhead',
+      id: 1,
+      cover_link: 'https://covers.openlibrary.org/b/id/13141227-M.jpg',
+    },
+    // review: {
+    //   rating: 6.3,
+    //   reaction: 'neutral',
+    //   hide_rank: false,
+    // },
+    collections: [
+      {
+        id: 1,
+        name: 'complete',
+        type: 'complete',
+      },
+    ],
+    authors: ['Barbara Kingsolver', 'Joe Mama'],
   },
   {
-    title: 'Solito',
-    id: 'Javier Zamora',
+    user_id: 6,
+    book: {
+      title: 'Solito',
+      id: 2,
+      cover_link: 'https://covers.openlibrary.org/b/id/11408459-M.jpg',
+    },
+    // review: {
+    //   rating: 3.1,
+    //   reaction: 'negative',
+    //   hide_rank: false,
+    // },
+    collections: [
+      {
+        id: 1,
+        name: 'saved',
+        type: 'saved',
+      },
+    ],
+    authors: ['Javier Zamora'],
   },
   {
-    title: 'This is Happiness',
-    id: 'Niall Williams',
-  },
-  {
-    title: 'To the Lighthouse',
-    id: 'Virginia Woolf',
-  },
-  {
-    title: 'Being Mortal: Medicine and What Matters in the End',
-    id: 'Atul Gawande',
+    user_id: 6,
+    book: {
+      title: 'This is Happiness',
+      id: 3,
+      cover_link: 'https://covers.openlibrary.org/b/id/9258937-M.jpg',
+    },
+    review: {
+      rating: 10.0,
+      reaction: 'positive',
+      hide_rank: false,
+    },
+    collections: [
+      {
+        id: 1,
+        name: 'complete',
+        type: 'complete',
+      },
+    ],
+    authors: ['Niall Williams'],
   },
 ];
 
@@ -72,7 +115,7 @@ const BooksRoute = () => {
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.routeContainer}>
-        <BooksList books={mockBooks} />
+        <BooksList userBooks={mockBooks} />
       </ScrollView>
     </View>
   );

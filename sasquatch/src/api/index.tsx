@@ -32,7 +32,7 @@ export const useApi = (): ReturnApis => {
           basePath: config.jerichoApiHost,
           accessToken: credentials ? credentials.accessToken : '',
         });
-        // console.log(apiConfig);
+        console.log(apiConfig);
         setUsersApi(new UsersApi(apiConfig));
         setCollectionsApis(new CollectionsApi(apiConfig));
       } catch (error) {

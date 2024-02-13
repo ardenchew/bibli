@@ -15,7 +15,7 @@ export const Title = ({style, user}: Props) => {
       style={style}
       title={user?.name}
       titleVariant={'headlineMedium'}
-      subtitle={user?.tag}
+      subtitle={`@ ${user?.tag}`}
       subtitleVariant={'labelLarge'}
       left={props => <Avatar.Icon {...props} icon="account" />}
       right={props => (

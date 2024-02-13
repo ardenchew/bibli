@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
@@ -17,27 +17,32 @@ router = APIRouter(
 )
 
 
+@router.get("/books/search/{q}", response_model=schema.books.SearchBookPage)
+async def search_books(
+        request: Request,
+        q: str,
+        session: Session = Depends(get_session),
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+
+):
+    f = schema.books.OmniBookFilter(
+        q=q,
+        offset=offset,
+        limit=limit,
+    )
+
+    # TODO authorization.
+    ol = OpenLibrary()
+    return books.search_books(session, ol, f, request.state.user.id)
+
+
 @router.get("/book/{book_id}", response_model=schema.books.BookRead)
 async def get_book(book_id: int, session: Session = Depends(get_session)):
     book = books.get_book(session, book_id)
     if not book:
         raise NotFoundException
     return book
-
-
-@router.get("/books", response_model=List[schema.books.BookRead])
-async def get_books(
-    f: schema.books.BookFilter,
-    request: Request,
-    session: Session = Depends(get_session),
-):
-    # TODO authorization.
-    ol = OpenLibrary()
-    if request.state.user.id:
-        user = users.get_user(session, request.state.user.id)
-        if user:
-            return user
-    return books.get_books(session, ol, f)
 
 
 @router.get("/author/{author_id}", response_model=schema.books.AuthorRead)

@@ -43,10 +43,22 @@ export interface AuthorRead {
     'summary'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof AuthorRead
+     */
+    'olid'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthorRead
+     */
+    'cover_link'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof AuthorRead
      */
-    'id': number;
+    'id'?: number;
 }
 /**
  * 
@@ -70,31 +82,6 @@ export interface BodyPatchCollectionBookLinkCollectionBookLinkPatch {
 /**
  * 
  * @export
- * @interface BookAuthorLinkBase
- */
-export interface BookAuthorLinkBase {
-    /**
-     * 
-     * @type {number}
-     * @memberof BookAuthorLinkBase
-     */
-    'book_id'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof BookAuthorLinkBase
-     */
-    'author_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof BookAuthorLinkBase
-     */
-    'type'?: string;
-}
-/**
- * 
- * @export
  * @interface BookRead
  */
 export interface BookRead {
@@ -104,6 +91,12 @@ export interface BookRead {
      * @memberof BookRead
      */
     'title': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'subtitle'?: string;
     /**
      * 
      * @type {string}
@@ -124,22 +117,28 @@ export interface BookRead {
     'pages'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'cover_link'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'olid'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof BookRead
      */
     'id': number;
     /**
      * 
-     * @type {Array<BookAuthorLinkBase>}
-     * @memberof BookRead
-     */
-    'author_links': Array<BookAuthorLinkBase>;
-    /**
-     * 
      * @type {Array<TagBase>}
      * @memberof BookRead
      */
-    'tags': Array<TagBase>;
+    'tags'?: Array<TagBase>;
 }
 /**
  * 
@@ -336,6 +335,25 @@ export interface ReviewRead {
 /**
  * 
  * @export
+ * @interface SearchBookPage
+ */
+export interface SearchBookPage {
+    /**
+     * 
+     * @type {number}
+     * @memberof SearchBookPage
+     */
+    'total_count': number;
+    /**
+     * 
+     * @type {Array<UserBookRead>}
+     * @memberof SearchBookPage
+     */
+    'books'?: Array<UserBookRead>;
+}
+/**
+ * 
+ * @export
  * @interface TagBase
  */
 export interface TagBase {
@@ -376,6 +394,43 @@ export interface TagValidation {
      * @memberof TagValidation
      */
     'warning'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface UserBookRead
+ */
+export interface UserBookRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserBookRead
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {BookRead}
+     * @memberof UserBookRead
+     */
+    'book': BookRead;
+    /**
+     * 
+     * @type {ReviewRead}
+     * @memberof UserBookRead
+     */
+    'review'?: ReviewRead;
+    /**
+     * 
+     * @type {Array<CollectionRead>}
+     * @memberof UserBookRead
+     */
+    'collections'?: Array<CollectionRead>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserBookRead
+     */
+    'authors'?: Array<string>;
 }
 /**
  * 
@@ -557,6 +612,61 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Authors
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAuthorsAuthorsGet: async (q: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('getAuthorsAuthorsGet', 'q', q)
+            const localVarPath = `/authors`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (q !== undefined) {
+                localVarQueryParameter['q'] = q;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -590,6 +700,99 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Getol
+         * @param {string} title 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getolOlclientGet: async (title: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'title' is not null or undefined
+            assertParamExists('getolOlclientGet', 'title', title)
+            const localVarPath = `/olclient`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (title !== undefined) {
+                localVarQueryParameter['title'] = title;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Search Books
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchBooksBooksSearchQGet: async (q: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('searchBooksBooksSearchQGet', 'q', q)
+            const localVarPath = `/books/search/{q}`
+                .replace(`{${"q"}}`, encodeURIComponent(String(q)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
 
 
     
@@ -625,6 +828,19 @@ export const BooksApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get Authors
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAuthorsAuthorsGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AuthorRead>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAuthorsAuthorsGet(q, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Get Book
          * @param {number} bookId 
          * @param {*} [options] Override http request option.
@@ -632,6 +848,30 @@ export const BooksApiFp = function(configuration?: Configuration) {
          */
         async getBookBookBookIdGet(bookId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookRead>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getBookBookBookIdGet(bookId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Getol
+         * @param {string} title 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getolOlclientGet(title: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getolOlclientGet(title, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Search Books
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchBooksBooksSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SearchBookPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchBooksBooksSearchQGet(q, offset, limit, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -656,6 +896,18 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
+         * @summary Get Authors
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAuthorsAuthorsGet(q: string, offset?: number, limit?: number, options?: any): AxiosPromise<Array<AuthorRead>> {
+            return localVarFp.getAuthorsAuthorsGet(q, offset, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get Book
          * @param {number} bookId 
          * @param {*} [options] Override http request option.
@@ -663,6 +915,28 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
          */
         getBookBookBookIdGet(bookId: number, options?: any): AxiosPromise<BookRead> {
             return localVarFp.getBookBookBookIdGet(bookId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Getol
+         * @param {string} title 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getolOlclientGet(title: string, options?: any): AxiosPromise<void> {
+            return localVarFp.getolOlclientGet(title, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Search Books
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchBooksBooksSearchQGet(q: string, offset?: number, limit?: number, options?: any): AxiosPromise<SearchBookPage> {
+            return localVarFp.searchBooksBooksSearchQGet(q, offset, limit, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -688,6 +962,20 @@ export class BooksApi extends BaseAPI {
 
     /**
      * 
+     * @summary Get Authors
+     * @param {string} q 
+     * @param {number} [offset] 
+     * @param {number} [limit] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public getAuthorsAuthorsGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getAuthorsAuthorsGet(q, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Get Book
      * @param {number} bookId 
      * @param {*} [options] Override http request option.
@@ -696,6 +984,32 @@ export class BooksApi extends BaseAPI {
      */
     public getBookBookBookIdGet(bookId: number, options?: AxiosRequestConfig) {
         return BooksApiFp(this.configuration).getBookBookBookIdGet(bookId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Getol
+     * @param {string} title 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public getolOlclientGet(title: string, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getolOlclientGet(title, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Search Books
+     * @param {string} q 
+     * @param {number} [offset] 
+     * @param {number} [limit] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public searchBooksBooksSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).searchBooksBooksSearchQGet(q, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
