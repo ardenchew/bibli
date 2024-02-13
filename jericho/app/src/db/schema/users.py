@@ -88,6 +88,7 @@ class User(UserBase, table=True):
 
 class UserRead(UserBase):
     id: int
+    link: Optional[UserLinkType]
 
 
 class UserPut(UserBase):

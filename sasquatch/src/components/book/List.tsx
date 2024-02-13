@@ -8,7 +8,7 @@ interface Props {
   userBooks: UserBookRead[];
 }
 
-const List = ({userBooks}: Props) => {
+export const List = ({userBooks}: Props) => {
   return (
     <View>
       {userBooks.map((item, index) => (
@@ -20,5 +20,3 @@ const List = ({userBooks}: Props) => {
     </View>
   );
 };
-
-export default List;

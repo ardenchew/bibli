@@ -4,7 +4,7 @@ import {TabBar, TabView, SceneMap} from 'react-native-tab-view';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {Button, Text} from 'react-native-paper';
 import {UserBookRead, UserRead} from '../../generated/jericho';
-import {default as BooksList} from '../book/List';
+import {List as BooksList} from '../book';
 import UserList from '../social/List';
 
 const mockBooks: UserBookRead[] = [

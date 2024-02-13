@@ -20,6 +20,25 @@ user_router = APIRouter(
 )
 
 
+@router.get("/search/{q}", response_model=schema.users.UserPage)
+async def search_users(
+        request: Request,
+        q: str,
+        session: Session = Depends(get_session),
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+):
+    f = schema.books.OmniUserFilter(
+        q=q,
+        offset=offset,
+        limit=limit,
+    )
+
+    # TODO authorization.
+    return users.search_users(session, f, request.state.user.id)
+
+
+
 # TODO consider the collision of current against user_id below.
 @user_router.get("/current", response_model=schema.users.UserRead)
 async def get_user(

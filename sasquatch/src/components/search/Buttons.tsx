@@ -3,6 +3,12 @@ import {StyleSheet, View} from 'react-native';
 import {Button} from 'react-native-paper';
 import {SearchType} from './const';
 
+const iconSearchTypeMap: Record<SearchType, string> = {
+  [SearchType.Books]: 'book-outline',
+  [SearchType.Authors]: 'account-box-edit-outline',
+  [SearchType.Members]: 'account-cowboy-hat-outline',
+};
+
 interface OmniSearchTypeButtonProps {
   type: SearchType;
   searchType: SearchType;
@@ -18,7 +24,8 @@ const OmniSearchTypeButton = ({
   return (
     <Button
       mode={type === searchType ? 'contained' : 'outlined'}
-      onPress={onPress}>
+      onPress={onPress}
+      icon={iconSearchTypeMap[type]}>
       {type[0].toUpperCase()}
       {type.substring(1)}
     </Button>
