@@ -32,7 +32,7 @@ export const Screen = ({user}: ScreenProps) => {
       }
     };
     initializeCollections().catch(error => console.log(error));
-  }, [collectionsApi, user.id]);
+  }, [collectionsApi, user.id, user.tag]);
 
   useEffect(() => {
     const initializeFollowing = async () => {
@@ -47,7 +47,7 @@ export const Screen = ({user}: ScreenProps) => {
       }
     };
     initializeFollowing().catch(error => console.log(error));
-  }, [usersApi, user.id]);
+  }, [usersApi, user.id, user.tag]);
 
   useEffect(() => {
     const initializeFollowers = async () => {
@@ -63,7 +63,7 @@ export const Screen = ({user}: ScreenProps) => {
       }
     };
     initializeFollowers().catch(error => console.log(error));
-  }, [usersApi, user.id]);
+  }, [usersApi, user.id, user.tag]);
 
   const [socialText, setSocialText] = useState<string>('');
   useEffect(() => {
@@ -83,7 +83,14 @@ export const Screen = ({user}: ScreenProps) => {
           isCurrentUser={isCurrentUser}
         />
         <Text style={styles.socialText}>{socialText}</Text>
-        <TitleButtons style={styles.profileButtons} user={user} />
+        {bibliUser && (
+          <TitleButtons
+            style={styles.profileButtons}
+            user={user}
+            currentUser={bibliUser}
+            usersApi={usersApi}
+          />
+        )}
       </View>
       <UserTabView
         user={user}

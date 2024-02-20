@@ -1,13 +1,20 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet} from 'react-native';
-import {Card, Avatar} from 'react-native-paper';
-import {UserRead} from '../../generated/jericho';
+import {Card, Avatar, Button} from 'react-native-paper';
+import {
+  UserLinkPut,
+  UserLinkType,
+  UserRead,
+  UsersApi,
+} from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack'; // Adjust the import path
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 interface UserItemProps {
   user: UserRead;
+  currentUser: UserRead;
+  api: UsersApi;
 }
 
 const CardPress = (user: UserRead) => {
@@ -20,7 +27,91 @@ const CardPress = (user: UserRead) => {
   };
 };
 
-const UserItem = ({user}: UserItemProps) => {
+const UserItem = ({user, currentUser, api}: UserItemProps) => {
+  const [userLink, setUserLink] = useState<UserLinkType | null>(
+    user.link ?? null,
+  );
+
+  const handleFollowPress = async () => {
+    try {
+      const userLinkPut: UserLinkPut = {
+        parent_id: currentUser.id,
+        child_id: user.id,
+        type: 'follow',
+      };
+      const response = await api.putUserLinkUsersLinkPut(userLinkPut);
+      setUserLink(response.data.type);
+    } catch (error) {
+      console.error('Error creating user link:', error);
+    }
+  };
+
+  const handleUnlinkPress = async () => {
+    try {
+      await api.deleteUserLinkUsersLinkParentUserIdChildUserIdDelete(
+        currentUser.id,
+        user.id,
+      );
+      setUserLink(null);
+    } catch (error) {
+      console.error('Error deleting user link:', error);
+    }
+  };
+
+  const renderRightButton = () => {
+    if (user.id === currentUser.id) {
+      return null;
+    }
+    switch (userLink) {
+      case null:
+        return (
+          <Button
+            mode="text"
+            icon={'account-plus-outline'}
+            onPress={handleFollowPress}
+            style={styles.rightButton}
+            labelStyle={[styles.rightButtonLabel, {marginHorizontal: 15}]}>
+            Follow
+          </Button>
+        );
+      case 'follow':
+        return (
+          <Button
+            mode="elevated"
+            icon={'account-check'}
+            onPress={handleUnlinkPress}
+            style={styles.rightButton}
+            labelStyle={styles.rightButtonLabel}>
+            Following
+          </Button>
+        );
+      case 'block':
+        return (
+          <Button
+            mode="text"
+            icon={'account-off'}
+            theme={{
+              colors: {
+                primary: LightTheme.colors.error,
+                onPrimary: LightTheme.colors.onError,
+                primaryContainer: LightTheme.colors.errorContainer,
+                onPrimaryContainer: LightTheme.colors.onErrorContainer,
+                outline: LightTheme.colors.onErrorContainer,
+                elevation: {
+                  level1: LightTheme.colors.errorContainer,
+                },
+              },
+            }}
+            style={styles.rightButton}
+            labelStyle={styles.rightButtonLabel}>
+            Blocked
+          </Button>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card
       mode={'contained'}
@@ -33,6 +124,7 @@ const UserItem = ({user}: UserItemProps) => {
         title={user.name}
         subtitle={`@${user.tag}`}
         left={props => <Avatar.Icon {...props} icon="account-outline" />}
+        right={renderRightButton}
       />
     </Card>
   );
@@ -43,6 +135,18 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginHorizontal: 10,
     elevation: 2,
+  },
+  rightButton: {
+    width: 120,
+    height: 30,
+    // justifyContent: 'center',
+    marginHorizontal: 0,
+  },
+  rightButtonLabel: {
+    fontSize: 15,
+    marginHorizontal: 20,
+    marginVertical: 0,
+    paddingVertical: 5,
   },
 });
 

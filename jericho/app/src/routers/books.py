@@ -26,7 +26,7 @@ async def search_books(
         limit: Optional[int] = None,
 
 ):
-    f = schema.books.OmniBookFilter(
+    f = schema.filter.Filter(
         q=q,
         offset=offset,
         limit=limit,

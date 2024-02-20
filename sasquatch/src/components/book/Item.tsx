@@ -1,13 +1,16 @@
-import React from 'react';
+import React, {useContext, useState, useRef} from 'react';
 import {StyleSheet, Image, Text, View} from 'react-native';
 import {Card, Avatar, IconButton} from 'react-native-paper';
 import {
+  CollectionBookLink,
   CollectionType,
   Reaction,
   ReviewRead,
   UserBookRead,
 } from '../../generated/jericho';
-import {LightTheme} from '../../styles/themes/LightTheme'; // Adjust the import path
+import {LightTheme} from '../../styles/themes/LightTheme';
+import {useApi} from '../../api';
+import {UserContext} from '../../context'; // Adjust the import path
 
 // Define the mapping from indicators to colors
 const reactionColorMap: {[key in Reaction]: string} = {
@@ -28,30 +31,79 @@ const ReviewIndicator = ({review}: {review: ReviewRead}) => {
 };
 
 interface RightIndicators {
+  book: UserBookRead;
   hasCompleteCollection: boolean;
   hasSavedCollection: boolean;
-  review?: ReviewRead;
 }
 
 const RightIndicators = ({
+  book,
   hasCompleteCollection,
   hasSavedCollection,
-  review,
 }: RightIndicators) => {
+  const {user: bibliUser} = useContext(UserContext);
+  const {collectionsApi} = useApi();
+
+  const [completed, setCompleted] = useState<boolean>(hasCompleteCollection);
+  const [bookmarked, setBookmarked] = useState<boolean>(hasSavedCollection);
+  const [reviewScoped, setReviewScoped] = useState<ReviewRead | undefined>(
+    book.review,
+  );
+
+  const bookmarkOnPress = async () => {
+    try {
+      const response = await collectionsApi.getCollectionsCollectionsGet(
+        bibliUser?.id,
+        CollectionType.Saved,
+      );
+      const collectionId = response.data[0]?.id;
+
+      if (!collectionId) {
+        throw new Error('Saved collection does not exist.');
+      }
+
+      console.log(book.book);
+
+      const collectionBookLink: CollectionBookLink = {
+        collection_id: collectionId,
+        book_id: book.book.id,
+      };
+
+      if (bookmarked) {
+        await collectionsApi.deleteCollectionBookLinkCollectionBookLinkDelete(
+          collectionBookLink,
+        );
+      } else {
+        await collectionsApi.postCollectionBookLinkCollectionBookLinkPost(
+          collectionBookLink,
+        );
+      }
+
+      setBookmarked(!bookmarked);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <View style={styles.rightContainer}>
-      {review ? (
-        <ReviewIndicator review={review} />
-      ) : hasCompleteCollection ? (
+      {reviewScoped ? (
+        <ReviewIndicator review={reviewScoped} />
+      ) : completed ? (
         <>
-          <IconButton style={styles.rightIcon} icon={'check-circle'} />
+          <IconButton style={styles.rightIcon} icon={'check-all'} />
         </>
       ) : (
         <>
-          <IconButton style={styles.rightIcon} icon={'plus-circle-outline'} />
           <IconButton
             style={styles.rightIcon}
-            icon={hasSavedCollection ? 'bookmark' : 'bookmark-outline'}
+            icon={'star-plus-outline'}
+            onPress={() => {}}
+          />
+          <IconButton
+            style={styles.rightIcon}
+            icon={bookmarked ? 'bookmark' : 'bookmark-outline'}
+            onPress={bookmarkOnPress}
           />
         </>
       )}
@@ -78,6 +130,9 @@ const Item = ({userBook}: Props) => {
     userBook.collections?.some(
       collection => collection.type === CollectionType.Saved,
     ) ?? false;
+  const title = userBook.book.subtitle
+    ? `${userBook.book.title}: ${userBook.book.subtitle}`
+    : userBook.book.title;
 
   return (
     <Card
@@ -87,7 +142,7 @@ const Item = ({userBook}: Props) => {
         colors: {surfaceVariant: LightTheme.colors.surface},
       }}>
       <Card.Title
-        title={userBook.book.title}
+        title={title}
         subtitle={userBook.authors?.join(', ')}
         left={props =>
           userBook.book.cover_link ? (
@@ -101,9 +156,9 @@ const Item = ({userBook}: Props) => {
         }
         right={() => (
           <RightIndicators
+            book={userBook}
             hasCompleteCollection={hasCompleteCollection}
             hasSavedCollection={hasSavedCollection}
-            review={userBook.review}
           />
         )}
       />

@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, View, ScrollView} from 'react-native';
-import {ActivityIndicator, Searchbar} from 'react-native-paper';
+import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, Searchbar, Text} from 'react-native-paper';
 import {OmniSearchTypeButtons, SearchType} from '../../components/search';
 import {SharedNavigator} from './Shared';
 import {List as BookList} from '../../components/book';
+import UserList from '../../components/social/List';
 import {useApi} from '../../api';
-import {UserBookRead} from '../../generated/jericho';
+import {UserBookRead, UserRead} from '../../generated/jericho';
 
 const SearchScreen = () => {
-  const {booksApi} = useApi();
+  const {booksApi, usersApi} = useApi();
   const includedSearchTypes: SearchType[] = [
     SearchType.Books,
     SearchType.Members,
@@ -19,40 +20,102 @@ const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const clearSearchQuery = () => setSearchQuery('');
   const [loading, setLoading] = useState<boolean>(false);
-
   const [booksResults, setBooksResults] = useState<UserBookRead[]>([]);
+  const [membersResults, setMembersResults] = useState<UserRead[]>([]);
+  const [noResults, setNoResults] = useState<boolean>(false);
 
-  // TODO loader wheel
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      console.log(searchQuery);
-      if (searchQuery !== '') {
+      if (searchQuery.length > 1) {
         setLoading(true);
-        booksApi
-          .searchBooksBooksSearchQGet(searchQuery)
+        const searchPromise =
+          searchType === SearchType.Books
+            ? booksApi.searchBooksBooksSearchQGet(searchQuery)
+            : usersApi.searchUsersUserSearchQGet(searchQuery);
+
+        searchPromise
           .then(response => {
-            setBooksResults(response.data.books ?? []);
+            if (searchType === SearchType.Books) {
+              setBooksResults(response.data.books ?? []);
+              setNoResults(response.data.books.length === 0);
+            } else {
+              setMembersResults(response.data.users ?? []);
+              setNoResults(response.data.users.length === 0);
+            }
           })
           .catch(error => {
             console.error(error);
+            setNoResults(true);
           })
           .finally(() => {
             setLoading(false);
           });
       } else {
         setBooksResults([]);
+        setMembersResults([]);
+        setNoResults(false);
       }
     }, 1000);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [booksApi, searchQuery, setBooksResults]);
+  }, [booksApi, usersApi, searchQuery, searchType]);
+
+  const renderNoResults = () => {
+    return (
+      <View
+        style={{
+          marginTop: 20,
+          alignItems: 'center',
+        }}>
+        <Text style={{fontSize: 17}}>No {searchType} found ¯\_(ツ)_/¯</Text>
+      </View>
+    );
+  };
+
+  const renderResults = () => {
+    if (loading) {
+      return (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
+
+    if (searchQuery.length > 1 && searchType === SearchType.Books) {
+      if (noResults) {
+        return renderNoResults();
+      }
+      return (
+        <ScrollView keyboardShouldPersistTaps={'handled'}>
+          <BookList userBooks={booksResults} />
+        </ScrollView>
+      );
+    }
+
+    if (searchQuery.length > 1 && searchType === SearchType.Members) {
+      if (noResults) {
+        return renderNoResults();
+      }
+      return (
+        <ScrollView keyboardShouldPersistTaps={'handled'}>
+          <UserList users={membersResults} />
+        </ScrollView>
+      );
+    }
+
+    return null;
+  };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeAreaView}>
       <Searchbar
         style={styles.searchBar}
+        autoCorrect={false}
         placeholder={`Search for ${searchType}...`}
-        onChangeText={setSearchQuery}
+        onChangeText={text => {
+          setNoResults(false);
+          setSearchQuery(text);
+        }}
         value={searchQuery}
         onClearIconPress={clearSearchQuery}
       />
@@ -63,15 +126,7 @@ const SearchScreen = () => {
           includedSearchTypes={includedSearchTypes}
         />
       </View>
-      {loading ? ( // Show loader while loading
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator />
-        </View>
-      ) : searchQuery ? ( // Show BookList if searchQuery is not empty
-        <ScrollView>
-          <BookList userBooks={booksResults} />
-        </ScrollView>
-      ) : null}
+      {renderResults()}
     </SafeAreaView>
   );
 };
@@ -81,6 +136,9 @@ const SearchTab = SharedNavigator(SearchScreen);
 export default SearchTab;
 
 const styles = StyleSheet.create({
+  safeAreaView: {
+    flex: 1,
+  },
   searchBar: {
     marginBottom: 10,
     marginHorizontal: 20,

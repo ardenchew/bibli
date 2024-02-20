@@ -95,6 +95,11 @@ class UserPut(UserBase):
     id: Optional[int] = None
 
 
+class UserPage(SQLModel):
+    total_count: int
+    users: List[UserRead] = []
+
+
 class TagValidation(SQLModel):
     valid: bool
     warning: Optional[str]

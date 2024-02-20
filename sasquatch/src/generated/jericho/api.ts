@@ -503,6 +503,25 @@ export type UserLinkType = typeof UserLinkType[keyof typeof UserLinkType];
 /**
  * 
  * @export
+ * @interface UserPage
+ */
+export interface UserPage {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserPage
+     */
+    'total_count': number;
+    /**
+     * 
+     * @type {Array<UserRead>}
+     * @memberof UserPage
+     */
+    'users'?: Array<UserRead>;
+}
+/**
+ * 
+ * @export
  * @interface UserPut
  */
 export interface UserPut {
@@ -549,7 +568,15 @@ export interface UserRead {
      * @memberof UserRead
      */
     'id': number;
+    /**
+     * 
+     * @type {UserLinkType}
+     * @memberof UserRead
+     */
+    'link'?: UserLinkType;
 }
+
+
 /**
  * 
  * @export
@@ -2290,6 +2317,54 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Search Users
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchUsersUserSearchQGet: async (q: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('searchUsersUserSearchQGet', 'q', q)
+            const localVarPath = `/user/search/{q}`
+                .replace(`{${"q"}}`, encodeURIComponent(String(q)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Validate Tag
          * @param {string} tag 
          * @param {*} [options] Override http request option.
@@ -2431,6 +2506,19 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Search Users
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchUsersUserSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchUsersUserSearchQGet(q, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Validate Tag
          * @param {string} tag 
          * @param {*} [options] Override http request option.
@@ -2531,6 +2619,18 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         putUserUserPut(userPut: UserPut, options?: any): AxiosPromise<UserRead> {
             return localVarFp.putUserUserPut(userPut, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Search Users
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchUsersUserSearchQGet(q: string, offset?: number, limit?: number, options?: any): AxiosPromise<UserPage> {
+            return localVarFp.searchUsersUserSearchQGet(q, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2648,6 +2748,20 @@ export class UsersApi extends BaseAPI {
      */
     public putUserUserPut(userPut: UserPut, options?: AxiosRequestConfig) {
         return UsersApiFp(this.configuration).putUserUserPut(userPut, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Search Users
+     * @param {string} q 
+     * @param {number} [offset] 
+     * @param {number} [limit] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public searchUsersUserSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).searchUsersUserSearchQGet(q, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

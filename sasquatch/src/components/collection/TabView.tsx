@@ -34,7 +34,7 @@ const mockBooks: UserBookRead[] = [
     book: {
       title: 'Solito',
       id: 2,
-      cover_link: 'https://covers.openlibrary.org/b/id/11408459-M.jpg',
+      cover_link: 'https://covers.openlibrary.org/b/id/13330013-M.jpg',
     },
     // review: {
     //   rating: 3.1,
@@ -55,7 +55,7 @@ const mockBooks: UserBookRead[] = [
     book: {
       title: 'This is Happiness',
       id: 3,
-      cover_link: 'https://covers.openlibrary.org/b/id/9258937-M.jpg',
+      cover_link: 'https://covers.openlibrary.org/b/id/9245317-M.jpg',
     },
     review: {
       rating: 10.0,

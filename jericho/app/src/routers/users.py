@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
@@ -20,7 +20,7 @@ user_router = APIRouter(
 )
 
 
-@router.get("/search/{q}", response_model=schema.users.UserPage)
+@user_router.get("/search/{q}", response_model=schema.users.UserPage)
 async def search_users(
         request: Request,
         q: str,
@@ -28,7 +28,7 @@ async def search_users(
         offset: Optional[int] = None,
         limit: Optional[int] = None,
 ):
-    f = schema.books.OmniUserFilter(
+    f = schema.filter.Filter(
         q=q,
         offset=offset,
         limit=limit,
@@ -55,24 +55,28 @@ async def get_user(
 
 @user_router.get("/{user_id}", response_model=schema.users.UserRead)
 async def get_user_by_id(
+    request: Request,
     user_id: int,
     session: Session = Depends(get_session),
 ):
     user = users.get_user(session, user_id)
     if not user:
         raise NotFoundException
-    return user
+    user_read = users.add_current_user_links(session, [user], request.state.user.id)
+    return user_read[0]
 
 
 @user_router.get("/tag/{tag}", response_model=schema.users.UserRead)
 async def get_user_by_tag(
+    request: Request,
     tag: str,
     session: Session = Depends(get_session),
 ):
     user = users.get_user_by_tag(session, tag)
     if not user:
         raise NotFoundException
-    return user
+    user_read = users.add_current_user_links(session, [user], request.state.user.id)
+    return user_read[0]
 
 
 @user_router.put("", response_model=schema.users.UserRead)
@@ -131,10 +135,12 @@ users_router = APIRouter(
 
 @users_router.get("/linked", response_model=List[schema.users.UserRead])
 async def get_linked_users(
+    request: Request,
     users_filter: schema.users.LinkedUsersFilter = Depends(),
     session: Session = Depends(get_session),
 ):
-    return users.get_linked_users(session, users_filter)
+    us = users.get_linked_users(session, users_filter)
+    return users.add_current_user_links(session, us, request.state.user.id)
 
 
 @users_router.put("/link", response_model=schema.users.UserLinkRead)

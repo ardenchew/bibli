@@ -1,4 +1,5 @@
-from typing import List
+import random
+from typing import Dict, List, Optional
 
 from sqlmodel import Session, col, select
 
@@ -12,6 +13,20 @@ DEFAULT_PAGE_LIMIT = 10
 MAXIMUM_PATE_LIMIT = 100
 
 
+class UserBookCollectionResult:
+    def __init__(
+            self,
+            ol_book: OlBook,
+            book: schema.books.Book,
+            collections: Optional[List[schema.collections.Collection]] = [],
+            review: Optional[schema.reviews.Review] = None,
+    ):
+        self.ol_book = ol_book
+        self.book = book
+        self.collections = collections
+        self.review = review
+
+
 def get_book(session: Session, book_id: int) -> schema.books.Book:
     return session.get(schema.books.Book, book_id)
 
@@ -19,7 +34,7 @@ def get_book(session: Session, book_id: int) -> schema.books.Book:
 def search_books(
         session: Session,
         ol: OpenLibrary,
-        f: schema.books.OmniBookFilter,
+        f: schema.filter.Filter,
         user_id: int,
 ) -> schema.books.SearchBookPage:
     _validate_filter(f)
@@ -28,7 +43,6 @@ def search_books(
         f.limit = DEFAULT_PAGE_LIMIT
 
     results = ol.Work.q(f.q, f.offset, f.limit)
-    print(results)
     page = schema.books.SearchBookPage(
         total_count=results.num_found,
     )
@@ -37,12 +51,22 @@ def search_books(
     ol_books = [i.to_book() for i in results.docs]
 
     # TODO add user info to book page before returning.
-    books_zip = _insert_missing_books_and_return(session, ol_books)
-    for olb, b in books_zip:
+    user_book_collections = _insert_missing_books_and_return(session, ol_books, user_id)
+    for ubc in user_book_collections:
+        # rating = random.uniform(0.0, 10.0)
+        # if rating < 3.4:
+        #     reaction = schema.reviews.Reaction.NEGATIVE
+        # elif rating < 6.8:
+        #     reaction = schema.reviews.Reaction.NEUTRAL
+        # else:
+        #     reaction = schema.reviews.Reaction.POSITIVE
+
         book_read = schema.books.UserBookRead(
             user_id=user_id,
-            book=b,
-            authors=[a['name'] for a in olb.authors],
+            book=ubc.book,
+            authors=[a['name'] for a in ubc.ol_book.authors],
+            collections=ubc.collections,
+            review=ubc.review,
         )
         page.books.append(book_read)
 
@@ -80,7 +104,7 @@ def upsert_author(session: Session, author: schema.books.Author) -> schema.books
 
 
 def _validate_filter(
-    f: schema.books.OmniBookFilter,
+        f: schema.filter.Filter,
 ):
     if f.limit and f.limit > MAXIMUM_PATE_LIMIT:
         raise InvalidArgumentException
@@ -89,40 +113,55 @@ def _validate_filter(
 def _insert_missing_books_and_return(
         session: Session,
         ol_books: List[OlBook],
-):
+        user_id: int,
+) -> List[UserBookCollectionResult]:
     # Ignore books that do not have an identifier.
-    ol_books = [b for b in ol_books if (OL_IDENTIFIER in b.identifiers) and (b.identifiers[OL_IDENTIFIER][0] != "")]
+    olid_to_ol_book: Dict[str, OlBook] = {}
+    olids = []  # must maintain order
+    for b in ol_books:
+        if (OL_IDENTIFIER in b.identifiers) and (b.identifiers[OL_IDENTIFIER][0] != ""):
+            olid = b.identifiers[OL_IDENTIFIER][0]
+            olids.append(olid)
+            olid_to_ol_book[olid] = b
 
-    # For maintaining return order.
-    order = dict()
-    olids = []
-    for i, b in enumerate(ol_books):
-        olid = b.identifiers[OL_IDENTIFIER][0]
-        order[olid] = i
-        olids.append(olid)
-
-    stmt = select(schema.books.Book).where(
+    stmt = select(schema.books.Book, schema.collections.Collection, schema.reviews.Review).outerjoin(
+        schema.collections.CollectionBookLink,
+        (schema.books.Book.id == schema.collections.CollectionBookLink.book_id)
+    ).outerjoin(
+        schema.collections.Collection,
+        (schema.collections.Collection.id ==
+         schema.collections.CollectionBookLink.collection_id) &
+        (schema.collections.Collection.user_id == user_id),
+    ).outerjoin(
+        schema.reviews.Review,
+        (schema.books.Book.id == schema.reviews.Review.book_id) &
+        (schema.reviews.Review.user_id == user_id),
+    ).where(
         col(schema.books.Book.olid).in_(olids)
     )
 
-    books_stored = session.exec(stmt).all()
-    olids_stored = set([b.olid for b in books_stored])
-    books_to_add = []
+    results = session.exec(stmt).all()
+    olid_results_dict: Dict[str, UserBookCollectionResult] = {}
+    for book, collection, review in results:
+        if book.olid in olid_results_dict:
+            olid_results_dict[book.olid].collections.append(collection)
+        else:
+            olid_results_dict[book.olid] = UserBookCollectionResult(
+                ol_book=olid_to_ol_book[book.olid],
+                book=book,
+                collections=[collection] if collection else [],
+                review=review,
+            )
 
     for b in ol_books:
         olid = b.identifiers[OL_IDENTIFIER][0]
-        if olid not in olids_stored:
+        if olid not in olid_results_dict:
             book = translate.from_ol_book(b)
             session.add(book)
-            # TODO test need for commit here
             session.commit()
-            print("BEFORE", book.id)
-            session.refresh(book)
-            print("AFTER", book.id)
-            books_stored.append(book)
+            olid_results_dict[olid] = UserBookCollectionResult(
+                ol_book=olid_to_ol_book[olid],
+                book=book,
+            )
 
-    books_return = [schema.books.Book()] * len(ol_books)
-    for b in books_stored:
-        books_return[order[b.olid]] = b
-
-    return zip(ol_books, books_return)
+    return [olid_results_dict[olid] for olid in olids]
