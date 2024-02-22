@@ -25,27 +25,6 @@ def test_get_book(client: TestClient, session: Session):
     assert data["detail"] == NotFoundException.detail
 
 
-def test_get_author(client: TestClient, session: Session):
-    # pylint: disable=C0415
-    from src.domain.service import books
-    import src.db.schema as schema
-
-    author = books.upsert_author(session, schema.books.Author(name="Javier Zamora"))
-
-    response = client.get(f"/author/{author.id}")
-    data = response.json()
-
-    assert response.status_code == 200
-    assert data["id"] == author.id
-    assert data["name"] == author.name
-
-    response = client.get(f"/author/{author.id + 1}")
-    data = response.json()
-
-    assert response.status_code == NotFoundException.status_code
-    assert data["detail"] == NotFoundException.detail
-
-
 def test_crud_user(client: TestClient):
     # pylint: disable=C0415
     from src.domain.service import users

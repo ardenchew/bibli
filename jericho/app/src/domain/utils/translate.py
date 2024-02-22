@@ -15,12 +15,3 @@ def from_ol_book(ob: OlBook) -> schema.books.Book:
             schema.books.AuthorRead(name=a["name"], olid=a["olid"]) for a in ob.authors
         ],
     )
-
-
-def from_ol_author(oa: OlAuthor) -> schema.books.AuthorRead:
-    return schema.books.AuthorRead(
-        name=oa.name,
-        summary=oa.bio,
-        olid=oa.olid,
-        cover_link=oa.cover,
-    )

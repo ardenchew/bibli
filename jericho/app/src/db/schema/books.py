@@ -18,21 +18,6 @@ class Tag(TagBase, table=True):
     book: "Book" = Relationship(back_populates="tags")
 
 
-class AuthorBase(SQLModel):
-    name: str
-    summary: Optional[str] = None
-    olid: Optional[str]
-    cover_link: Optional[str]
-
-
-class Author(AuthorBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-
-
-class AuthorRead(AuthorBase):
-    id: Optional[int]
-
-
 class BookBase(SQLModel):
     title: str
     subtitle: Optional[str]

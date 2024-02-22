@@ -61,6 +61,7 @@ class LinkedUsersFilter(SQLModel):
 class UserBase(SQLModel):
     name: Optional[str]
     tag: Optional[str] = Field(default=None, unique=True, index=True)
+    bio: Optional[str]
 
 
 # Uses the many-to-many self referencing feedback here:

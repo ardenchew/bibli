@@ -43,36 +43,3 @@ async def get_book(book_id: int, session: Session = Depends(get_session)):
     if not book:
         raise NotFoundException
     return book
-
-
-@router.get("/author/{author_id}", response_model=schema.books.AuthorRead)
-async def get_author(author_id: int, session: Session = Depends(get_session)):
-    author = books.get_author(session, author_id)
-    if not author:
-        raise NotFoundException
-    return author
-
-
-@router.get("/authors", response_model=List[schema.books.AuthorRead])
-async def get_authors(
-    q: str,
-    offset: int | None = None,
-    limit: int | None = None,
-    session: Session = Depends(get_session),
-):
-    ol = OpenLibrary()
-    return books.get_authors(session, ol, q, offset, limit)
-
-
-@router.get("/olclient")
-async def getol(title: str):
-    ol = OpenLibrary()
-    books = ol.Work.q(title)
-    print(books[0])
-    print(books[0].authors[0])
-
-    olid = books[0].authors[0]["olid"]
-    print(olid)
-
-    author = ol.Author.get(olid)
-    print(author)

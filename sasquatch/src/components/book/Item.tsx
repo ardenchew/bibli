@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   ratingIndicatorContainer: {
-    borderColor: LightTheme.colors.outline,
+    borderColor: LightTheme.colors.outlineVariant,
     width: 38,
     height: 38,
     borderRadius: 19,
