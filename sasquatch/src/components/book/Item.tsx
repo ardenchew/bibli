@@ -141,6 +141,7 @@ const Item = ({userBook}: Props) => {
       theme={{
         colors: {surfaceVariant: LightTheme.colors.surface},
       }}>
+      {/*TODO Hold for book blurb would be so cool*/}
       <Card.Title
         title={title}
         subtitle={userBook.authors?.join(', ')}

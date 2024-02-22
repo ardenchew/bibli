@@ -67,7 +67,7 @@ const SearchScreen = () => {
           marginTop: 20,
           alignItems: 'center',
         }}>
-        <Text style={{fontSize: 17}}>No {searchType} found ¯\_(ツ)_/¯</Text>
+        <Text style={{fontSize: 17}}>No {searchType} found 🤷</Text>
       </View>
     );
   };

@@ -1,4 +1,3 @@
-import random
 from typing import Dict, List, Optional
 
 from sqlmodel import Session, col, select
@@ -53,18 +52,10 @@ def search_books(
     # TODO add user info to book page before returning.
     user_book_collections = _insert_missing_books_and_return(session, ol_books, user_id)
     for ubc in user_book_collections:
-        # rating = random.uniform(0.0, 10.0)
-        # if rating < 3.4:
-        #     reaction = schema.reviews.Reaction.NEGATIVE
-        # elif rating < 6.8:
-        #     reaction = schema.reviews.Reaction.NEUTRAL
-        # else:
-        #     reaction = schema.reviews.Reaction.POSITIVE
-
         book_read = schema.books.UserBookRead(
             user_id=user_id,
             book=ubc.book,
-            authors=[a['name'] for a in ubc.ol_book.authors],
+            authors=[a['name'] for a in ubc.ol_book.authors],  # store author for individual extraction
             collections=ubc.collections,
             review=ubc.review,
         )
@@ -107,21 +98,28 @@ def _insert_missing_books_and_return(
     ).outerjoin(
         schema.collections.Collection,
         (schema.collections.Collection.id ==
-         schema.collections.CollectionBookLink.collection_id) &
-        (schema.collections.Collection.user_id == user_id),
+         schema.collections.CollectionBookLink.collection_id),
+    ).outerjoin(
+        schema.collections.CollectionUserLink,
+        (schema.collections.Collection.id == schema.collections.CollectionUserLink.collection_id),
     ).outerjoin(
         schema.reviews.Review,
         (schema.books.Book.id == schema.reviews.Review.book_id) &
         (schema.reviews.Review.user_id == user_id),
     ).where(
-        col(schema.books.Book.olid).in_(olids)
+        col(schema.books.Book.olid).in_(olids) &
+        (((schema.collections.CollectionUserLink.user_id == user_id) &
+          (schema.collections.CollectionUserLink.type == schema.collections.CollectionUserLinkType.OWNER)) |
+         col(schema.collections.CollectionUserLink.collection_id).is_(None)
+         )
     )
 
     results = session.exec(stmt).all()
     olid_results_dict: Dict[str, UserBookCollectionResult] = {}
     for book, collection, review in results:
         if book.olid in olid_results_dict:
-            olid_results_dict[book.olid].collections.append(collection)
+            if collection:
+                olid_results_dict[book.olid].collections.append(collection)
         else:
             olid_results_dict[book.olid] = UserBookCollectionResult(
                 ol_book=olid_to_ol_book[book.olid],
@@ -129,16 +127,19 @@ def _insert_missing_books_and_return(
                 collections=[collection] if collection else [],
                 review=review,
             )
-
     for b in ol_books:
         olid = b.identifiers[OL_IDENTIFIER][0]
         if olid not in olid_results_dict:
             book = translate.from_ol_book(b)
-            session.add(book)
-            session.commit()
-            olid_results_dict[olid] = UserBookCollectionResult(
-                ol_book=olid_to_ol_book[olid],
-                book=book,
-            )
+            try:
+                session.add(book)
+                session.commit()
+                olid_results_dict[olid] = UserBookCollectionResult(
+                    ol_book=olid_to_ol_book[olid],
+                    book=book,
+                )
+            except Exception as e:
+                session.rollback()
+                print(e)
 
-    return [olid_results_dict[olid] for olid in olids]
+    return [olid_results_dict[olid] for olid in olids if olid in olid_results_dict]

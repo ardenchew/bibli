@@ -23,9 +23,14 @@ def _insert_default_collections(
         collection = schema.collections.Collection(
             name=default_type_name,
             type=default_type,
-            user=user,
         )
         session.add(collection)
+        collection_user_link = schema.collections.CollectionUserLink(
+            collection=collection,
+            user=user,
+            type=schema.collections.CollectionUserLinkType.OWNER,
+        )
+        session.add(collection_user_link)
 
 
 def search_users(
@@ -146,9 +151,11 @@ def upsert_user(
         user: schema.users.User,
 ) -> schema.users.User:
     new_user = user.id is None
+    print(new_user)
 
     if user.tag:
         if not validate_tag(user.tag).valid:
+            print(validate_tag(user.tag).warning)
             return InvalidArgumentException
 
     user = session.merge(user)
@@ -210,7 +217,7 @@ def validate_tag(tag: str) -> schema.users.TagValidation:
             warning=TAG_WARNING_LENGTH,
         )
 
-    tag_regex = "^[a-z0-9]+$"
+    tag_regex = "^[a-z0-9-_]+$"
     if not re.search(tag_regex, tag):
         return schema.users.TagValidation(
             valid=False,

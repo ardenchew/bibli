@@ -11,8 +11,11 @@ def _generate_query_statement(
 ):
     stmt = select(schema.collections.Collection)
     if collections_filter.user_id is not None:
-        stmt = stmt.where(
-            schema.collections.Collection.user_id == collections_filter.user_id
+        stmt = stmt.join(
+            schema.collections.CollectionUserLink,
+            (schema.collections.Collection.id == schema.collections.CollectionUserLink.collection_id),
+        ).where(
+            schema.collections.CollectionUserLink.user_id == collections_filter.user_id
         )
     if collections_filter.type is not None:
         stmt = stmt.where(schema.collections.Collection.type == collections_filter.type)

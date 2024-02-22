@@ -82,6 +82,7 @@ export const Screen = ({user}: ScreenProps) => {
           user={user}
           isCurrentUser={isCurrentUser}
         />
+        {user.bio ? <Text style={styles.bioText}>{user.bio}</Text> : null}
         <Text style={styles.socialText}>{socialText}</Text>
         {bibliUser && (
           <TitleButtons
@@ -112,11 +113,18 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginHorizontal: 10,
   },
+  bioText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingBottom: 5,
+    alignSelf: 'center',
+    width: 200,
+  },
   socialText: {
     textAlign: 'center',
   },
   profileBanner: {
-    padding: 20,
+    paddingTop: 5,
   },
   profileButtons: {
     padding: 10,

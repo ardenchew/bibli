@@ -66,7 +66,7 @@ const ContinueButton = ({username, valid}: ContinueButtonProps) => {
 };
 
 const UserText = () => {
-  const usersApi = useUsersApi();
+  const {usersApi} = useApi();
   const [bibliUser, setBibliUser] = useState<UserRead | null>(null);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const UserText = () => {
 
 const UsernameScreen = ({navigation}: Props) => {
   const {user} = useAuth0();
-  const usersApi = useUsersApi();
+  const {usersApi} = useApi();
   const [username, setUsername] = useState('');
   const [valid, setValid] = useState(false);
   const [warning, setWarning] = useState('');
