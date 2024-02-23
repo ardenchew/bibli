@@ -86,12 +86,12 @@ async def put_user(
     session: Session = Depends(get_session),
 ):
     # Clean this up to handle errors.
-    # authorize_request_user_action(request, user.id)
+    authorize_request_user_action(request, user.id)
 
     # Create translation layer.
     # Check that this doesn't erase foreign relationships.
     db_user = schema.users.User(
-        sub=user.tag,
+        sub=request.state.user.sub,
         id=user.id,
         name=user.name,
         tag=user.tag,

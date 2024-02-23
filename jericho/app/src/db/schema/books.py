@@ -47,6 +47,12 @@ class UserBookRead(SQLModel):
     authors: List[str] = []
 
 
-class SearchBookPage(SQLModel):
+class BookPage(SQLModel):
     total_count: int
     books: List[UserBookRead] = []
+
+
+class BookFilter(SQLModel):
+    collection_ids: Optional[List[int]]
+    offset: Optional[int] = None
+    limit: Optional[int] = None

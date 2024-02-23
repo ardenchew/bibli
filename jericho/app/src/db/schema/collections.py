@@ -31,16 +31,29 @@ class CollectionBookLink(SQLModel, table=True):
     book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
 
 
-class CollectionUserLink(SQLModel, table=True):
+class CollectionUserLinkBase(SQLModel):
+    collection_id: int
+    user_id: int
+    type: CollectionUserLinkType
+
+
+class CollectionUserLink(CollectionUserLinkBase, table=True):
     collection_id: int = Field(
         default=None, primary_key=True, foreign_key="collection.id"
     )
     user_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
-    type: CollectionUserLinkType
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
     collection: "Collection" = Relationship(back_populates="user_links")
     user: "User" = Relationship(back_populates="collection_links")
+
+
+class CollectionUserLinkRead(CollectionUserLinkBase):
+    created_at: datetime
+
+
+class CollectionUserLinkPut(CollectionUserLinkBase):
+    pass
 
 
 class CollectionBase(SQLModel):
@@ -57,6 +70,8 @@ class Collection(CollectionBase, table=True):
 class CollectionRead(CollectionBase):
     id: int
     type: Optional[CollectionType]
+
+    user_links: List[CollectionUserLinkRead]
 
 
 class CollectionPut(CollectionBase):

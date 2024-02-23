@@ -40,9 +40,9 @@ export default function Router() {
     }
   }, [setBibliUser, usersApi, user]);
 
-  return (
-    <UserContext.Provider value={bibliUserContext}>
-      {!user || !bibliUser?.tag || !bibliUser?.name ? (
+  const renderScreens = () => {
+    if (!user || !bibliUser?.tag || !bibliUser?.name) {
+      return (
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Login">
             {!user || !bibliUser ? (
@@ -72,9 +72,15 @@ export default function Router() {
             )}
           </Stack.Navigator>
         </NavigationContainer>
-      ) : (
-        <BottomNavigator />
-      )}
+      );
+    } else {
+      return <BottomNavigator />;
+    }
+  };
+
+  return (
+    <UserContext.Provider value={bibliUserContext}>
+      {renderScreens()}
     </UserContext.Provider>
   );
 }

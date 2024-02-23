@@ -4,7 +4,8 @@ import {
   useWindowDimensions,
   StyleSheet,
   SafeAreaView,
-  ScrollView, RefreshControl,
+  ScrollView,
+  RefreshControl,
 } from 'react-native';
 import {TabBar, TabView} from 'react-native-tab-view';
 import {LightTheme} from '../../styles/themes/LightTheme';
@@ -14,75 +15,6 @@ import {default as CollectionsList} from '../collection/List';
 import UserList from '../social/List';
 import {Dispatch, SetStateAction, useState} from 'react';
 import {useApi} from '../../api';
-
-const mockCollections: CollectionRead[] = [
-  {
-    name: 'Reviewed',
-    id: 1,
-    type: '57 books',
-  },
-  {
-    name: 'Bookmarked',
-    id: 2,
-    type: '142 books',
-  },
-  {
-    name: 'Checked Out',
-    id: 3,
-    type: '21 books',
-  },
-  {
-    name: 'Custom bookshelf',
-    id: 4,
-    type: '4 books',
-  },
-];
-
-const mockFollowing: UserRead[] = [
-  {
-    name: 'Emily',
-    id: 8,
-    tag: 'emily',
-  },
-  {
-    name: 'Mesther',
-    id: 9,
-    tag: 'cat_in_the_hat_enthusiast',
-  },
-  {
-    name: 'Adam Grail',
-    id: 10,
-    tag: 'builtdifferent',
-  },
-  {
-    name: 'Michelle',
-    id: 11,
-    tag: 'pursegorl',
-  },
-  {
-    name: 'Drew Leonard',
-    id: 12,
-    tag: 'chef-welly',
-  },
-  {
-    name: 'George William Peter Horrell The Fifth',
-    id: 13,
-    tag: 'brit',
-  },
-  {
-    name: 'Arielle Grail',
-    id: 14,
-    tag: 'taylorswiftmegafan69420',
-  },
-];
-
-const mockFollowers: UserRead[] = [
-  {
-    name: 'Joe',
-    id: 1,
-    tag: 'mama',
-  },
-];
 
 interface CollectionsProps {
   user: UserRead;

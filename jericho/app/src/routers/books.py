@@ -17,14 +17,13 @@ router = APIRouter(
 )
 
 
-@router.get("/books/search/{q}", response_model=schema.books.SearchBookPage)
+@router.get("/books/search/{q}", response_model=schema.books.BookPage)
 async def search_books(
         request: Request,
         q: str,
         session: Session = Depends(get_session),
         offset: Optional[int] = None,
         limit: Optional[int] = None,
-
 ):
     f = schema.filter.Filter(
         q=q,
@@ -43,3 +42,12 @@ async def get_book(book_id: int, session: Session = Depends(get_session)):
     if not book:
         raise NotFoundException
     return book
+
+
+@router.post("/books", response_model=schema.books.BookPage)
+async def get_books(
+    request: Request,
+    f: schema.books.BookFilter,
+    session: Session = Depends(get_session),
+):
+    return books.get_books(session, f, request.state.user.id)

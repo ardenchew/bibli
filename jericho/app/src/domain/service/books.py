@@ -30,36 +30,53 @@ def get_book(session: Session, book_id: int) -> schema.books.Book:
     return session.get(schema.books.Book, book_id)
 
 
+def get_books(session: Session, f: schema.books.BookFilter, user_id: int) -> schema.books.BookPage:
+    if not f.limit:
+        f.limit = DEFAULT_PAGE_LIMIT
+
+    stmt = select(schema.books.Book)
+
+    if f.collection_ids:
+        stmt = stmt.join(
+            schema.collections.CollectionBookLink,
+            (schema.books.Book.id ==
+             schema.collections.CollectionBookLink.book_id),
+        ).where(
+            col(schema.collections.CollectionBookLink.collection_id).in_(f.collection_ids)
+        )
+
+    stmt = stmt.limit(f.limit)
+
+    if not f.offset:
+        stmt = stmt.offset(f.offset)
+
+    results = session.exec(stmt).all()
+    print(results)
+
+    # return schema.books.Page(total_count=0)
+
+    return _books_to_page(session, results, user_id, 0)
+
+
 def search_books(
         session: Session,
         ol: OpenLibrary,
         f: schema.filter.Filter,
         user_id: int,
-) -> schema.books.SearchBookPage:
+) -> schema.books.BookPage:
     _validate_filter(f)
 
     if not f.limit:
         f.limit = DEFAULT_PAGE_LIMIT
 
     results = ol.Work.q(f.q, f.offset, f.limit)
-    page = schema.books.SearchBookPage(
-        total_count=results.num_found,
-    )
 
     # TODO fix summary and pages conversion in OL client.
     ol_books = [i.to_book() for i in results.docs]
 
     # TODO add user info to book page before returning.
-    user_book_collections = _insert_missing_books_and_return(session, ol_books, user_id)
-    for ubc in user_book_collections:
-        book_read = schema.books.UserBookRead(
-            user_id=user_id,
-            book=ubc.book,
-            authors=[a['name'] for a in ubc.ol_book.authors],  # store author for individual extraction
-            collections=ubc.collections,
-            review=ubc.review,
-        )
-        page.books.append(book_read)
+    books = _insert_missing_books_and_return(session, ol_books, user_id)
+    page = _books_to_page(session, books, user_id, results.num_found)
 
     return page
 
@@ -82,7 +99,7 @@ def _insert_missing_books_and_return(
         session: Session,
         ol_books: List[OlBook],
         user_id: int,
-) -> List[UserBookCollectionResult]:
+) -> List[schema.books.Book]:
     # Ignore books that do not have an identifier.
     olid_to_ol_book: Dict[str, OlBook] = {}
     olids = []  # must maintain order
@@ -92,54 +109,69 @@ def _insert_missing_books_and_return(
             olids.append(olid)
             olid_to_ol_book[olid] = b
 
+    # TODO add only books then use _books_to_page
+    stmt = select(schema.books.Book).where(col(schema.books.Book.olid).in_(olids))
+    results = session.exec(stmt).all()
+    olid_to_book: Dict[str, schema.books.Book] = {}
+    for b in results:
+        olid_to_book[b.olid] = b
+
+    for olid, b in olid_to_ol_book.items():
+        if olid not in olid_to_book:
+            book = translate.from_ol_book(b)
+            try:
+                session.add(book)
+                session.commit()
+                olid_to_book[olid] = book
+            except Exception as e:
+                session.rollback()
+                print(e)
+
+    return [olid_to_book[olid] for olid in olids]
+
+
+def _books_to_page(session: Session, books: List[schema.books.Book], user_id: int, total_count: int) -> schema.books.BookPage:
+    page = schema.books.BookPage(total_count=total_count)
+
+    # Fetch collection ids for user owned.
+    cul_stmt = select(schema.collections.CollectionUserLink
+                      ).where((schema.collections.CollectionUserLink.user_id == user_id) &
+                              (schema.collections.CollectionUserLink.type == schema.collections.CollectionUserLinkType.OWNER))
+
+    cul_results = session.exec(cul_stmt).all()
+    col_ids = [c.collection_id for c in cul_results]
+
+    ids = [b.id for b in books]  # must maintain order
+    print(ids)
+
     stmt = select(schema.books.Book, schema.collections.Collection, schema.reviews.Review).outerjoin(
         schema.collections.CollectionBookLink,
-        (schema.books.Book.id == schema.collections.CollectionBookLink.book_id)
+        ((schema.books.Book.id == schema.collections.CollectionBookLink.book_id) &
+         (col(schema.collections.CollectionBookLink.collection_id).in_(col_ids)))
     ).outerjoin(
         schema.collections.Collection,
         (schema.collections.Collection.id ==
          schema.collections.CollectionBookLink.collection_id),
     ).outerjoin(
-        schema.collections.CollectionUserLink,
-        (schema.collections.Collection.id == schema.collections.CollectionUserLink.collection_id),
-    ).outerjoin(
         schema.reviews.Review,
         (schema.books.Book.id == schema.reviews.Review.book_id) &
         (schema.reviews.Review.user_id == user_id),
-    ).where(
-        col(schema.books.Book.olid).in_(olids) &
-        (((schema.collections.CollectionUserLink.user_id == user_id) &
-          (schema.collections.CollectionUserLink.type == schema.collections.CollectionUserLinkType.OWNER)) |
-         col(schema.collections.CollectionUserLink.collection_id).is_(None)
-         )
-    )
+    ).where(col(schema.books.Book.id).in_(ids))
 
     results = session.exec(stmt).all()
-    olid_results_dict: Dict[str, UserBookCollectionResult] = {}
+    id_results_dict: Dict[int, schema.books.UserBookRead] = {}
     for book, collection, review in results:
-        if book.olid in olid_results_dict:
+        if book.id in id_results_dict:
             if collection:
-                olid_results_dict[book.olid].collections.append(collection)
+                id_results_dict[book.id].collections.append(collection)
         else:
-            olid_results_dict[book.olid] = UserBookCollectionResult(
-                ol_book=olid_to_ol_book[book.olid],
+            id_results_dict[book.id] = schema.books.UserBookRead(
+                user_id=user_id,
                 book=book,
+                authors=["arden"],  # store author for individual extraction
                 collections=[collection] if collection else [],
                 review=review,
             )
-    for b in ol_books:
-        olid = b.identifiers[OL_IDENTIFIER][0]
-        if olid not in olid_results_dict:
-            book = translate.from_ol_book(b)
-            try:
-                session.add(book)
-                session.commit()
-                olid_results_dict[olid] = UserBookCollectionResult(
-                    ol_book=olid_to_ol_book[olid],
-                    book=book,
-                )
-            except Exception as e:
-                session.rollback()
-                print(e)
 
-    return [olid_results_dict[olid] for olid in olids if olid in olid_results_dict]
+    page.books = [id_results_dict[i] for i in ids]
+    return page

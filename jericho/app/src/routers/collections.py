@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
@@ -38,6 +38,34 @@ async def get_collections(
     return collections.get_collections(session, collection_filter)
 
 
+@router.get("/collection/user/link/{collection_id}/{user_id}", response_model=Optional[schema.collections.CollectionUserLinkRead])
+async def get_collection_user_link(
+        collection_id: int,
+        user_id: int,
+        session: Session = Depends(get_session),
+):
+    return collections.get_collection_user_link(session, collection_id, user_id)
+
+
+@router.put("/collection/user/link", response_model=schema.collections.CollectionUserLinkRead)
+async def put_collection_user_link(
+        link: schema.collections.CollectionUserLinkPut,
+        session: Session = Depends(get_session),
+):
+    db_link = schema.collections.CollectionUserLink.from_orm(link)
+    return collections.upsert_collection_user_link(session, db_link)
+
+
+@router.delete("/collection/user/link/{collection_id}/{user_id}")
+async def delete_collection_user_link(
+        collection_id: int,
+        user_id: int,
+        session: Session = Depends(get_session),
+):
+    collections.delete_collection_user_link(session, collection_id, user_id)
+    return
+
+
 @router.put("/collection", response_model=schema.collections.CollectionRead)
 async def put_collection(
     collection: schema.collections.CollectionPut,
@@ -52,7 +80,7 @@ async def delete_collection(
     collection_id: int,
     session: Session = Depends(get_session),
 ):
-    collection = collections.get_collection(session, collection_id)
+    collection = session.get(schema.collections.Collection, collection_id)
     if not collection:
         raise NotFoundException
     collections.delete_collection(session, collection)
