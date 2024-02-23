@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 from sqlmodel import Session, col, select
 
-from resources.exceptions import InvalidArgumentException
+from resources.exceptions import InvalidArgumentException, NotFoundException
 import src.db.schema as schema
 from olclient import OpenLibrary, Book as OlBook
 from src.domain.utils import translate
@@ -28,14 +28,20 @@ class UserBookCollectionResult:
 
 def get_book(session: Session, book_id: int, user_id: int) -> schema.books.UserBookRead:
     book = session.get(schema.books.Book, book_id)
+    if not book:
+        raise NotFoundException
+
     if book.summary is None and book.first_publication_date is None:
+        # TODO if no summary is found should peruse editions for a summary.
         try:
             ol = OpenLibrary()
             work = ol.Work.get(book.olid)
             if work:
-                if work.description:
+                print('WORK ', work)
+                print('WORK.first ', work.first_publish_date)
+                if book.summary is None and work.description:
                     book.summary = work.description
-                if work.first_publish_date:
+                if book.first_publication_date is None and work.first_publish_date:
                     book.first_publication_date = work.first_publish_date
                 session.add(book)
                 session.commit()

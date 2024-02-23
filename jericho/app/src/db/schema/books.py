@@ -45,7 +45,7 @@ class BookBase(SQLModel):
     title: str
     subtitle: Optional[str]
     summary: Optional[str]
-    publication_date: Optional[date] = Field(sa_column=Column(Date))
+    publication_date: Optional[date] = Field(default=None, sa_column=Column(Date))
     first_publication_date: Optional[str]
     pages: Optional[int] = None
     cover_link: Optional[str]

@@ -23,7 +23,7 @@ def get_work_helper_class(ol_context):
             super().__init__(identifiers)
             self.olid = olid
             self._editions: List = []
-            self.first_publish_date = get_text_value(kwargs.pop("first_publish_date", None))
+            self.first_publish_date = kwargs.pop("first_publish_date", None)
             self.description = get_text_value(kwargs.pop("description", None))
             self.notes = get_text_value(kwargs.pop("notes", None))
             for kwarg in kwargs:
