@@ -1,64 +1,88 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
+import src.db.schema as schema
 from resources.exceptions import NotFoundException
-from src.routers.authorization import authorize_request_user_action
 from src.auth.middleware import auth0_middleware
 from src.database import get_session
-from src.domain.users import schemas, service
-
+from src.domain.service import users
+from src.routers.authorization import authorize_request_user_action
 
 user_router = APIRouter(
     prefix="/user",
     tags=["users"],
-    responses={NotFoundException.status_code: {"description": NotFoundException.detail}},
+    responses={
+        NotFoundException.status_code: {"description": NotFoundException.detail}
+    },
     dependencies=[Depends(auth0_middleware)],
 )
 
 
-# TODO consider the collision of current against user_id below.
-@user_router.get("/current", response_model=schemas.UserRead)
-async def get_user(
+@user_router.get("/search/{q}", response_model=schema.users.UserPage)
+async def search_users(
         request: Request,
+        q: str,
         session: Session = Depends(get_session),
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
 ):
-    print("request", request.state.user.sub)
+    f = schema.filter.Filter(
+        q=q,
+        offset=offset,
+        limit=limit,
+    )
+
+    # TODO authorization.
+    return users.search_users(session, f, request.state.user.id)
+
+
+
+# TODO consider the collision of current against user_id below.
+@user_router.get("/current", response_model=schema.users.UserRead)
+async def get_user(
+    request: Request,
+    session: Session = Depends(get_session),
+):
     if request.state.user.id:
-        user = service.get_user(session, request.state.user.id)
+        user = users.get_user(session, request.state.user.id)
         if user:
             return user
     # Initialize user with sub if no user found. This is lazy.
-    return service.upsert_user(session, schemas.User(sub=request.state.user.sub))
+    return users.upsert_user(session, schema.users.User(sub=request.state.user.sub))
 
 
-@user_router.get("/{user_id}", response_model=schemas.UserRead)
+@user_router.get("/{user_id}", response_model=schema.users.UserRead)
 async def get_user_by_id(
+    request: Request,
     user_id: int,
     session: Session = Depends(get_session),
 ):
-    user = service.get_user(session, user_id)
+    user = users.get_user(session, user_id)
     if not user:
         raise NotFoundException
-    return user
+    user_read = users.add_current_user_links(session, [user], request.state.user.id)
+    return user_read[0]
 
 
-@user_router.get("/tag/{tag}", response_model=schemas.UserRead)
+@user_router.get("/tag/{tag}", response_model=schema.users.UserRead)
 async def get_user_by_tag(
-        tag: str,
-        session: Session = Depends(get_session),
+    request: Request,
+    tag: str,
+    session: Session = Depends(get_session),
 ):
-    user = service.get_user_by_tag(session, tag)
+    user = users.get_user_by_tag(session, tag)
     if not user:
         raise NotFoundException
-    return user
+    user_read = users.add_current_user_links(session, [user], request.state.user.id)
+    return user_read[0]
 
 
-@user_router.put("", response_model=schemas.UserRead)
+@user_router.put("", response_model=schema.users.UserRead)
 async def put_user(
     request: Request,
-    user: schemas.UserPut,
+    user: schema.users.UserPut,
     session: Session = Depends(get_session),
 ):
     # Clean this up to handle errors.
@@ -66,13 +90,14 @@ async def put_user(
 
     # Create translation layer.
     # Check that this doesn't erase foreign relationships.
-    db_user = schemas.User(
+    db_user = schema.users.User(
         sub=request.state.user.sub,
         id=user.id,
         name=user.name,
         tag=user.tag,
+        bio=user.bio,
     )
-    return service.upsert_user(session, db_user)
+    return users.upsert_user(session, db_user)
 
 
 @user_router.delete("/{user_id}")
@@ -84,43 +109,47 @@ async def delete_user(
     # Clean this up to handle errors.
     authorize_request_user_action(request, user_id)
 
-    user = service.get_user(session, user_id)
+    user = users.get_user(session, user_id)
     if not user:
         raise NotFoundException
-    service.delete_user(session, user)
+    users.delete_user(session, user)
     return
 
 
-@user_router.get("/validate/tag", response_model=schemas.TagValidation)
+@user_router.get("/validate/tag", response_model=schema.users.TagValidation)
 async def validate_tag(
-        tag: str,
-        session: Session = Depends(get_session),
+    tag: str,
+    session: Session = Depends(get_session),
 ):
-    return service.validate_new_tag(session, tag)
+    return users.validate_new_tag(session, tag)
 
 
 users_router = APIRouter(
     prefix="/users",
     tags=["users"],
-    responses={NotFoundException.status_code: {"description": NotFoundException.detail}},
+    responses={
+        NotFoundException.status_code: {"description": NotFoundException.detail}
+    },
     dependencies=[Depends(auth0_middleware)],
 )
 
 
-@users_router.get("/linked", response_model=List[schemas.UserRead])
+@users_router.get("/linked", response_model=List[schema.users.UserRead])
 async def get_linked_users(
-    users_filter: schemas.LinkedUsersFilter = Depends(),
+    request: Request,
+    users_filter: schema.users.LinkedUsersFilter = Depends(),
     session: Session = Depends(get_session),
 ):
-    return service.get_linked_users(session, users_filter)
+    us = users.get_linked_users(session, users_filter)
+    return users.add_current_user_links(session, us, request.state.user.id)
 
 
-@users_router.put("/link", response_model=schemas.UserLinkRead)
+@users_router.put("/link", response_model=schema.users.UserLinkRead)
 async def put_user_link(
-    user_link: schemas.UserLinkPut, session: Session = Depends(get_session)
+    user_link: schema.users.UserLinkPut, session: Session = Depends(get_session)
 ):
-    db_user_link = schemas.UserLink.from_orm(user_link)
-    return service.upsert_user_link(session, db_user_link)
+    db_user_link = schema.users.UserLink.from_orm(user_link)
+    return users.upsert_user_link(session, db_user_link)
 
 
 @users_router.delete("/link/{parent_user_id}/{child_user_id}")
@@ -129,8 +158,8 @@ async def delete_user_link(
     child_user_id: int,
     session: Session = Depends(get_session),
 ):
-    user_link = service.get_user_link(session, parent_user_id, child_user_id)
+    user_link = users.get_user_link(session, parent_user_id, child_user_id)
     if not user_link:
         raise NotFoundException
-    service.delete_user_link(session, user_link)
+    users.delete_user_link(session, user_link)
     return

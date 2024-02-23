@@ -51,6 +51,7 @@ const EditScreen = () => {
     id: bibliUser?.id,
     name: bibliUser?.name,
     tag: bibliUser?.tag,
+    bio: bibliUser?.bio,
   });
   const [nameValid, setNameValid] = useState(true);
   const [tagValid, setTagValid] = useState(true);
@@ -60,7 +61,8 @@ const EditScreen = () => {
   useEffect(() => {
     const isSameUser =
       bibliUser?.tag === updateUser?.tag &&
-      bibliUser?.name === updateUser?.name;
+      bibliUser?.name === updateUser?.name &&
+      bibliUser?.bio === updateUser?.bio;
 
     setDisableSubmit(isSameUser || !tagValid || !nameValid);
   }, [bibliUser, updateUser, tagValid, nameValid]);
@@ -87,6 +89,11 @@ const EditScreen = () => {
       setTagValid(true);
       setTagWarn('');
     }
+  };
+
+  const handleBioChange = (bio: string) => {
+    // @ts-ignore
+    setUpdateUser({...updateUser, bio: bio.trim() === '' ? null : bio});
   };
 
   return (
@@ -121,6 +128,15 @@ const EditScreen = () => {
           maxLength={20}
           error={!nameValid}
           onChangeText={handleNameChange}
+        />
+      </View>
+      <View style={styles.textInputView}>
+        <TextInput
+          label={'Bio'}
+          mode="outlined"
+          defaultValue={bibliUser?.bio}
+          maxLength={50}
+          onChangeText={handleBioChange}
         />
       </View>
       <SubmitButton updateUser={updateUser} disabled={disableSubmit} />

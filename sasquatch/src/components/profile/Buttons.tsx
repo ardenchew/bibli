@@ -2,7 +2,7 @@ import {Button} from 'react-native-paper';
 import * as React from 'react';
 import {StyleProp, ViewStyle, View, StyleSheet, TextStyle} from 'react-native';
 import {useContext, useState} from 'react';
-import {UserLinkRead, UserRead} from '../../generated/jericho';
+import {UserLinkPut, UserRead, UsersApi} from '../../generated/jericho';
 import {UserContext} from '../../context';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
@@ -10,7 +10,9 @@ import {useNavigation} from '@react-navigation/native';
 interface ProfileButtonProps {
   style?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
-  link?: UserLinkRead;
+  user?: UserRead;
+  currentUser?: UserRead;
+  usersApi?: UsersApi;
 }
 
 const DiscoverButton = ({style, labelStyle}: ProfileButtonProps) => {
@@ -43,8 +45,48 @@ const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
   );
 };
 
-const FollowButton = ({style, labelStyle, link}: ProfileButtonProps) => {
-  const [active, setActive] = useState<Boolean>(link?.type === 'follow');
+const FollowButton = ({
+  style,
+  labelStyle,
+  user,
+  currentUser,
+  usersApi,
+}: ProfileButtonProps) => {
+  if (!currentUser || !user || currentUser?.id === user?.id) {
+    return null;
+  }
+
+  const [active, setActive] = useState<Boolean>(user?.link === 'follow');
+
+  const onPress = async () => {
+    if (!usersApi) {
+      return null;
+    }
+
+    if (active) {
+      try {
+        await usersApi.deleteUserLinkUsersLinkParentUserIdChildUserIdDelete(
+          currentUser?.id,
+          user?.id,
+        );
+        setActive(false);
+      } catch (error) {
+        console.error('Error deleting user link:', error);
+      }
+    } else {
+      try {
+        const userLinkPut: UserLinkPut = {
+          parent_id: currentUser.id,
+          child_id: user.id,
+          type: 'follow',
+        };
+        await usersApi.putUserLinkUsersLinkPut(userLinkPut);
+        setActive(true);
+      } catch (error) {
+        console.error('Error creating user link:', error);
+      }
+    }
+  };
 
   return (
     <Button
@@ -53,28 +95,8 @@ const FollowButton = ({style, labelStyle, link}: ProfileButtonProps) => {
       icon={active ? 'account-check-outline' : 'account-plus'}
       style={style}
       labelStyle={labelStyle}
-      onPress={() => {
-        setActive(!active);
-      }}>
+      onPress={onPress}>
       {active ? 'Following' : 'Follow'}
-    </Button>
-  );
-};
-
-const BlockButton = ({style, labelStyle, link}: ProfileButtonProps) => {
-  const [active, setActive] = useState<Boolean>(link?.type === 'block');
-
-  return (
-    <Button
-      mode={active ? 'contained' : 'outlined'}
-      compact={true}
-      icon={active ? 'account-off-outline' : 'account-off'}
-      style={style}
-      labelStyle={labelStyle}
-      onPress={() => {
-        setActive(!active);
-      }}>
-      {active ? 'Blocked' : 'Block'}
     </Button>
   );
 };
@@ -82,11 +104,12 @@ const BlockButton = ({style, labelStyle, link}: ProfileButtonProps) => {
 interface Props {
   style: StyleProp<ViewStyle>;
   user: UserRead;
-  link?: UserLinkRead;
+  currentUser: UserRead;
+  usersApi: UsersApi;
 }
 
 // Profile button container - dynamically allow for different profile buttons.
-export const TitleButtons = ({user, style, link}: Props) => {
+export const TitleButtons = ({style, user, currentUser, usersApi}: Props) => {
   const {user: bibliUser} = useContext(UserContext);
   const isCurrentUser = bibliUser?.id === user.id;
 
@@ -100,7 +123,11 @@ export const TitleButtons = ({user, style, link}: Props) => {
           </>
         ) : (
           <>
-            <FollowButton link={link} />
+            <FollowButton
+              user={user}
+              currentUser={currentUser}
+              usersApi={usersApi}
+            />
             {/*<BlockButton />*/}
           </>
         )}

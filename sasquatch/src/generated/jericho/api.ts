@@ -40,7 +40,7 @@ export interface AuthorRead {
      * @type {string}
      * @memberof AuthorRead
      */
-    'summary'?: string;
+    'olid'?: string;
     /**
      * 
      * @type {number}
@@ -70,27 +70,46 @@ export interface BodyPatchCollectionBookLinkCollectionBookLinkPatch {
 /**
  * 
  * @export
- * @interface BookAuthorLinkBase
+ * @interface BookFilter
  */
-export interface BookAuthorLinkBase {
+export interface BookFilter {
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof BookFilter
+     */
+    'collection_ids'?: Array<number>;
     /**
      * 
      * @type {number}
-     * @memberof BookAuthorLinkBase
+     * @memberof BookFilter
      */
-    'book_id'?: number;
+    'offset'?: number;
     /**
      * 
      * @type {number}
-     * @memberof BookAuthorLinkBase
+     * @memberof BookFilter
      */
-    'author_id'?: number;
+    'limit'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface BookPage
+ */
+export interface BookPage {
     /**
      * 
-     * @type {string}
-     * @memberof BookAuthorLinkBase
+     * @type {number}
+     * @memberof BookPage
      */
-    'type'?: string;
+    'total_count': number;
+    /**
+     * 
+     * @type {Array<UserBookRead>}
+     * @memberof BookPage
+     */
+    'books'?: Array<UserBookRead>;
 }
 /**
  * 
@@ -104,6 +123,12 @@ export interface BookRead {
      * @memberof BookRead
      */
     'title': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'subtitle'?: string;
     /**
      * 
      * @type {string}
@@ -124,22 +149,28 @@ export interface BookRead {
     'pages'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'cover_link'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'olid'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof BookRead
      */
     'id': number;
     /**
      * 
-     * @type {Array<BookAuthorLinkBase>}
-     * @memberof BookRead
-     */
-    'author_links': Array<BookAuthorLinkBase>;
-    /**
-     * 
      * @type {Array<TagBase>}
      * @memberof BookRead
      */
-    'tags': Array<TagBase>;
+    'tags'?: Array<TagBase>;
 }
 /**
  * 
@@ -172,12 +203,6 @@ export interface CollectionPut {
      * @memberof CollectionPut
      */
     'name': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CollectionPut
-     */
-    'user_id'?: number;
 }
 /**
  * 
@@ -196,12 +221,6 @@ export interface CollectionRead {
      * @type {number}
      * @memberof CollectionRead
      */
-    'user_id'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof CollectionRead
-     */
     'id': number;
     /**
      * 
@@ -209,6 +228,12 @@ export interface CollectionRead {
      * @memberof CollectionRead
      */
     'type'?: CollectionType;
+    /**
+     * 
+     * @type {Array<CollectionUserLinkRead>}
+     * @memberof CollectionRead
+     */
+    'user_links': Array<CollectionUserLinkRead>;
 }
 
 
@@ -225,6 +250,81 @@ export const CollectionType = {
 } as const;
 
 export type CollectionType = typeof CollectionType[keyof typeof CollectionType];
+
+
+/**
+ * 
+ * @export
+ * @interface CollectionUserLinkPut
+ */
+export interface CollectionUserLinkPut {
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionUserLinkPut
+     */
+    'collection_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionUserLinkPut
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {CollectionUserLinkType}
+     * @memberof CollectionUserLinkPut
+     */
+    'type': CollectionUserLinkType;
+}
+
+
+/**
+ * 
+ * @export
+ * @interface CollectionUserLinkRead
+ */
+export interface CollectionUserLinkRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionUserLinkRead
+     */
+    'collection_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionUserLinkRead
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {CollectionUserLinkType}
+     * @memberof CollectionUserLinkRead
+     */
+    'type': CollectionUserLinkType;
+    /**
+     * 
+     * @type {string}
+     * @memberof CollectionUserLinkRead
+     */
+    'created_at': string;
+}
+
+
+/**
+ * An enumeration.
+ * @export
+ * @enum {string}
+ */
+
+export const CollectionUserLinkType = {
+    Owner: 'owner',
+    Collaborator: 'collaborator',
+    Follower: 'follower'
+} as const;
+
+export type CollectionUserLinkType = typeof CollectionUserLinkType[keyof typeof CollectionUserLinkType];
 
 
 /**
@@ -380,6 +480,43 @@ export interface TagValidation {
 /**
  * 
  * @export
+ * @interface UserBookRead
+ */
+export interface UserBookRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserBookRead
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {BookRead}
+     * @memberof UserBookRead
+     */
+    'book': BookRead;
+    /**
+     * 
+     * @type {ReviewRead}
+     * @memberof UserBookRead
+     */
+    'review'?: ReviewRead;
+    /**
+     * 
+     * @type {Array<CollectionRead>}
+     * @memberof UserBookRead
+     */
+    'collections'?: Array<CollectionRead>;
+    /**
+     * 
+     * @type {Array<AuthorRead>}
+     * @memberof UserBookRead
+     */
+    'authors'?: Array<AuthorRead>;
+}
+/**
+ * 
+ * @export
  * @interface UserLinkPut
  */
 export interface UserLinkPut {
@@ -448,6 +585,25 @@ export type UserLinkType = typeof UserLinkType[keyof typeof UserLinkType];
 /**
  * 
  * @export
+ * @interface UserPage
+ */
+export interface UserPage {
+    /**
+     * 
+     * @type {number}
+     * @memberof UserPage
+     */
+    'total_count': number;
+    /**
+     * 
+     * @type {Array<UserRead>}
+     * @memberof UserPage
+     */
+    'users'?: Array<UserRead>;
+}
+/**
+ * 
+ * @export
  * @interface UserPut
  */
 export interface UserPut {
@@ -463,6 +619,12 @@ export interface UserPut {
      * @memberof UserPut
      */
     'tag'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserPut
+     */
+    'bio'?: string;
     /**
      * 
      * @type {number}
@@ -490,11 +652,25 @@ export interface UserRead {
     'tag'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof UserRead
+     */
+    'bio'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof UserRead
      */
     'id': number;
+    /**
+     * 
+     * @type {UserLinkType}
+     * @memberof UserRead
+     */
+    'link'?: UserLinkType;
 }
+
+
 /**
  * 
  * @export
@@ -536,40 +712,6 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
     return {
         /**
          * 
-         * @summary Get Author
-         * @param {number} authorId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAuthorAuthorAuthorIdGet: async (authorId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'authorId' is not null or undefined
-            assertParamExists('getAuthorAuthorAuthorIdGet', 'authorId', authorId)
-            const localVarPath = `/author/{author_id}`
-                .replace(`{${"author_id"}}`, encodeURIComponent(String(authorId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary Get Book
          * @param {number} bookId 
          * @param {*} [options] Override http request option.
@@ -590,6 +732,98 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Books
+         * @param {BookFilter} bookFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getBooksBooksPost: async (bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'bookFilter' is not null or undefined
+            assertParamExists('getBooksBooksPost', 'bookFilter', bookFilter)
+            const localVarPath = `/books`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(bookFilter, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Search Books
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchBooksBooksSearchQGet: async (q: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('searchBooksBooksSearchQGet', 'q', q)
+            const localVarPath = `/books/search/{q}`
+                .replace(`{${"q"}}`, encodeURIComponent(String(q)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
 
 
     
@@ -614,24 +848,37 @@ export const BooksApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
-         * @summary Get Author
-         * @param {number} authorId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getAuthorAuthorAuthorIdGet(authorId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AuthorRead>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAuthorAuthorAuthorIdGet(authorId, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
          * @summary Get Book
          * @param {number} bookId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getBookBookBookIdGet(bookId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookRead>> {
+        async getBookBookBookIdGet(bookId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserBookRead>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getBookBookBookIdGet(bookId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get Books
+         * @param {BookFilter} bookFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getBooksBooksPost(bookFilter, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Search Books
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchBooksBooksSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchBooksBooksSearchQGet(q, offset, limit, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -646,23 +893,35 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
     return {
         /**
          * 
-         * @summary Get Author
-         * @param {number} authorId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAuthorAuthorAuthorIdGet(authorId: number, options?: any): AxiosPromise<AuthorRead> {
-            return localVarFp.getAuthorAuthorAuthorIdGet(authorId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get Book
          * @param {number} bookId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBookBookBookIdGet(bookId: number, options?: any): AxiosPromise<BookRead> {
+        getBookBookBookIdGet(bookId: number, options?: any): AxiosPromise<UserBookRead> {
             return localVarFp.getBookBookBookIdGet(bookId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Books
+         * @param {BookFilter} bookFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getBooksBooksPost(bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
+            return localVarFp.getBooksBooksPost(bookFilter, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Search Books
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchBooksBooksSearchQGet(q: string, offset?: number, limit?: number, options?: any): AxiosPromise<BookPage> {
+            return localVarFp.searchBooksBooksSearchQGet(q, offset, limit, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -676,18 +935,6 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
 export class BooksApi extends BaseAPI {
     /**
      * 
-     * @summary Get Author
-     * @param {number} authorId 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof BooksApi
-     */
-    public getAuthorAuthorAuthorIdGet(authorId: number, options?: AxiosRequestConfig) {
-        return BooksApiFp(this.configuration).getAuthorAuthorAuthorIdGet(authorId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get Book
      * @param {number} bookId 
      * @param {*} [options] Override http request option.
@@ -696,6 +943,32 @@ export class BooksApi extends BaseAPI {
      */
     public getBookBookBookIdGet(bookId: number, options?: AxiosRequestConfig) {
         return BooksApiFp(this.configuration).getBookBookBookIdGet(bookId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Books
+     * @param {BookFilter} bookFilter 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getBooksBooksPost(bookFilter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Search Books
+     * @param {string} q 
+     * @param {number} [offset] 
+     * @param {number} [limit] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public searchBooksBooksSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).searchBooksBooksSearchQGet(q, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -787,6 +1060,48 @@ export const CollectionsApiAxiosParamCreator = function (configuration?: Configu
         },
         /**
          * 
+         * @summary Delete Collection User Link
+         * @param {number} collectionId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete: async (collectionId: number, userId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'collectionId' is not null or undefined
+            assertParamExists('deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete', 'collectionId', collectionId)
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete', 'userId', userId)
+            const localVarPath = `/collection/user/link/{collection_id}/{user_id}`
+                .replace(`{${"collection_id"}}`, encodeURIComponent(String(collectionId)))
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Get Collection
          * @param {number} collectionId 
          * @param {*} [options] Override http request option.
@@ -797,6 +1112,48 @@ export const CollectionsApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('getCollectionCollectionCollectionIdGet', 'collectionId', collectionId)
             const localVarPath = `/collection/{collection_id}`
                 .replace(`{${"collection_id"}}`, encodeURIComponent(String(collectionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Collection User Link
+         * @param {number} collectionId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet: async (collectionId: number, userId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'collectionId' is not null or undefined
+            assertParamExists('getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet', 'collectionId', collectionId)
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet', 'userId', userId)
+            const localVarPath = `/collection/user/link/{collection_id}/{user_id}`
+                .replace(`{${"collection_id"}}`, encodeURIComponent(String(collectionId)))
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -987,6 +1344,46 @@ export const CollectionsApiAxiosParamCreator = function (configuration?: Configu
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Put Collection User Link
+         * @param {CollectionUserLinkPut} collectionUserLinkPut 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putCollectionUserLinkCollectionUserLinkPut: async (collectionUserLinkPut: CollectionUserLinkPut, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'collectionUserLinkPut' is not null or undefined
+            assertParamExists('putCollectionUserLinkCollectionUserLinkPut', 'collectionUserLinkPut', collectionUserLinkPut)
+            const localVarPath = `/collection/user/link`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(collectionUserLinkPut, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -1021,6 +1418,18 @@ export const CollectionsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Delete Collection User Link
+         * @param {number} collectionId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete(collectionId: number, userId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete(collectionId, userId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Get Collection
          * @param {number} collectionId 
          * @param {*} [options] Override http request option.
@@ -1028,6 +1437,18 @@ export const CollectionsApiFp = function(configuration?: Configuration) {
          */
         async getCollectionCollectionCollectionIdGet(collectionId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CollectionRead>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getCollectionCollectionCollectionIdGet(collectionId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get Collection User Link
+         * @param {number} collectionId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet(collectionId: number, userId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CollectionUserLinkRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet(collectionId, userId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1075,6 +1496,17 @@ export const CollectionsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.putCollectionCollectionPut(collectionPut, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * 
+         * @summary Put Collection User Link
+         * @param {CollectionUserLinkPut} collectionUserLinkPut 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putCollectionUserLinkCollectionUserLinkPut(collectionUserLinkPut: CollectionUserLinkPut, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CollectionUserLinkRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putCollectionUserLinkCollectionUserLinkPut(collectionUserLinkPut, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -1107,6 +1539,17 @@ export const CollectionsApiFactory = function (configuration?: Configuration, ba
         },
         /**
          * 
+         * @summary Delete Collection User Link
+         * @param {number} collectionId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete(collectionId: number, userId: number, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete(collectionId, userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get Collection
          * @param {number} collectionId 
          * @param {*} [options] Override http request option.
@@ -1114,6 +1557,17 @@ export const CollectionsApiFactory = function (configuration?: Configuration, ba
          */
         getCollectionCollectionCollectionIdGet(collectionId: number, options?: any): AxiosPromise<CollectionRead> {
             return localVarFp.getCollectionCollectionCollectionIdGet(collectionId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Collection User Link
+         * @param {number} collectionId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet(collectionId: number, userId: number, options?: any): AxiosPromise<CollectionUserLinkRead> {
+            return localVarFp.getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet(collectionId, userId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1156,6 +1610,16 @@ export const CollectionsApiFactory = function (configuration?: Configuration, ba
         putCollectionCollectionPut(collectionPut: CollectionPut, options?: any): AxiosPromise<CollectionRead> {
             return localVarFp.putCollectionCollectionPut(collectionPut, options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary Put Collection User Link
+         * @param {CollectionUserLinkPut} collectionUserLinkPut 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putCollectionUserLinkCollectionUserLinkPut(collectionUserLinkPut: CollectionUserLinkPut, options?: any): AxiosPromise<CollectionUserLinkRead> {
+            return localVarFp.putCollectionUserLinkCollectionUserLinkPut(collectionUserLinkPut, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -1192,6 +1656,19 @@ export class CollectionsApi extends BaseAPI {
 
     /**
      * 
+     * @summary Delete Collection User Link
+     * @param {number} collectionId 
+     * @param {number} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CollectionsApi
+     */
+    public deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete(collectionId: number, userId: number, options?: AxiosRequestConfig) {
+        return CollectionsApiFp(this.configuration).deleteCollectionUserLinkCollectionUserLinkCollectionIdUserIdDelete(collectionId, userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Get Collection
      * @param {number} collectionId 
      * @param {*} [options] Override http request option.
@@ -1200,6 +1677,19 @@ export class CollectionsApi extends BaseAPI {
      */
     public getCollectionCollectionCollectionIdGet(collectionId: number, options?: AxiosRequestConfig) {
         return CollectionsApiFp(this.configuration).getCollectionCollectionCollectionIdGet(collectionId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Collection User Link
+     * @param {number} collectionId 
+     * @param {number} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CollectionsApi
+     */
+    public getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet(collectionId: number, userId: number, options?: AxiosRequestConfig) {
+        return CollectionsApiFp(this.configuration).getCollectionUserLinkCollectionUserLinkCollectionIdUserIdGet(collectionId, userId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1249,6 +1739,18 @@ export class CollectionsApi extends BaseAPI {
      */
     public putCollectionCollectionPut(collectionPut: CollectionPut, options?: AxiosRequestConfig) {
         return CollectionsApiFp(this.configuration).putCollectionCollectionPut(collectionPut, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Put Collection User Link
+     * @param {CollectionUserLinkPut} collectionUserLinkPut 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CollectionsApi
+     */
+    public putCollectionUserLinkCollectionUserLinkPut(collectionUserLinkPut: CollectionUserLinkPut, options?: AxiosRequestConfig) {
+        return CollectionsApiFp(this.configuration).putCollectionUserLinkCollectionUserLinkPut(collectionUserLinkPut, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -1976,6 +2478,54 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Search Users
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchUsersUserSearchQGet: async (q: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'q' is not null or undefined
+            assertParamExists('searchUsersUserSearchQGet', 'q', q)
+            const localVarPath = `/user/search/{q}`
+                .replace(`{${"q"}}`, encodeURIComponent(String(q)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Validate Tag
          * @param {string} tag 
          * @param {*} [options] Override http request option.
@@ -2117,6 +2667,19 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Search Users
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchUsersUserSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchUsersUserSearchQGet(q, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Validate Tag
          * @param {string} tag 
          * @param {*} [options] Override http request option.
@@ -2217,6 +2780,18 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         putUserUserPut(userPut: UserPut, options?: any): AxiosPromise<UserRead> {
             return localVarFp.putUserUserPut(userPut, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Search Users
+         * @param {string} q 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchUsersUserSearchQGet(q: string, offset?: number, limit?: number, options?: any): AxiosPromise<UserPage> {
+            return localVarFp.searchUsersUserSearchQGet(q, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2334,6 +2909,20 @@ export class UsersApi extends BaseAPI {
      */
     public putUserUserPut(userPut: UserPut, options?: AxiosRequestConfig) {
         return UsersApiFp(this.configuration).putUserUserPut(userPut, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Search Users
+     * @param {string} q 
+     * @param {number} [offset] 
+     * @param {number} [limit] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public searchUsersUserSearchQGet(q: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).searchUsersUserSearchQGet(q, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

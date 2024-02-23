@@ -1,21 +1,20 @@
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import decode, get_unverified_header
 from sqlmodel import Session
 
+from src.auth.auth0 import get_rsa_public_key, jwk_to_pem
 from src.auth.user import get_request_user_by_sub
 from src.config import auth0_audience, auth0_domain
 from src.database import get_session
-from src.auth.auth0 import get_rsa_public_key, jwk_to_pem
-
 
 bearer = HTTPBearer()
 
 
 async def auth0_middleware(
-        request: Request,
-        credentials: HTTPAuthorizationCredentials = Depends(bearer),
-        session: Session = Depends(get_session),
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(bearer),
+    session: Session = Depends(get_session),
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,7 +34,7 @@ async def auth0_middleware(
             pem_key,
             # If necessary due to PEM formatting set options verify_signature false.
             # options={"verify_signature": False, "verify_aud": True},
-            algorithms=token_header['alg'],
+            algorithms=token_header["alg"],
             audience=auth0_audience,
             issuer=auth0_domain,
         )
@@ -43,5 +42,5 @@ async def auth0_middleware(
         print(f"Credential Exception: {e}")
         raise credentials_exception
 
-    request.state.user = get_request_user_by_sub(session, payload['sub'])
+    request.state.user = get_request_user_by_sub(session, payload["sub"])
     print(f"User: {request.state.user}")

@@ -1,5 +1,10 @@
 import {useEffect, useState} from 'react';
-import {CollectionsApi, Configuration, UsersApi} from '../generated/jericho';
+import {
+  BooksApi,
+  CollectionsApi,
+  Configuration,
+  UsersApi,
+} from '../generated/jericho';
 import {useAuth0} from 'react-native-auth0';
 import config from '../config';
 
@@ -9,6 +14,7 @@ import config from '../config';
 interface ReturnApis {
   usersApi: UsersApi;
   collectionsApi: CollectionsApi;
+  booksApi: BooksApi;
 }
 
 // TODO create an api context to replace this functional call.
@@ -23,6 +29,9 @@ export const useApi = (): ReturnApis => {
   const [collectionsApi, setCollectionsApis] = useState<CollectionsApi>(
     new CollectionsApi(defaultApiConfig),
   );
+  const [booksApi, setBooksApi] = useState<BooksApi>(
+    new BooksApi(defaultApiConfig),
+  );
 
   useEffect(() => {
     const fetchCredentialsAndInitializeApi = async () => {
@@ -32,9 +41,10 @@ export const useApi = (): ReturnApis => {
           basePath: config.jerichoApiHost,
           accessToken: credentials ? credentials.accessToken : '',
         });
-        // console.log(apiConfig);
+        console.log(apiConfig);
         setUsersApi(new UsersApi(apiConfig));
         setCollectionsApis(new CollectionsApi(apiConfig));
+        setBooksApi(new BooksApi(apiConfig));
       } catch (error) {
         console.error('Error fetching credentials:', error);
         // Handle the error as appropriate
@@ -47,5 +57,6 @@ export const useApi = (): ReturnApis => {
   return {
     usersApi,
     collectionsApi,
+    booksApi,
   };
 };

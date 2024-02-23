@@ -61,6 +61,7 @@ class LinkedUsersFilter(SQLModel):
 class UserBase(SQLModel):
     name: Optional[str]
     tag: Optional[str] = Field(default=None, unique=True, index=True)
+    bio: Optional[str]
 
 
 # Uses the many-to-many self referencing feedback here:
@@ -81,17 +82,22 @@ class User(UserBase, table=True):
             "foreign_keys": "UserLink.parent_id",
         },
     )
-    collections: List["Collection"] = Relationship(  # noqa: F821
-        back_populates="user",
-    )
+
+    collection_links: List["CollectionUserLink"] = Relationship(back_populates="user")
 
 
 class UserRead(UserBase):
     id: int
+    link: Optional[UserLinkType]
 
 
 class UserPut(UserBase):
     id: Optional[int] = None
+
+
+class UserPage(SQLModel):
+    total_count: int
+    users: List[UserRead] = []
 
 
 class TagValidation(SQLModel):

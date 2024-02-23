@@ -28,11 +28,11 @@ export const Screen = ({user}: ScreenProps) => {
         );
         setCollections(response.data);
       } catch (error) {
-        console.log('Error fetching collections for user ${user.tag}:', error);
+        console.log(`Error fetching collections for user ${user.tag}:`, error);
       }
     };
     initializeCollections().catch(error => console.log(error));
-  }, [collectionsApi, user.id]);
+  }, [collectionsApi, user.id, user.tag]);
 
   useEffect(() => {
     const initializeFollowing = async () => {
@@ -43,11 +43,11 @@ export const Screen = ({user}: ScreenProps) => {
         );
         setFollowing(response.data);
       } catch (error) {
-        console.log('Error fetching following for user ${user.tag}:', error);
+        console.log(`Error fetching following for user ${user.tag}:`, error);
       }
     };
     initializeFollowing().catch(error => console.log(error));
-  }, [usersApi, user.id]);
+  }, [usersApi, user.id, user.tag]);
 
   useEffect(() => {
     const initializeFollowers = async () => {
@@ -59,11 +59,11 @@ export const Screen = ({user}: ScreenProps) => {
         );
         setFollowers(response.data);
       } catch (error) {
-        console.log('Error fetching followers for user ${user.tag}:', error);
+        console.log(`Error fetching followers for user ${user.tag}:`, error);
       }
     };
     initializeFollowers().catch(error => console.log(error));
-  }, [usersApi, user.id]);
+  }, [usersApi, user.id, user.tag]);
 
   const [socialText, setSocialText] = useState<string>('');
   useEffect(() => {
@@ -82,8 +82,16 @@ export const Screen = ({user}: ScreenProps) => {
           user={user}
           isCurrentUser={isCurrentUser}
         />
+        {user.bio ? <Text style={styles.bioText}>{user.bio}</Text> : null}
         <Text style={styles.socialText}>{socialText}</Text>
-        <TitleButtons style={styles.profileButtons} user={user} />
+        {bibliUser && (
+          <TitleButtons
+            style={styles.profileButtons}
+            user={user}
+            currentUser={bibliUser}
+            usersApi={usersApi}
+          />
+        )}
       </View>
       <UserTabView
         user={user}
@@ -105,11 +113,18 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginHorizontal: 10,
   },
+  bioText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingBottom: 5,
+    alignSelf: 'center',
+    width: 200,
+  },
   socialText: {
     textAlign: 'center',
   },
   profileBanner: {
-    padding: 20,
+    paddingTop: 5,
   },
   profileButtons: {
     padding: 10,

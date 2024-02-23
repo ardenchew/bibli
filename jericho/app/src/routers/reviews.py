@@ -3,10 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
-from src.auth.middleware import auth0_middleware
+import src.db.schema as schema
 from resources.exceptions import NotFoundException
+from src.auth.middleware import auth0_middleware
 from src.database import get_session
-from src.domain.reviews import schemas, service
+from src.domain.service import reviews
 
 router = APIRouter(
     tags=["reviews"],
@@ -14,22 +15,22 @@ router = APIRouter(
 )
 
 
-@router.get("/reviews", response_model=List[schemas.ReviewRead])
+@router.get("/reviews", response_model=List[schema.reviews.ReviewRead])
 async def get_reviews(
-    review_filter: schemas.ReviewsFilter = Depends(),
+    review_filter: schema.reviews.ReviewsFilter = Depends(),
     session: Session = Depends(get_session),
 ):
-    return service.get_reviews(session, review_filter)
+    return reviews.get_reviews(session, review_filter)
 
 
-@router.put("/review", response_model=schemas.ReviewRead)
+@router.put("/review", response_model=schema.reviews.ReviewRead)
 async def put_review(
-    review: schemas.ReviewPut,
-    comparison: schemas.Comparison = Depends(),
+    review: schema.reviews.ReviewPut,
+    comparison: schema.reviews.Comparison = Depends(),
     session: Session = Depends(get_session),
 ):
-    db_review = schemas.Review.from_orm(review)
-    return service.upsert_review(session, db_review, comparison)
+    db_review = schema.reviews.Review.from_orm(review)
+    return reviews.upsert_review(session, db_review, comparison)
 
 
 @router.delete("/review/{user_id}/{book_id}")
@@ -38,8 +39,8 @@ async def delete_review(
     book_id: int,
     session: Session = Depends(get_session),
 ):
-    review = service.get_review(session, user_id, book_id)
+    review = reviews.get_review(session, user_id, book_id)
     if not review:
         raise NotFoundException
-    service.delete_review(session, review)
+    reviews.delete_review(session, review)
     return
