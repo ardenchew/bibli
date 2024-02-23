@@ -41,6 +41,8 @@ class Results:
             id_librarything=None,
             cover_i=None,
             cover_edition_key=None,
+            number_of_pages_median=None,
+            description=None,
             **kwargs,
         ):
             """
@@ -66,6 +68,7 @@ class Results:
             work_olid = extract_olid_from_url(key, "works")
             edition_olids = edition_key
 
+            self.olid = work_olid
             self.title = title
             self.subtitle = subtitle
             self.subjects = subject
@@ -88,6 +91,7 @@ class Results:
                 self.cover = (
                     f"https://covers.openlibrary.org/b/olid/{cover_edition_key}-M.jpg"
                 )
+            self.cover_edition_key = cover_edition_key
 
             # These keys all map to [lists] of (usually one) unicode ids
             self.identifiers = {
@@ -98,20 +102,26 @@ class Results:
                 "goodreads": id_goodreads or [],
                 "librarything": id_librarything or [],
             }
+            self.number_of_pages = number_of_pages_median
+            self.description = description
+            print("DESCRIPTION: ", description)
 
         def to_book(self):
             """Converts an OpenLibrary Search API Results Document to a
             standardized Book
             """
-            # TODO remove greedy load logic and store in db.  Only need this for previews.
 
-            publisher = self.publishers[0] if self.publishers else ""
             return Book(
                 title=self.title,
                 subtitle=self.subtitle,
                 identifiers=self.identifiers,
+                olid=self.olid,
                 authors=self.authors,
-                publisher=publisher,
+                publisher=self.publishers,
                 publish_date=self.first_publish_year,
                 cover=self.cover,
+                primary_edition=self.edition_olids[0],
+                number_of_pages=self.number_of_pages,
+                cover_edition_key=self.cover_edition_key,
+                description=self.description,
             )

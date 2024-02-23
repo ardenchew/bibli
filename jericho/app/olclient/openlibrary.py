@@ -372,7 +372,10 @@ class OpenLibrary:
                         # No edition found by bibkey
                         return
 
+                print("OLID ", olid)
+
                 path = f"/books/{olid}.json"
+                print("PATH ", path)
                 response = cls.OL.get_ol_response(path)
 
                 try:

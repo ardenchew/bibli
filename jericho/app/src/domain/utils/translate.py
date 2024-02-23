@@ -11,5 +11,7 @@ def from_ol_book(ob: OlBook) -> schema.books.Book:
         publication_date=ob.publish_date,
         pages=ob.pages,
         cover_link=ob.cover,
-        olid=ob.identifiers["olid"][0],
+        olid=ob.olid,
+        authors=[schema.books.Author(name=a['name'], olid=a['olid']) for a in ob.authors],
+        summary=ob.description
     )

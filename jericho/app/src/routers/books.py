@@ -36,9 +36,13 @@ async def search_books(
     return books.search_books(session, ol, f, request.state.user.id)
 
 
-@router.get("/book/{book_id}", response_model=schema.books.BookRead)
-async def get_book(book_id: int, session: Session = Depends(get_session)):
-    book = books.get_book(session, book_id)
+@router.get("/book/{book_id}", response_model=schema.books.UserBookRead)
+async def get_book(
+        request: Request,
+        book_id: int,
+        session: Session = Depends(get_session),
+):
+    book = books.get_book(session, book_id, request.state.user.id)
     if not book:
         raise NotFoundException
     return book

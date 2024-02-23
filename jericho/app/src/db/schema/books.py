@@ -18,11 +18,35 @@ class Tag(TagBase, table=True):
     book: "Book" = Relationship(back_populates="tags")
 
 
+class AuthorBookLink(SQLModel, table=True):
+    author_id: int = Field(
+        default=None, primary_key=True, foreign_key="author.id"
+    )
+    book_id: int = Field(
+        default=None, primary_key=True, foreign_key="book.id"
+    )
+
+
+class AuthorBase(SQLModel):
+    name: str
+    olid: Optional[str] = Field(default=None, unique=True)
+
+
+class Author(AuthorBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    books: List["Book"] = Relationship(back_populates="authors", link_model=AuthorBookLink)
+
+
+class AuthorRead(AuthorBase):
+    id: int
+
+
 class BookBase(SQLModel):
     title: str
     subtitle: Optional[str]
     summary: Optional[str]
     publication_date: Optional[date] = Field(sa_column=Column(Date))
+    first_publication_date: Optional[str]
     pages: Optional[int] = None
     cover_link: Optional[str]
     olid: Optional[str] = Field(default=None, unique=True)
@@ -31,6 +55,7 @@ class BookBase(SQLModel):
 class Book(BookBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     tags: List[Tag] = Relationship(back_populates="book")
+    authors: List[Author] = Relationship(back_populates="books", link_model=AuthorBookLink)
 
 
 class BookRead(BookBase):
@@ -44,7 +69,7 @@ class UserBookRead(SQLModel):
     review: Optional[ReviewRead]
     collections: Optional[List[CollectionRead]]
     # TODO use AuthorRead object as BookRead attribute.
-    authors: List[str] = []
+    authors: List[AuthorRead] = []
 
 
 class BookPage(SQLModel):

@@ -26,6 +26,31 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 /**
  * 
  * @export
+ * @interface AuthorRead
+ */
+export interface AuthorRead {
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthorRead
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthorRead
+     */
+    'olid'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AuthorRead
+     */
+    'id': number;
+}
+/**
+ * 
+ * @export
  * @interface BodyPatchCollectionBookLinkCollectionBookLinkPatch
  */
 export interface BodyPatchCollectionBookLinkCollectionBookLinkPatch {
@@ -484,10 +509,10 @@ export interface UserBookRead {
     'collections'?: Array<CollectionRead>;
     /**
      * 
-     * @type {Array<string>}
+     * @type {Array<AuthorRead>}
      * @memberof UserBookRead
      */
-    'authors'?: Array<string>;
+    'authors'?: Array<AuthorRead>;
 }
 /**
  * 
@@ -828,7 +853,7 @@ export const BooksApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getBookBookBookIdGet(bookId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookRead>> {
+        async getBookBookBookIdGet(bookId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserBookRead>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getBookBookBookIdGet(bookId, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -873,7 +898,7 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBookBookBookIdGet(bookId: number, options?: any): AxiosPromise<BookRead> {
+        getBookBookBookIdGet(bookId: number, options?: any): AxiosPromise<UserBookRead> {
             return localVarFp.getBookBookBookIdGet(bookId, options).then((request) => request(axios, basePath));
         },
         /**

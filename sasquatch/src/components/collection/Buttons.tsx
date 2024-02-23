@@ -24,7 +24,7 @@ const OwnerButton = ({style, labelStyle}: ProfileButtonProps) => {
     <Button
       mode={'text'}
       compact={true}
-      icon={'account-key-outline'}
+      icon={'key-variant'}
       style={style}
       labelStyle={labelStyle}>
       Owner
@@ -159,11 +159,13 @@ export const TitleButtons = ({
   return (
     <View style={style}>
       <View style={styles.container}>
-        {link === 'owner' && <OwnerButton style={style} />}
-        {link === 'collaborator' && <CollaboratorButton style={style} />}
-        {link === 'follower' && (
+        {link === CollectionUserLinkType.Owner && <OwnerButton style={style} />}
+        {link === CollectionUserLinkType.Collaborator && (
+          <CollaboratorButton style={style} />
+        )}
+        {link === CollectionUserLinkType.Follower && (
           <FollowerButton
-            style={style}
+            style={[style, {marginBottom: 5}]}
             collection={collection}
             setLink={setLink}
             bibliUser={bibliUser ?? undefined}
@@ -172,7 +174,7 @@ export const TitleButtons = ({
         )}
         {link === null && (
           <FollowButton
-            style={style}
+            style={[style, {marginBottom: 5}]}
             collection={collection}
             setLink={setLink}
             bibliUser={bibliUser ?? undefined}

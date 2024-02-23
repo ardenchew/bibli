@@ -108,11 +108,15 @@ class Book(Entity):
         title,
         subtitle="",
         identifiers=None,
+        olid=None,
         number_of_pages=None,
         authors=None,
         publisher=None,
         publish_date="",
         cover="",
+        primary_edition="",
+        cover_edition_key="",
+        description="",
         **kwargs,
     ):
         """
@@ -130,6 +134,7 @@ class Book(Entity):
             cover (unicode) - uri of bookcover
         """
         super().__init__(identifiers=identifiers)
+        self.olid = olid
         self.title = title
         self.subtitle = subtitle
         self.pages = number_of_pages
@@ -137,6 +142,9 @@ class Book(Entity):
         self.publisher = publisher
         self.publish_date = publish_date
         self.cover = cover
+        self.primary_edition = primary_edition,
+        self.cover_edition_key = cover_edition_key,
+        self.description = description,
 
         for kwarg in kwargs:
             setattr(self, kwarg, kwargs[kwarg])

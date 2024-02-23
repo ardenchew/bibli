@@ -144,7 +144,7 @@ const Item = ({userBook}: Props) => {
       {/*TODO Hold for book blurb would be so cool*/}
       <Card.Title
         title={title}
-        subtitle={userBook.authors?.join(', ')}
+        subtitle={userBook.authors?.map(author => author.name).join(', ')}
         left={props =>
           userBook.book.cover_link ? (
             <Image
