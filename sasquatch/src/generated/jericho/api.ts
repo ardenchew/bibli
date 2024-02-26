@@ -143,6 +143,12 @@ export interface BookRead {
     'publication_date'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'first_publication_date'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof BookRead
      */
@@ -161,16 +167,28 @@ export interface BookRead {
     'olid'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'isbn13'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'isbn10'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof BookRead
      */
     'id': number;
     /**
      * 
-     * @type {Array<TagBase>}
+     * @type {Array<TagBookLink>}
      * @memberof BookRead
      */
-    'tags'?: Array<TagBase>;
+    'tag_links'?: Array<TagBookLink>;
 }
 /**
  * 
@@ -436,25 +454,25 @@ export interface ReviewRead {
 /**
  * 
  * @export
- * @interface TagBase
+ * @interface TagBookLink
  */
-export interface TagBase {
+export interface TagBookLink {
     /**
      * 
      * @type {string}
-     * @memberof TagBase
+     * @memberof TagBookLink
      */
-    'name'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TagBase
-     */
-    'verified': boolean;
+    'tag_name'?: string;
     /**
      * 
      * @type {number}
-     * @memberof TagBase
+     * @memberof TagBookLink
+     */
+    'book_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TagBookLink
      */
     'count': number;
 }

@@ -2,14 +2,16 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Screen as ProfileScreen} from '../../components/profile';
 import {Screen as CollectionScreen} from '../../components/collection';
+import {Screen as BookScreen} from '../../components/book';
 import EditScreen from '../../components/profile/EditScreen';
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import {CollectionRead, UserRead} from '../../generated/jericho';
+import {CollectionRead, UserBookRead, UserRead} from '../../generated/jericho';
 import {NavigationLightTheme} from '../../styles/themes/NavigationLightTheme';
 import {NavigationContainer} from '@react-navigation/native';
+import {LightTheme} from '../../styles/themes/LightTheme';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -18,6 +20,9 @@ export type RootStackParamList = {
   };
   Collection: {
     collection: CollectionRead;
+  };
+  Book: {
+    userBook: UserBookRead;
   };
   EditProfile: undefined;
 };
@@ -43,6 +48,14 @@ const Collection = ({
   return (
     <View style={styles.container}>
       <CollectionScreen collection={route.params.collection} />
+    </View>
+  );
+};
+
+const Book = ({route}: NativeStackScreenProps<RootStackParamList, 'Book'>) => {
+  return (
+    <View style={styles.container}>
+      <BookScreen userBook={route.params.userBook} />
     </View>
   );
 };
@@ -73,6 +86,14 @@ export const SharedNavigator = (home: any) => {
             name="EditProfile"
             component={EditScreen}
             options={defaultStackScreenOptions}
+          />
+          <Stack.Screen
+            name="Book"
+            component={Book}
+            options={{
+              ...defaultStackScreenOptions,
+              headerTransparent: true,
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

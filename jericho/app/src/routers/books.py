@@ -32,8 +32,8 @@ async def search_books(
     )
 
     # TODO authorization.
-    ol = OpenLibrary()
-    return books.search_books(session, ol, f, request.state.user.id)
+    # ol = OpenLibrary()
+    return books.search_books_v2(session, f, request.state.user.id)
 
 
 @router.get("/book/{book_id}", response_model=schema.books.UserBookRead)
@@ -55,3 +55,11 @@ async def get_books(
     session: Session = Depends(get_session),
 ):
     return books.get_books(session, f, request.state.user.id)
+
+
+@router.get("/tags/{book_id}", response_model=List[schema.books.TagBookLink])
+async def get_book(
+        book_id: int,
+        session: Session = Depends(get_session),
+):
+    return books.get_tags_from_book_id(session, book_id)

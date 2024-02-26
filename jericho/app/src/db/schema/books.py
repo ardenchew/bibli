@@ -7,15 +7,15 @@ from src.db.schema.reviews import ReviewRead
 from src.db.schema.collections import CollectionRead
 
 
-class TagBase(SQLModel):
-    name: str = Field(default=None, primary_key=True)
-    verified: bool = Field(sa_column=Column(Boolean))
-    count: int
-
-
-class Tag(TagBase, table=True):
+class TagBookLink(SQLModel, table=True):
+    tag_name: str = Field(default=None, primary_key=True, foreign_key="tag.name")
     book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
-    book: "Book" = Relationship(back_populates="tags")
+    count: int
+    book: "Book" = Relationship(back_populates="tag_links")
+
+
+class Tag(SQLModel, table=True):
+    name: str = Field(default=None, primary_key=True, unique=True)
 
 
 class AuthorBookLink(SQLModel, table=True):
@@ -29,11 +29,11 @@ class AuthorBookLink(SQLModel, table=True):
 
 class AuthorBase(SQLModel):
     name: str
-    olid: Optional[str] = Field(default=None, unique=True)
 
 
 class Author(AuthorBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(default=None, unique=True)
     books: List["Book"] = Relationship(back_populates="authors", link_model=AuthorBookLink)
 
 
@@ -46,21 +46,21 @@ class BookBase(SQLModel):
     subtitle: Optional[str]
     summary: Optional[str]
     publication_date: Optional[date] = Field(default=None, sa_column=Column(Date))
-    first_publication_date: Optional[str]
     pages: Optional[int] = None
     cover_link: Optional[str]
-    olid: Optional[str] = Field(default=None, unique=True)
+    gid: Optional[str] = Field(default=None, unique=True)
+    isbn13: Optional[str]
+    isbn10: Optional[str]
 
 
 class Book(BookBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    tags: List[Tag] = Relationship(back_populates="book")
+    tag_links: List[TagBookLink] = Relationship(back_populates="book")
     authors: List[Author] = Relationship(back_populates="books", link_model=AuthorBookLink)
 
 
 class BookRead(BookBase):
     id: int
-    tags: Optional[List[TagBase]]
 
 
 class UserBookRead(SQLModel):
