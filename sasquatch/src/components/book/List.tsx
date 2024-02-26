@@ -1,6 +1,6 @@
 import React from 'react';
 import {View} from 'react-native';
-import Item from './Item';
+import {Item} from './Item';
 import {UserBookRead} from '../../generated/jericho';
 import {Divider} from 'react-native-paper';
 

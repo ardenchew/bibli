@@ -10,7 +10,9 @@ import {
 } from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useApi} from '../../api';
-import {UserContext} from '../../context'; // Adjust the import path
+import {UserContext} from '../../context';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack'; // Adjust the import path
 
 // Define the mapping from indicators to colors
 const reactionColorMap: {[key in Reaction]: string} = {
@@ -30,17 +32,17 @@ const ReviewIndicator = ({review}: {review: ReviewRead}) => {
   );
 };
 
-interface RightIndicators {
+interface RightIndicatorsProps {
   book: UserBookRead;
   hasCompleteCollection: boolean;
   hasSavedCollection: boolean;
 }
 
-const RightIndicators = ({
+export const RightIndicators = ({
   book,
   hasCompleteCollection,
   hasSavedCollection,
-}: RightIndicators) => {
+}: RightIndicatorsProps) => {
   const {user: bibliUser} = useContext(UserContext);
   const {collectionsApi} = useApi();
 
@@ -117,11 +119,21 @@ const RightIndicators = ({
   );
 };
 
+const CardPress = (userBook: UserBookRead) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  return () => {
+    navigation.push('Book', {
+      userBook: userBook,
+    });
+  };
+};
+
 interface Props {
   userBook: UserBookRead;
 }
 
-const Item = ({userBook}: Props) => {
+export const Item = ({userBook}: Props) => {
   const hasCompleteCollection =
     userBook.collections?.some(
       collection => collection.type === CollectionType.Complete,
@@ -140,7 +152,8 @@ const Item = ({userBook}: Props) => {
       style={styles.container}
       theme={{
         colors: {surfaceVariant: LightTheme.colors.surface},
-      }}>
+      }}
+      onPress={CardPress(userBook)}>
       {/*TODO Hold for book blurb would be so cool*/}
       <Card.Title
         title={title}
@@ -202,5 +215,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-export default Item;
