@@ -114,7 +114,7 @@ const SocialRoute = ({
       );
       setFollowers(followersResponse.data);
     } catch (error) {
-      console.log('Error fetching socials for user ${user.tag}:', error);
+      console.log(`Error fetching socials for user ${user.tag}:`, error);
     }
     setRefreshing(false);
   };

@@ -14,6 +14,11 @@ import {UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack'; // Adjust the import path
 
+interface ReviewIndicatorProps {
+  completed: boolean;
+  review?: ReviewRead;
+}
+
 // Define the mapping from indicators to colors
 const reactionColorMap: {[key in Reaction]: string} = {
   [Reaction.Positive]: '#0cb256', // green
@@ -21,7 +26,18 @@ const reactionColorMap: {[key in Reaction]: string} = {
   [Reaction.Negative]: '#d53325', // red
 };
 
-const ReviewIndicator = ({review}: {review: ReviewRead}) => {
+export const ReviewIndicator = ({completed, review}: ReviewIndicatorProps) => {
+  if (!review) {
+    return completed ? (
+      <View style={styles.ratingIndicatorContainer}>
+        <IconButton
+          iconColor={reactionColorMap[Reaction.Positive]}
+          icon={'check-all'}
+        />
+      </View>
+    ) : null;
+  }
+
   const color = reactionColorMap[review.reaction];
   return (
     <View style={styles.ratingIndicatorContainer}>
@@ -89,12 +105,8 @@ export const RightIndicators = ({
 
   return (
     <View style={styles.rightContainer}>
-      {reviewScoped ? (
-        <ReviewIndicator review={reviewScoped} />
-      ) : completed ? (
-        <>
-          <IconButton style={styles.rightIcon} icon={'check-all'} />
-        </>
+      {reviewScoped || completed ? (
+        <ReviewIndicator completed={completed} review={reviewScoped} />
       ) : (
         <>
           <IconButton

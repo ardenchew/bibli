@@ -103,7 +103,6 @@ def get_books(session: Session, f: schema.books.BookFilter, user_id: int) -> sch
         stmt = stmt.offset(f.offset)
 
     results = session.exec(stmt).all()
-    print(results)
 
     return _books_to_page(session, results, user_id, 0)
 
@@ -234,13 +233,13 @@ def _books_to_page(session: Session, books: List[schema.books.Book], user_id: in
     for book, collection, review in results:
         if book.id in id_results_dict:
             if collection:
-                id_results_dict[book.id].collections.append(collection)
+                id_results_dict[book.id].collections.append(schema.collections.CollectionRead.from_orm(collection))
         else:
             id_results_dict[book.id] = schema.books.UserBookRead(
                 user_id=user_id,
                 book=book,
                 authors=[schema.books.AuthorRead.from_orm(a) for a in book.authors],
-                collections=[collection] if collection else [],
+                collections=[schema.collections.CollectionRead.from_orm(collection)] if collection else [],
                 review=review,
             )
 

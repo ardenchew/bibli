@@ -1,18 +1,38 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {
   Dimensions,
   Image,
   ImageBackground,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
-import {CollectionType, UserBookRead} from '../../generated/jericho';
-import {Button, Divider, Text} from 'react-native-paper';
+import {
+  BooksApi,
+  CollectionRead,
+  CollectionType,
+  TagBookLink,
+  UserBookRead,
+  UserRead,
+  UsersApi,
+} from '../../generated/jericho';
+import {
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  IconButton,
+  Text,
+} from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useHeaderHeight} from '@react-navigation/elements';
-import {RightIndicators} from './Item';
+import {RightIndicators, ReviewIndicator} from './Item';
+import {useApi} from '../../api';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {UserContext} from '../../context';
 
 const {height} = Dimensions.get('window');
 const backgroundHeight = height;
@@ -41,7 +61,7 @@ export const Headline = ({userBook}: {userBook: UserBookRead}) => {
     : userBook.book.title;
   const headerHeight = useHeaderHeight();
   const marginTop = -headerHeight * 1.5;
-  const authors = userBook.authors?.map(author => author.name).join(', ')
+  const authors = userBook.authors?.map(author => author.name).join(', ');
 
   const hasCompleteCollection =
     userBook.collections?.some(
@@ -91,7 +111,15 @@ export const InfoSection = ({userBook}: {userBook: UserBookRead}) => {
     detailStrArray.push(`${userBook.book.pages} pages`);
   }
   if (userBook.book.publication_date) {
-    detailStrArray.push(`Published ${userBook.book.publication_date}`);
+    const date = new Date(userBook.book.publication_date);
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    };
+    detailStrArray.push(
+      `Published ${date.toLocaleDateString('en-US', options)}`,
+    );
   }
   const detailStr = detailStrArray.join(' • ');
 
@@ -114,7 +142,9 @@ export const InfoSection = ({userBook}: {userBook: UserBookRead}) => {
     <View style={styles.infoSection}>
       {detailStr && (
         <View>
-          <Text style={styles.detailStr}>{detailStr}</Text>
+          <Text style={styles.detailStr} variant={'titleSmall'}>
+            {detailStr}
+          </Text>
           <Divider style={{marginVertical: 5}} />
         </View>
       )}
@@ -148,17 +178,355 @@ export const InfoSection = ({userBook}: {userBook: UserBookRead}) => {
   );
 };
 
+function toTitleCase(str: string): string {
+  return str.replace(
+    /\w\S*/g,
+    txt => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase(),
+  );
+}
+
+export const TagPills = ({tags}: {tags: TagBookLink[] | undefined}) => {
+  if (!tags || tags.length === 0) {
+    return <Text>No tags available</Text>;
+  }
+  const filteredTags = tags
+    .filter(tag => tag.count >= 10)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 12);
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        marginBottom: 10,
+      }}>
+      {filteredTags.map(tag => (
+        <Button
+          key={tag.tag_name}
+          mode={'contained-tonal'}
+          contentStyle={{marginVertical: -5, marginHorizontal: -8}}
+          style={{margin: 3}}
+          // onPress={() => {}}
+        >
+          {toTitleCase(tag.tag_name)}
+        </Button>
+      ))}
+    </View>
+  );
+};
+
+interface TagSectionProps {
+  userBook: UserBookRead;
+  booksApi: BooksApi;
+}
+
+export const TagSection = ({userBook, booksApi}: TagSectionProps) => {
+  const [tags, setTags] = useState<TagBookLink[]>();
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await booksApi.getBookTagsBookIdGet(userBook.book.id);
+        setTags(response.data);
+      } catch (error) {
+        console.log(`Error fetching tags for book ${userBook.book.id}:`, error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTags().catch(error => console.log(error));
+  }, [booksApi, userBook.book.id]);
+
+  return loading || !tags ? null : (
+    <View style={styles.tagSection}>
+      <Text variant="titleMedium" style={{marginBottom: 10}}>
+        Tags
+      </Text>
+      <TagPills tags={tags} />
+    </View>
+  );
+};
+
+const CollectionPillPress = (collection: CollectionRead) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  return () => {
+    navigation.push('Collection', {
+      collection: collection,
+    });
+  };
+};
+
+export const CollectionPills = ({
+  collections,
+}: {
+  collections: CollectionRead[];
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        marginBottom: 10,
+      }}>
+      {collections.map(collection => (
+        <Button
+          key={collection.id}
+          mode={'contained'}
+          contentStyle={{marginVertical: -5, marginHorizontal: -8}}
+          style={{margin: 3}}
+          onPress={CollectionPillPress(collection)}>
+          {collection.name}
+        </Button>
+      ))}
+    </View>
+  );
+};
+
+export const CollectionSection = ({userBook}: {userBook: UserBookRead}) => {
+  return !userBook.collections || userBook.collections.length === 0 ? null : (
+    <View style={styles.tagSection}>
+      <CollectionPills collections={userBook.collections} />
+    </View>
+  );
+};
+
+const FollowingPress = (user: UserRead) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  return () => {
+    navigation.push('Profile', {
+      profile: user,
+    });
+  };
+};
+
+interface FollowingBookItemProps {
+  following: UserRead;
+  followingBook: UserBookRead;
+}
+
+export const FollowingBookItemCollectionTags = ({
+  collections,
+}: {
+  collections: CollectionRead[];
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+      }}>
+      {collections.map(collection => (
+        <Button
+          key={collection.id}
+          mode={'outlined'}
+          contentStyle={{marginVertical: -10, marginHorizontal: -10}}
+          style={{margin: 2}}
+          labelStyle={{fontSize: 12}}
+          onPress={CollectionPillPress(collection)}>
+          {collection.name}
+        </Button>
+      ))}
+    </View>
+  );
+};
+
+export const FollowingBookItem = ({
+  following,
+  followingBook,
+}: FollowingBookItemProps) => {
+  const [expanded, setExpanded] = useState<boolean>(false);
+  const [parsedCollections, setParsedCollections] = useState<CollectionRead[]>([]);
+  const [completed, setCompleted] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!followingBook.collections) {
+      return;
+    }
+
+    // Filter collections and set parsedCollections
+    const filteredCollections = followingBook.collections.filter(
+      collection => collection.type !== CollectionType.Complete,
+    );
+    setParsedCollections(filteredCollections);
+
+    // Check if any collection with type 'Complete' exists
+    const hasCompleted = followingBook.collections.some(
+      collection => collection.type === CollectionType.Complete,
+    );
+    setCompleted(hasCompleted);
+  }, [followingBook]);
+
+  const handleExpandPress = () => {
+    setExpanded(!expanded);
+  };
+
+  // TODO if no review but in finished use check mark.  Pop
+  // @ts-ignore
+  return (
+    <Card
+      mode={'contained'}
+      style={{
+        marginVertical: 5,
+        marginHorizontal: 10,
+        elevation: 2,
+      }}
+      onPress={FollowingPress(following)}
+      theme={{
+        colors: {surfaceVariant: LightTheme.colors.surface},
+      }}>
+      <Card.Title
+        title={following.name}
+        subtitle={`@${following.tag}`}
+        left={props => <Avatar.Icon {...props} icon="account-outline" />}
+        right={() => (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              direction: 'rtl',
+              marginHorizontal: 10,
+            }}>
+            {parsedCollections.length > 1 && (
+              <IconButton
+                style={{marginHorizontal: 0}}
+                icon={expanded ? 'chevron-up' : 'chevron-down'}
+                onPress={handleExpandPress}
+              />
+            )}
+            <ReviewIndicator
+              completed={completed}
+              review={followingBook.review}
+            />
+          </View>
+        )}
+      />
+      {expanded && parsedCollections.length > 1 && (
+        <Card.Content style={{marginHorizontal: 20}}>
+          <FollowingBookItemCollectionTags collections={parsedCollections} />
+        </Card.Content>
+      )}
+    </Card>
+  );
+};
+
+interface FollowingSectionProps {
+  userId: number;
+  userBook: UserBookRead;
+  usersApi: UsersApi;
+  booksApi: BooksApi;
+}
+
+export const FollowingSection = ({
+  userId,
+  userBook,
+  usersApi,
+  booksApi,
+}: FollowingSectionProps) => {
+  const [followingBookItems, setFollowingBookItems] = useState<
+    FollowingBookItemProps[]
+  >([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchFollowingBooks = async () => {
+      try {
+        const response =
+          await booksApi.getFollowingUserBooksFollowingBooksBookIdParentIdGet(
+            userBook.book.id,
+            userId,
+          );
+        const books = response.data;
+
+        const bookItems: FollowingBookItemProps[] = await Promise.all(
+          books.map(async (book: UserBookRead) => {
+            const userResponse = await usersApi.getUserByIdUserUserIdGet(
+              book.user_id,
+            );
+            return {
+              following: userResponse.data,
+              followingBook: book,
+            };
+          }),
+        );
+
+        setFollowingBookItems(bookItems);
+      } catch (error) {
+        console.log(
+          `Error fetching followers and books for user ${userId}:`,
+          error,
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFollowingBooks().catch(error => console.log(error));
+  }, [booksApi, userBook.book.id, userId, usersApi]);
+
+  return loading ? null : (
+    <View>
+      {followingBookItems.map(i => (
+        <FollowingBookItem
+          key={i.following.id}
+          following={i.following}
+          followingBook={i.followingBook}
+        />
+      ))}
+    </View>
+  );
+};
+
 interface ScreenProps {
   userBook: UserBookRead;
 }
 
 // TODO this can be a lot better if the background image is stored in the header.
 // try using the useNavigation hook with navigation.setOptions to improve.
-export const Screen = ({userBook}: ScreenProps) => {
+export const Screen = ({userBook: initBook}: ScreenProps) => {
+  const {user: bibliUser} = useContext(UserContext);
+  const {booksApi, usersApi} = useApi();
+  const [userBook, setUserBook] = useState<UserBookRead>(initBook);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const response = await booksApi.getBookBookBookIdGet(userBook.book.id);
+      setUserBook(response.data);
+    } catch (error) {
+      console.log(`Error fetching book ${userBook.book.id}`);
+    }
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
       <TopSection userBook={userBook} />
+      <CollectionSection userBook={userBook} />
       <InfoSection userBook={userBook} />
+      <TagSection userBook={userBook} booksApi={booksApi} />
+      <FollowingSection
+        userId={bibliUser?.id ?? userBook.user_id}
+        userBook={userBook}
+        usersApi={usersApi}
+        booksApi={booksApi}
+      />
     </ScrollView>
   );
 };
@@ -225,5 +593,9 @@ const styles = StyleSheet.create({
   summaryStr: {
     marginVertical: 5,
     alignSelf: 'center',
+  },
+  tagSection: {
+    alignItems: 'center',
+    marginHorizontal: 20,
   },
 });

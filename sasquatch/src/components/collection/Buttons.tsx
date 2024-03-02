@@ -11,7 +11,6 @@ import {
 
 interface ProfileButtonProps {
   style?: StyleProp<ViewStyle>;
-  labelStyle?: StyleProp<TextStyle>;
   link?: CollectionUserLinkType;
   setLink?: Dispatch<SetStateAction<CollectionUserLinkType | null>>;
   collection?: CollectionRead;
@@ -19,27 +18,27 @@ interface ProfileButtonProps {
   collectionsApi?: CollectionsApi;
 }
 
-const OwnerButton = ({style, labelStyle}: ProfileButtonProps) => {
+const OwnerButton = ({style}: ProfileButtonProps) => {
   return (
     <Button
       mode={'text'}
       compact={true}
       icon={'key-variant'}
       style={style}
-      labelStyle={labelStyle}>
+      labelStyle={styles.buttonLabelStyle}>
       Owner
     </Button>
   );
 };
 
-const CollaboratorButton = ({style, labelStyle}: ProfileButtonProps) => {
+const CollaboratorButton = ({style}: ProfileButtonProps) => {
   return (
     <Button
       mode={'text'}
       compact={true}
       icon={'account-edit-outline'}
       style={style}
-      labelStyle={labelStyle}>
+      labelStyle={styles.buttonLabelStyle}>
       Collaborator
     </Button>
   );
@@ -47,7 +46,6 @@ const CollaboratorButton = ({style, labelStyle}: ProfileButtonProps) => {
 
 const FollowerButton = ({
   style,
-  labelStyle,
   collection,
   setLink,
   bibliUser,
@@ -75,7 +73,7 @@ const FollowerButton = ({
       compact={true}
       icon={'account-check-outline'}
       style={style}
-      labelStyle={labelStyle}
+      labelStyle={styles.buttonLabelStyle}
       onPress={onPress}>
       Following
     </Button>
@@ -84,7 +82,6 @@ const FollowerButton = ({
 
 const FollowButton = ({
   style,
-  labelStyle,
   collection,
   setLink,
   bibliUser,
@@ -114,7 +111,7 @@ const FollowButton = ({
       compact={true}
       icon={'account-plus'}
       style={style}
-      labelStyle={labelStyle}
+      labelStyle={styles.buttonLabelStyle}
       onPress={onPress}>
       Follow
     </Button>
@@ -196,4 +193,7 @@ const styles = StyleSheet.create({
   profileBanner: {
     flex: 1,
   },
+  buttonLabelStyle: {
+    marginVertical: 5,
+  }
 });
