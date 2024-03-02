@@ -25,8 +25,10 @@ const SearchScreen = () => {
   const [noResults, setNoResults] = useState<boolean>(false);
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (searchQuery.length > 1) {
+    let delayDebounceFn: NodeJS.Timeout;
+
+    if (searchQuery.length > 1) {
+      delayDebounceFn = setTimeout(() => {
         setLoading(true);
         const searchPromise =
           searchType === SearchType.Books
@@ -34,28 +36,29 @@ const SearchScreen = () => {
             : usersApi.searchUsersUserSearchQGet(searchQuery);
 
         searchPromise
-          .then(response => {
+          .then((response: { data: { books?: Book[]; users?: User[] } }) => {
             if (searchType === SearchType.Books) {
               setBooksResults(response.data.books ?? []);
-              setNoResults(response.data.books.length === 0);
+              setNoResults(response.data.books?.length === 0 ?? false);
             } else {
               setMembersResults(response.data.users ?? []);
-              setNoResults(response.data.users.length === 0);
+              setNoResults(response.data.users?.length === 0 ?? false);
             }
           })
-          .catch(error => {
+          .catch((error: Error) => {
             console.error(error);
             setNoResults(true);
           })
           .finally(() => {
             setLoading(false);
           });
-      } else {
-        setBooksResults([]);
-        setMembersResults([]);
-        setNoResults(false);
-      }
-    }, 1000);
+      }, 1000);
+    } else {
+      setLoading(false);
+      setBooksResults([]);
+      setMembersResults([]);
+      setNoResults(false);
+    }
 
     return () => clearTimeout(delayDebounceFn);
   }, [booksApi, usersApi, searchQuery, searchType]);

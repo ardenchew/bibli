@@ -11,7 +11,6 @@ import {
 import {CollectionRead, UserBookRead, UserRead} from '../../generated/jericho';
 import {NavigationLightTheme} from '../../styles/themes/NavigationLightTheme';
 import {NavigationContainer} from '@react-navigation/native';
-import {LightTheme} from '../../styles/themes/LightTheme';
 
 export type RootStackParamList = {
   Home: undefined;

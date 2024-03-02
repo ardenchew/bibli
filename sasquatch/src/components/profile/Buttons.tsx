@@ -23,6 +23,7 @@ const DiscoverButton = ({style, labelStyle}: ProfileButtonProps) => {
       icon={'book-multiple-outline'}
       style={style}
       labelStyle={labelStyle}
+      contentStyle={styles.content}
       onPress={() => {}}>
       Discover
     </Button>
@@ -39,6 +40,7 @@ const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
       icon={'pencil'}
       style={style}
       labelStyle={labelStyle}
+      contentStyle={styles.content}
       onPress={() => navigation.push('EditProfile')}>
       Edit
     </Button>
@@ -95,6 +97,7 @@ const FollowButton = ({
       icon={active ? 'account-check-outline' : 'account-plus'}
       style={style}
       labelStyle={labelStyle}
+      contentStyle={styles.content}
       onPress={onPress}>
       {active ? 'Following' : 'Follow'}
     </Button>
@@ -145,5 +148,8 @@ const styles = StyleSheet.create({
   },
   profileBanner: {
     flex: 1,
+  },
+  content: {
+    marginVertical: -5,
   },
 });

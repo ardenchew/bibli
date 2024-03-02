@@ -63,3 +63,45 @@ async def get_book(
         session: Session = Depends(get_session),
 ):
     return books.get_tags_from_book_id(session, book_id)
+
+
+@router.get("/book/{book_id}/{user_id}", response_model=schema.books.UserBookRead)
+async def get_user_book(
+        book_id: int,
+        user_id: int,
+        session: Session = Depends(get_session),
+):
+    book = books.get_book(session, book_id, user_id)
+    if not book:
+        raise NotFoundException
+    return book
+
+
+@router.post("/books/{user_id}", response_model=schema.books.BookPage)
+async def get_user_books(
+        user_id: int,
+        f: schema.books.BookFilter,
+        session: Session = Depends(get_session),
+):
+    return books.get_books(session, f, user_id)
+
+
+@router.get("/following/books/{book_id}/{parent_id}", response_model=List[schema.books.UserBookRead])
+async def get_following_user_books(
+        book_id: int,
+        parent_id: int,
+        session: Session = Depends(get_session),
+):
+    users_filter = schema.users.LinkedUsersFilter(
+        parent_id=parent_id,
+        type=schema.users.UserLinkType.FOLLOW,
+    )
+    us = users.get_linked_users(session, users_filter)
+
+    bs: List[schema.books.UserBookRead] = []
+    for u in us:
+        b = books.get_book(session, book_id, u.id)
+        if len(b.collections) > 0 or b.review:
+            bs.append(b)
+
+    return bs

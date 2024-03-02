@@ -10,8 +10,8 @@ def tags_from_google_book_subjects(subjects: List[str]) -> Set[str]:
     for subject in subjects:
         splits = re.split(r'[&/\\,]', subject)
         for split in splits:
-            tag = split.strip()
-            if len(tag) > 40 or tag.count(' ') > 3 or tag.lower() == "general":
+            tag = split.strip().lower()
+            if len(tag) > 40 or tag.count(' ') > 3 or tag == "general":
                 continue
             tags.add(tag)
     return tags
