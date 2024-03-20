@@ -1,18 +1,19 @@
 import React, {useContext, useState} from 'react';
 import {StyleSheet, Image, Text, View} from 'react-native';
-import {Card, Avatar, IconButton} from 'react-native-paper';
+import {Card, Avatar, IconButton, Menu} from 'react-native-paper';
 import {
-  CollectionBookLink,
+  CollectionBookLink, CollectionsApi,
   CollectionType,
   Reaction,
   ReviewRead,
   UserBookRead,
 } from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
-import {useApi} from '../../api';
 import {UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack'; // Adjust the import path
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {ReviewModal} from './Review';
+import {useLogout} from '../profile/Logout'; // Adjust the import path
 
 interface ReviewIndicatorProps {
   completed: boolean;
@@ -48,25 +49,56 @@ export const ReviewIndicator = ({completed, review}: ReviewIndicatorProps) => {
   );
 };
 
+interface MenuButtonProps {}
+
+const MenuButton = ({}: MenuButtonProps) => {
+  const [visible, setVisible] = useState<boolean>(false);
+
+  const openMenu = () => setVisible(true);
+  const closeMenu = () => setVisible(false);
+
+  return (
+    <Menu
+      visible={visible}
+      onDismiss={closeMenu}
+      anchor={
+        <IconButton
+          style={styles.rightIcon}
+          icon="dots-vertical"
+          onPress={openMenu}
+        />
+      }>
+      <Menu.Item
+        leadingIcon={'book-plus'}
+        onPress={() => {}}
+        title="Add to collection"
+      />
+    </Menu>
+  );
+};
+
 interface RightIndicatorsProps {
   book: UserBookRead;
   hasCompleteCollection: boolean;
   hasSavedCollection: boolean;
+  collectionsApi: CollectionsApi;
+  // reviewPress: null | ((event: GestureResponderEvent) => void) | undefined;
 }
 
 export const RightIndicators = ({
   book,
   hasCompleteCollection,
   hasSavedCollection,
+  collectionsApi,
 }: RightIndicatorsProps) => {
+  // TODO useState with book so it can be updated.
   const {user: bibliUser} = useContext(UserContext);
-  const {collectionsApi} = useApi();
-
   const [completed, setCompleted] = useState<boolean>(hasCompleteCollection);
   const [bookmarked, setBookmarked] = useState<boolean>(hasSavedCollection);
   const [reviewScoped, setReviewScoped] = useState<ReviewRead | undefined>(
     book.review,
   );
+  const [visible, setVisible] = useState<boolean>(false);
 
   const bookmarkOnPress = async () => {
     try {
@@ -109,10 +141,17 @@ export const RightIndicators = ({
         <ReviewIndicator completed={completed} review={reviewScoped} />
       ) : (
         <>
+          {visible && (
+            <ReviewModal
+              visible={visible}
+              setVisible={setVisible}
+              userBook={book}
+            />
+          )}
           <IconButton
             style={styles.rightIcon}
             icon={'star-plus-outline'}
-            onPress={() => {}}
+            onPress={() => setVisible(true)}
           />
           <IconButton
             style={styles.rightIcon}
@@ -121,12 +160,7 @@ export const RightIndicators = ({
           />
         </>
       )}
-      <IconButton
-        style={styles.rightIcon}
-        icon={'dots-vertical'}
-        onPress={() => {}}
-        rippleColor={'transparent'}
-      />
+      <MenuButton />
     </View>
   );
 };
@@ -143,9 +177,10 @@ const CardPress = (userBook: UserBookRead) => {
 
 interface Props {
   userBook: UserBookRead;
+  collectionsApi: CollectionsApi;
 }
 
-export const Item = ({userBook}: Props) => {
+export const Item = ({userBook, collectionsApi}: Props) => {
   const hasCompleteCollection =
     userBook.collections?.some(
       collection => collection.type === CollectionType.Complete,
@@ -185,6 +220,7 @@ export const Item = ({userBook}: Props) => {
             book={userBook}
             hasCompleteCollection={hasCompleteCollection}
             hasSavedCollection={hasSavedCollection}
+            collectionsApi={collectionsApi}
           />
         )}
       />
@@ -205,10 +241,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'nowrap',
     alignItems: 'center',
+    gap: -10,
   },
   rightIcon: {
     margin: 0,
-    marginLeft: -10,
     padding: 0,
     alignSelf: 'center',
   },

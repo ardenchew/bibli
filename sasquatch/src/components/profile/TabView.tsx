@@ -9,12 +9,15 @@ import {
 } from 'react-native';
 import {TabBar, TabView} from 'react-native-tab-view';
 import {LightTheme} from '../../styles/themes/LightTheme';
-import {Button, SegmentedButtons, Text} from 'react-native-paper';
+import {SegmentedButtons, Text} from 'react-native-paper';
 import {CollectionRead, UserLinkType, UserRead} from '../../generated/jericho';
 import {default as CollectionsList} from '../collection/List';
 import UserList from '../social/List';
-import {Dispatch, SetStateAction, useState} from 'react';
+import {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {useApi} from '../../api';
+import {UserContext} from '../../context';
+import {NewCollection} from './NewCollection';
+import {useIsFocused} from '@react-navigation/native';
 
 interface CollectionsProps {
   user: UserRead;
@@ -27,6 +30,8 @@ const CollectionsRoute = ({
   collections,
   setCollections,
 }: CollectionsProps) => {
+  const isFocused = useIsFocused();
+  const {user: bibliUser} = useContext(UserContext);
   const {collectionsApi} = useApi();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
@@ -43,6 +48,27 @@ const CollectionsRoute = ({
     setRefreshing(false);
   };
 
+  // TODO this is a bandaid for scoped state management.
+  useEffect(() => {
+    const fetchData = async () => {
+      if (isFocused) {
+        try {
+          const response = await collectionsApi.getCollectionsCollectionsGet(
+            user.id,
+          );
+          setCollections(response.data);
+        } catch (error) {
+          console.log(
+            `Error fetching collections for user ${user.tag}:`,
+            error,
+          );
+        }
+      }
+    };
+
+    fetchData().catch(e => console.log(e));
+  }, [collectionsApi, isFocused, setCollections, user.id, user.tag]);
+
   return (
     <View style={{flex: 1}}>
       <ScrollView
@@ -52,18 +78,12 @@ const CollectionsRoute = ({
         }>
         <CollectionsList collections={collections} />
       </ScrollView>
-      <Button
-        compact={true}
-        icon={'plus'}
-        onPress={() => {}}
-        mode={'elevated'}
-        children={'New Collection'}
-        style={{
-          position: 'absolute',
-          alignSelf: 'center',
-          bottom: 20,
-        }}
-      />
+      {user.id === bibliUser?.id && (
+        <NewCollection
+          collections={collections}
+          setCollections={setCollections}
+        />
+      )}
     </View>
   );
 };
@@ -141,13 +161,9 @@ const SocialRoute = ({
         />
       </SafeAreaView>
       {segment === 'following' ? (
-        <>
-          <UserList users={following} />
-        </>
+        <UserList users={following} />
       ) : (
-        <>
-          <UserList users={followers} />
-        </>
+        <UserList users={followers} />
       )}
     </ScrollView>
   );

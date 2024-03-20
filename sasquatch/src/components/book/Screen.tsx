@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import {
   BooksApi,
-  CollectionRead,
+  CollectionRead, CollectionsApi,
   CollectionType,
   TagBookLink,
   UserBookRead,
@@ -55,7 +55,12 @@ export const Background = ({userBook}: {userBook: UserBookRead}) => {
   );
 };
 
-export const Headline = ({userBook}: {userBook: UserBookRead}) => {
+interface HeadlineProps {
+  userBook: UserBookRead;
+  collectionsApi: CollectionsApi;
+}
+
+export const Headline = ({userBook, collectionsApi}: HeadlineProps) => {
   const title = userBook.book.subtitle
     ? `${userBook.book.title}: ${userBook.book.subtitle}`
     : userBook.book.title;
@@ -87,6 +92,7 @@ export const Headline = ({userBook}: {userBook: UserBookRead}) => {
             book={userBook}
             hasCompleteCollection={hasCompleteCollection}
             hasSavedCollection={hasSavedCollection}
+            collectionsApi={collectionsApi}
           />
         </View>
       </View>
@@ -94,13 +100,18 @@ export const Headline = ({userBook}: {userBook: UserBookRead}) => {
   );
 };
 
-export const TopSection = ({userBook}: {userBook: UserBookRead}) => {
+interface TopSectionProps {
+  userBook: UserBookRead;
+  collectionsApi: CollectionsApi;
+}
+
+export const TopSection = ({userBook, collectionsApi}: TopSectionProps) => {
   const headerHeight = useHeaderHeight();
   const marginTop = -backgroundHeight + headerHeight * 3;
   return (
     <View style={{...styles.topSection, marginTop: marginTop}}>
       <Background userBook={userBook} />
-      <Headline userBook={userBook} />
+      <Headline userBook={userBook} collectionsApi={collectionsApi} />
     </View>
   );
 };
@@ -178,6 +189,56 @@ export const InfoSection = ({userBook}: {userBook: UserBookRead}) => {
   );
 };
 
+export const ReviewSection = ({userBook}: {userBook: UserBookRead}) => {
+  const initialNumberOfLines = 10;
+  const [expanded, setExpanded] = useState<boolean>(false);
+  const toggleExpand = () => {
+    setExpanded(!expanded);
+  };
+
+  const [showMore, setShowMore] = useState<boolean>(false);
+  const onTextLayout = useCallback(
+    (e: {nativeEvent: {lines: string | any[]}}) => {
+      const {lines} = e.nativeEvent;
+      setShowMore(lines.length > initialNumberOfLines);
+    },
+    [],
+  );
+
+  return userBook.review?.notes ? (
+    <View style={styles.infoSection}>
+      <Text variant="titleMedium" style={{marginBottom: 10}}>
+        Your Review
+      </Text>
+      <View>
+        {showMore ? (
+          <>
+            <Text
+              style={styles.summaryStr}
+              numberOfLines={expanded ? undefined : initialNumberOfLines}>
+              {userBook.review?.notes}
+            </Text>
+            <Button
+              mode={'text'}
+              onPress={toggleExpand}
+              compact={true}
+              rippleColor={'transparent'}
+              style={{marginVertical: -5}}>
+              {expanded ? 'less' : 'more'}
+            </Button>
+          </>
+        ) : (
+          <Text style={styles.summaryStr} onTextLayout={onTextLayout}>
+            {userBook.review?.notes}
+          </Text>
+        )}
+      </View>
+    </View>
+  ) : (
+    <></>
+  );
+};
+
 function toTitleCase(str: string): string {
   return str.replace(
     /\w\S*/g,
@@ -248,6 +309,7 @@ export const TagSection = ({userBook, booksApi}: TagSectionProps) => {
         Tags
       </Text>
       <TagPills tags={tags} />
+      <Divider style={{marginVertical: 5, width: '100%'}} />
     </View>
   );
 };
@@ -346,7 +408,10 @@ export const FollowingBookItem = ({
   followingBook,
 }: FollowingBookItemProps) => {
   const [expanded, setExpanded] = useState<boolean>(false);
-  const [parsedCollections, setParsedCollections] = useState<CollectionRead[]>([]);
+  const [expandable, setExpandable] = useState<boolean>(false);
+  const [parsedCollections, setParsedCollections] = useState<CollectionRead[]>(
+    [],
+  );
   const [completed, setCompleted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -366,6 +431,13 @@ export const FollowingBookItem = ({
     );
     setCompleted(hasCompleted);
   }, [followingBook]);
+
+  useEffect(() => {
+    setExpandable(
+      parsedCollections.length > 0 ||
+        (followingBook.review?.notes ?? '').trim() !== '',
+    );
+  }, [followingBook.review?.notes, parsedCollections.length]);
 
   const handleExpandPress = () => {
     setExpanded(!expanded);
@@ -398,7 +470,7 @@ export const FollowingBookItem = ({
               direction: 'rtl',
               marginHorizontal: 10,
             }}>
-            {parsedCollections.length > 1 && (
+            {expandable && (
               <IconButton
                 style={{marginHorizontal: 0}}
                 icon={expanded ? 'chevron-up' : 'chevron-down'}
@@ -412,8 +484,11 @@ export const FollowingBookItem = ({
           </View>
         )}
       />
-      {expanded && parsedCollections.length > 1 && (
-        <Card.Content style={{marginHorizontal: 20}}>
+      {expanded && (
+        <Card.Content style={{marginHorizontal: 20, gap: 10}}>
+          {followingBook.review?.notes && (
+            <Text>{followingBook.review?.notes}</Text>
+          )}
           <FollowingBookItemCollectionTags collections={parsedCollections} />
         </Card.Content>
       )}
@@ -496,7 +571,7 @@ interface ScreenProps {
 // try using the useNavigation hook with navigation.setOptions to improve.
 export const Screen = ({userBook: initBook}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {booksApi, usersApi} = useApi();
+  const {booksApi, usersApi, collectionsApi} = useApi();
   const [userBook, setUserBook] = useState<UserBookRead>(initBook);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
@@ -517,10 +592,11 @@ export const Screen = ({userBook: initBook}: ScreenProps) => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }>
-      <TopSection userBook={userBook} />
+      <TopSection userBook={userBook} collectionsApi={collectionsApi} />
       <CollectionSection userBook={userBook} />
       <InfoSection userBook={userBook} />
       <TagSection userBook={userBook} booksApi={booksApi} />
+      <ReviewSection userBook={userBook} />
       <FollowingSection
         userId={bibliUser?.id ?? userBook.user_id}
         userBook={userBook}

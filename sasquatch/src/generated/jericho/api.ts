@@ -330,6 +330,31 @@ export type CollectionUserLinkType = typeof CollectionUserLinkType[keyof typeof 
 /**
  * 
  * @export
+ * @interface Comparison
+ */
+export interface Comparison {
+    /**
+     * 
+     * @type {number}
+     * @memberof Comparison
+     */
+    'less_than_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Comparison
+     */
+    'equal_to_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Comparison
+     */
+    'greater_than_id'?: number;
+}
+/**
+ * 
+ * @export
  * @interface HTTPValidationError
  */
 export interface HTTPValidationError {
@@ -385,6 +410,12 @@ export interface ReviewPut {
      * @memberof ReviewPut
      */
     'reaction': Reaction;
+    /**
+     * 
+     * @type {Comparison}
+     * @memberof ReviewPut
+     */
+    'comparison': Comparison;
 }
 
 
@@ -430,6 +461,12 @@ export interface ReviewRead {
      * @memberof ReviewRead
      */
     'hide_rank': boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReviewRead
+     */
+    'rank': number;
 }
 
 
@@ -2258,13 +2295,10 @@ export const ReviewsApiAxiosParamCreator = function (configuration?: Configurati
          * 
          * @summary Put Review
          * @param {ReviewPut} reviewPut 
-         * @param {number} [lessThanId] 
-         * @param {number} [equalToId] 
-         * @param {number} [greaterThanId] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putReviewReviewPut: async (reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        putReviewReviewPut: async (reviewPut: ReviewPut, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'reviewPut' is not null or undefined
             assertParamExists('putReviewReviewPut', 'reviewPut', reviewPut)
             const localVarPath = `/review`;
@@ -2282,18 +2316,6 @@ export const ReviewsApiAxiosParamCreator = function (configuration?: Configurati
             // authentication HTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (lessThanId !== undefined) {
-                localVarQueryParameter['less_than_id'] = lessThanId;
-            }
-
-            if (equalToId !== undefined) {
-                localVarQueryParameter['equal_to_id'] = equalToId;
-            }
-
-            if (greaterThanId !== undefined) {
-                localVarQueryParameter['greater_than_id'] = greaterThanId;
-            }
 
 
     
@@ -2347,14 +2369,11 @@ export const ReviewsApiFp = function(configuration?: Configuration) {
          * 
          * @summary Put Review
          * @param {ReviewPut} reviewPut 
-         * @param {number} [lessThanId] 
-         * @param {number} [equalToId] 
-         * @param {number} [greaterThanId] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async putReviewReviewPut(reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ReviewRead>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.putReviewReviewPut(reviewPut, lessThanId, equalToId, greaterThanId, options);
+        async putReviewReviewPut(reviewPut: ReviewPut, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ReviewRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putReviewReviewPut(reviewPut, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -2393,14 +2412,11 @@ export const ReviewsApiFactory = function (configuration?: Configuration, basePa
          * 
          * @summary Put Review
          * @param {ReviewPut} reviewPut 
-         * @param {number} [lessThanId] 
-         * @param {number} [equalToId] 
-         * @param {number} [greaterThanId] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putReviewReviewPut(reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options?: any): AxiosPromise<ReviewRead> {
-            return localVarFp.putReviewReviewPut(reviewPut, lessThanId, equalToId, greaterThanId, options).then((request) => request(axios, basePath));
+        putReviewReviewPut(reviewPut: ReviewPut, options?: any): AxiosPromise<ReviewRead> {
+            return localVarFp.putReviewReviewPut(reviewPut, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2442,15 +2458,12 @@ export class ReviewsApi extends BaseAPI {
      * 
      * @summary Put Review
      * @param {ReviewPut} reviewPut 
-     * @param {number} [lessThanId] 
-     * @param {number} [equalToId] 
-     * @param {number} [greaterThanId] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ReviewsApi
      */
-    public putReviewReviewPut(reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options?: AxiosRequestConfig) {
-        return ReviewsApiFp(this.configuration).putReviewReviewPut(reviewPut, lessThanId, equalToId, greaterThanId, options).then((request) => request(this.axios, this.basePath));
+    public putReviewReviewPut(reviewPut: ReviewPut, options?: AxiosRequestConfig) {
+        return ReviewsApiFp(this.configuration).putReviewReviewPut(reviewPut, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

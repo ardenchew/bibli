@@ -4,7 +4,11 @@ import Item from './Item';
 import {CollectionRead} from '../../generated/jericho';
 import {Divider} from 'react-native-paper';
 
-const List = ({collections}: {collections: CollectionRead[]}) => {
+interface Props {
+  collections: CollectionRead[];
+}
+
+const List = ({collections}: Props) => {
   return (
     <View>
       {collections.map((item, index) => (

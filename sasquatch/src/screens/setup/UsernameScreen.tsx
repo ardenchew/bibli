@@ -125,6 +125,7 @@ const UsernameScreen = ({navigation}: Props) => {
           maxLength={20}
           error={!!warning}
           onChangeText={handleUsernameChange}
+          autoFocus={true}
         />
         {warning && (
           <HelperText type="error" visible={!!warning}>

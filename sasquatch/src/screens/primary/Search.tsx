@@ -9,7 +9,7 @@ import {useApi} from '../../api';
 import {UserBookRead, UserRead} from '../../generated/jericho';
 
 const SearchScreen = () => {
-  const {booksApi, usersApi} = useApi();
+  const {booksApi, usersApi, collectionsApi} = useApi();
   const includedSearchTypes: SearchType[] = [
     SearchType.Books,
     SearchType.Members,
@@ -36,15 +36,19 @@ const SearchScreen = () => {
             : usersApi.searchUsersUserSearchQGet(searchQuery);
 
         searchPromise
-          .then((response: { data: { books?: Book[]; users?: User[] } }) => {
-            if (searchType === SearchType.Books) {
-              setBooksResults(response.data.books ?? []);
-              setNoResults(response.data.books?.length === 0 ?? false);
-            } else {
-              setMembersResults(response.data.users ?? []);
-              setNoResults(response.data.users?.length === 0 ?? false);
-            }
-          })
+          .then(
+            (response: {
+              data: {books?: UserBookRead[]; users?: UserRead[]};
+            }) => {
+              if (searchType === SearchType.Books) {
+                setBooksResults(response.data.books ?? []);
+                setNoResults(response.data.books?.length === 0 ?? false);
+              } else {
+                setMembersResults(response.data.users ?? []);
+                setNoResults(response.data.users?.length === 0 ?? false);
+              }
+            },
+          )
           .catch((error: Error) => {
             console.error(error);
             setNoResults(true);
@@ -52,7 +56,7 @@ const SearchScreen = () => {
           .finally(() => {
             setLoading(false);
           });
-      }, 1000);
+      }, 500);
     } else {
       setLoading(false);
       setBooksResults([]);
@@ -90,7 +94,7 @@ const SearchScreen = () => {
       }
       return (
         <ScrollView keyboardShouldPersistTaps={'handled'}>
-          <BookList userBooks={booksResults} />
+          <BookList userBooks={booksResults} collectionsApi={collectionsApi} />
         </ScrollView>
       );
     }

@@ -112,7 +112,10 @@ export const Screen = ({collection}: ScreenProps) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <BooksList userBooks={bookPage?.books ?? []} />
+        <BooksList
+          userBooks={bookPage?.books ?? []}
+          collectionsApi={collectionsApi}
+        />
       </ScrollView>
     </SafeAreaView>
   );
