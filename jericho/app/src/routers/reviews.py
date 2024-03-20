@@ -26,11 +26,10 @@ async def get_reviews(
 @router.put("/review", response_model=schema.reviews.ReviewRead)
 async def put_review(
     review: schema.reviews.ReviewPut,
-    comparison: schema.reviews.Comparison = Depends(),
     session: Session = Depends(get_session),
 ):
     db_review = schema.reviews.Review.from_orm(review)
-    return reviews.upsert_review(session, db_review, comparison)
+    return reviews.upsert_review(session, db_review, review.comparison)
 
 
 @router.delete("/review/{user_id}/{book_id}")

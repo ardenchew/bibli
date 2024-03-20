@@ -53,6 +53,7 @@ async def put_collection_user_link(
         session: Session = Depends(get_session),
 ):
     db_link = schema.collections.CollectionUserLink.from_orm(link)
+    print("DB LINK", db_link)
     return collections.upsert_collection_user_link(session, db_link)
 
 

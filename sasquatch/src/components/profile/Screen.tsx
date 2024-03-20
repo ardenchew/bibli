@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {UserContext} from '../../context';
-import {Image, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import {Title} from './Title';
 import {UserTabView} from './TabView';
 import {TitleButtons} from './Buttons';
