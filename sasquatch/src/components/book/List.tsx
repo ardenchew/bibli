@@ -1,24 +1,23 @@
 import React from 'react';
 import {View} from 'react-native';
 import {Item} from './Item';
-import {CollectionsApi, UserBookRead} from '../../generated/jericho';
+import {BooksApi, CollectionsApi, UserBookRead} from '../../generated/jericho';
 import {Divider} from 'react-native-paper';
-import {GestureResponderEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 
 interface Props {
   userBooks: UserBookRead[];
-  // reviewPress?: ((event: GestureResponderEvent) => void) | undefined;
+  booksApi: BooksApi;
   collectionsApi: CollectionsApi;
 }
 
-export const List = ({userBooks, collectionsApi}: Props) => {
+export const List = ({userBooks, booksApi, collectionsApi}: Props) => {
   return (
     <View>
       {userBooks.map((item, index) => (
         <View key={item.book.id.toString()}>
           <Item
             userBook={item}
-            // reviewPress={reviewPress}
+            booksApi={booksApi}
             collectionsApi={collectionsApi}
           />
           {index !== userBooks.length - 1 && <Divider bold={true} />}

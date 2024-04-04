@@ -7,6 +7,7 @@ import {List as BookList} from '../../components/book';
 import UserList from '../../components/social/List';
 import {useApi} from '../../api';
 import {UserBookRead, UserRead} from '../../generated/jericho';
+import {useIsFocused} from '@react-navigation/native';
 
 const SearchScreen = () => {
   const {booksApi, usersApi, collectionsApi} = useApi();
@@ -23,11 +24,12 @@ const SearchScreen = () => {
   const [booksResults, setBooksResults] = useState<UserBookRead[]>([]);
   const [membersResults, setMembersResults] = useState<UserRead[]>([]);
   const [noResults, setNoResults] = useState<boolean>(false);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     let delayDebounceFn: NodeJS.Timeout;
 
-    if (searchQuery.length > 1) {
+    if (searchQuery.length > 1 && isFocused) {
       delayDebounceFn = setTimeout(() => {
         setLoading(true);
         const searchPromise =
@@ -65,7 +67,7 @@ const SearchScreen = () => {
     }
 
     return () => clearTimeout(delayDebounceFn);
-  }, [booksApi, usersApi, searchQuery, searchType]);
+  }, [isFocused, booksApi, usersApi, searchQuery, searchType]);
 
   const renderNoResults = () => {
     return (
@@ -94,7 +96,7 @@ const SearchScreen = () => {
       }
       return (
         <ScrollView keyboardShouldPersistTaps={'handled'}>
-          <BookList userBooks={booksResults} collectionsApi={collectionsApi} />
+          <BookList userBooks={booksResults} booksApi={booksApi} collectionsApi={collectionsApi} />
         </ScrollView>
       );
     }
