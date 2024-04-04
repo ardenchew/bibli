@@ -1,19 +1,21 @@
-import React, {useContext, useState} from 'react';
+import React, {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {StyleSheet, Image, Text, View} from 'react-native';
 import {Card, Avatar, IconButton, Menu} from 'react-native-paper';
 import {
-  CollectionBookLink, CollectionsApi,
+  BooksApi,
+  CollectionBookLink,
+  CollectionsApi,
   CollectionType,
   Reaction,
   ReviewRead,
-  UserBookRead,
+  UserBookRead, UserRead,
 } from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ReviewModal} from './Review';
-import {useLogout} from '../profile/Logout'; // Adjust the import path
+import {ActiveIndicator, SavedIndicator} from './Indicators';
 
 interface ReviewIndicatorProps {
   completed: boolean;
@@ -25,6 +27,79 @@ const reactionColorMap: {[key in Reaction]: string} = {
   [Reaction.Positive]: '#0cb256', // green
   [Reaction.Neutral]: '#e39700', // yellow
   [Reaction.Negative]: '#d53325', // red
+};
+
+interface HasCollections {
+  hasComplete: boolean;
+  hasActive: boolean;
+  hasSaved: boolean;
+}
+
+export const useHasCollections = (userBook: UserBookRead): HasCollections => {
+  const [hasComplete, setHasComplete] = useState<boolean>(() =>
+    userBook.collections
+      ? userBook.collections.some(
+          collection => collection.type === CollectionType.Complete,
+        )
+      : false,
+  );
+  const [hasActive, setHasActive] = useState<boolean>(() =>
+    userBook.collections
+      ? userBook.collections.some(
+          collection => collection.type === CollectionType.Active
+        )
+      : false,
+  );
+  const [hasSaved, setHasSaved] = useState<boolean>(() =>
+    userBook.collections
+      ? userBook.collections.some(
+          collection => collection.type === CollectionType.Saved
+        )
+      : false,
+  );
+
+  useEffect(() => {
+    if (userBook.collections) {
+      const complete = userBook.collections.some(
+        collection => collection.type === CollectionType.Complete,
+      );
+      const active = userBook.collections.some(
+        collection => collection.type === CollectionType.Active,
+      );
+      const saved = userBook.collections.some(
+        collection => collection.type === CollectionType.Saved,
+      );
+
+      setHasComplete(complete);
+      setHasActive(active);
+      setHasSaved(saved);
+    } else {
+      setHasComplete(false);
+      setHasActive(false);
+      setHasSaved(false);
+    }
+  }, [userBook.collections]);
+
+  return {
+    hasComplete,
+    hasActive,
+    hasSaved,
+  };
+};
+
+export const RefreshBook = (
+  booksApi: BooksApi,
+  book: UserBookRead,
+  setBook: Dispatch<SetStateAction<UserBookRead>>,
+) => {
+  return async () => {
+    try {
+      const response = await booksApi.getBookBookBookIdGet(book.book.id);
+      setBook(response.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 };
 
 export const ReviewIndicator = ({completed, review}: ReviewIndicatorProps) => {
@@ -79,22 +154,19 @@ const MenuButton = ({}: MenuButtonProps) => {
 
 interface RightIndicatorsProps {
   book: UserBookRead;
-  hasCompleteCollection: boolean;
-  hasSavedCollection: boolean;
   collectionsApi: CollectionsApi;
-  // reviewPress: null | ((event: GestureResponderEvent) => void) | undefined;
+  refreshBook: () => void;
 }
 
 export const RightIndicators = ({
   book,
-  hasCompleteCollection,
-  hasSavedCollection,
   collectionsApi,
+  refreshBook,
 }: RightIndicatorsProps) => {
-  // TODO useState with book so it can be updated.
   const {user: bibliUser} = useContext(UserContext);
-  const [completed, setCompleted] = useState<boolean>(hasCompleteCollection);
-  const [bookmarked, setBookmarked] = useState<boolean>(hasSavedCollection);
+  const {hasComplete, hasActive, hasSaved} = useHasCollections(book);
+
+  const [bookmarked, setBookmarked] = useState<boolean>(hasSaved);
   const [reviewScoped, setReviewScoped] = useState<ReviewRead | undefined>(
     book.review,
   );
@@ -111,8 +183,6 @@ export const RightIndicators = ({
       if (!collectionId) {
         throw new Error('Saved collection does not exist.');
       }
-
-      console.log(book.book);
 
       const collectionBookLink: CollectionBookLink = {
         collection_id: collectionId,
@@ -137,8 +207,8 @@ export const RightIndicators = ({
 
   return (
     <View style={styles.rightContainer}>
-      {reviewScoped || completed ? (
-        <ReviewIndicator completed={completed} review={reviewScoped} />
+      {reviewScoped || hasComplete ? (
+        <ReviewIndicator completed={hasComplete} review={reviewScoped} />
       ) : (
         <>
           {visible && (
@@ -153,11 +223,19 @@ export const RightIndicators = ({
             icon={'star-plus-outline'}
             onPress={() => setVisible(true)}
           />
-          <IconButton
-            style={styles.rightIcon}
-            icon={bookmarked ? 'bookmark' : 'bookmark-outline'}
-            onPress={bookmarkOnPress}
+          {/*<IconButton*/}
+          {/*  style={styles.rightIcon}*/}
+          {/*  icon={bookmarked ? 'bookmark' : 'bookmark-outline'}*/}
+          {/*  onPress={bookmarkOnPress}*/}
+          {/*/>*/}
+          <SavedIndicator
+            bibliUser={bibliUser}
+            collectionsApi={collectionsApi}
+            book={book}
+            refreshBook={refreshBook}
+            hasSaved={hasSaved}
           />
+          <ActiveIndicator hasActive={hasActive} />
         </>
       )}
       <MenuButton />
@@ -177,18 +255,13 @@ const CardPress = (userBook: UserBookRead) => {
 
 interface Props {
   userBook: UserBookRead;
+  booksApi: BooksApi;
   collectionsApi: CollectionsApi;
 }
 
-export const Item = ({userBook, collectionsApi}: Props) => {
-  const hasCompleteCollection =
-    userBook.collections?.some(
-      collection => collection.type === CollectionType.Complete,
-    ) ?? false;
-  const hasSavedCollection =
-    userBook.collections?.some(
-      collection => collection.type === CollectionType.Saved,
-    ) ?? false;
+export const Item = ({userBook, booksApi, collectionsApi}: Props) => {
+  const [book, setBook] = useState<UserBookRead>(userBook);
+  const refreshBook = RefreshBook(booksApi, book, setBook);
   const title = userBook.book.subtitle
     ? `${userBook.book.title}: ${userBook.book.subtitle}`
     : userBook.book.title;
@@ -218,9 +291,8 @@ export const Item = ({userBook, collectionsApi}: Props) => {
         right={() => (
           <RightIndicators
             book={userBook}
-            hasCompleteCollection={hasCompleteCollection}
-            hasSavedCollection={hasSavedCollection}
             collectionsApi={collectionsApi}
+            refreshBook={refreshBook}
           />
         )}
       />

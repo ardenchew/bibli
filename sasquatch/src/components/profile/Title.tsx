@@ -49,7 +49,7 @@ export const Title = ({style, user, isCurrentUser}: Props) => {
         style={style}
         title={user?.name}
         titleVariant={'headlineMedium'}
-        subtitle={`@ ${user?.tag}`}
+        subtitle={`@${user?.tag}`}
         subtitleVariant={'labelLarge'}
         left={props => <Avatar.Icon {...props} icon="account" />}
         right={() => <MenuButton isCurrentUser={isCurrentUser} />}
