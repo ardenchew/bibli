@@ -10,7 +10,7 @@ import {UserBookRead, UserRead} from '../../generated/jericho';
 import {useIsFocused} from '@react-navigation/native';
 
 const SearchScreen = () => {
-  const {booksApi, usersApi, collectionsApi} = useApi();
+  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
   const includedSearchTypes: SearchType[] = [
     SearchType.Books,
     SearchType.Members,
@@ -96,7 +96,12 @@ const SearchScreen = () => {
       }
       return (
         <ScrollView keyboardShouldPersistTaps={'handled'}>
-          <BookList userBooks={booksResults} booksApi={booksApi} collectionsApi={collectionsApi} />
+          <BookList
+            userBooks={booksResults}
+            booksApi={booksApi}
+            collectionsApi={collectionsApi}
+            reviewsApi={reviewsApi}
+          />
         </ScrollView>
       );
     }

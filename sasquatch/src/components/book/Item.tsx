@@ -3,11 +3,11 @@ import {StyleSheet, Image, Text, View} from 'react-native';
 import {Card, Avatar, IconButton, Menu} from 'react-native-paper';
 import {
   BooksApi,
-  CollectionBookLink,
+  CollectionBookLink, CollectionRead,
   CollectionsApi,
   CollectionType,
   Reaction,
-  ReviewRead,
+  ReviewRead, ReviewsApi,
   UserBookRead, UserRead,
 } from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
@@ -15,19 +15,8 @@ import {UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ReviewModal} from './Review';
-import {ActiveIndicator, SavedIndicator} from './Indicators';
-
-interface ReviewIndicatorProps {
-  completed: boolean;
-  review?: ReviewRead;
-}
-
-// Define the mapping from indicators to colors
-const reactionColorMap: {[key in Reaction]: string} = {
-  [Reaction.Positive]: '#0cb256', // green
-  [Reaction.Neutral]: '#e39700', // yellow
-  [Reaction.Negative]: '#d53325', // red
-};
+import {ActiveIndicator, CompleteIndicator, RateIndicator, ReviewIndicator, SavedIndicator} from './Indicators';
+import {MenuButton} from './ItemMenu';
 
 interface HasCollections {
   hasComplete: boolean;
@@ -97,150 +86,66 @@ export const RefreshBook = (
       const response = await booksApi.getBookBookBookIdGet(book.book.id);
       setBook(response.data);
     } catch (e) {
-      console.log(e);
+      console.log(`Error fetching book ${book.book.id}: ${e}`);
     }
   };
 };
 
-export const ReviewIndicator = ({completed, review}: ReviewIndicatorProps) => {
-  if (!review) {
-    return completed ? (
-      <View style={styles.ratingIndicatorContainer}>
-        <IconButton
-          iconColor={reactionColorMap[Reaction.Positive]}
-          icon={'check-all'}
-        />
-      </View>
-    ) : null;
-  }
-
-  const color = reactionColorMap[review.reaction];
-  return (
-    <View style={styles.ratingIndicatorContainer}>
-      <Text style={[styles.ratingIndicatorText, {color}]}>
-        {review.rating.toFixed(1)}
-      </Text>
-    </View>
-  );
-};
-
-interface MenuButtonProps {}
-
-const MenuButton = ({}: MenuButtonProps) => {
-  const [visible, setVisible] = useState<boolean>(false);
-
-  const openMenu = () => setVisible(true);
-  const closeMenu = () => setVisible(false);
-
-  return (
-    <Menu
-      visible={visible}
-      onDismiss={closeMenu}
-      anchor={
-        <IconButton
-          style={styles.rightIcon}
-          icon="dots-vertical"
-          onPress={openMenu}
-        />
-      }>
-      <Menu.Item
-        leadingIcon={'book-plus'}
-        onPress={() => {}}
-        title="Add to collection"
-      />
-    </Menu>
-  );
-};
-
-interface RightIndicatorsProps {
+interface IndicatorsProps {
   book: UserBookRead;
   collectionsApi: CollectionsApi;
+  reviewsApi: ReviewsApi;
   refreshBook: () => void;
+  currentOwnedCollection?: CollectionRead;
 }
 
-export const RightIndicators = ({
+export const Indicators = ({
   book,
   collectionsApi,
+  reviewsApi,
   refreshBook,
-}: RightIndicatorsProps) => {
+  currentOwnedCollection,
+}: IndicatorsProps) => {
   const {user: bibliUser} = useContext(UserContext);
   const {hasComplete, hasActive, hasSaved} = useHasCollections(book);
 
-  const [bookmarked, setBookmarked] = useState<boolean>(hasSaved);
-  const [reviewScoped, setReviewScoped] = useState<ReviewRead | undefined>(
-    book.review,
-  );
-  const [visible, setVisible] = useState<boolean>(false);
-
-  const bookmarkOnPress = async () => {
-    try {
-      const response = await collectionsApi.getCollectionsCollectionsGet(
-        bibliUser?.id,
-        CollectionType.Saved,
-      );
-      const collectionId = response.data[0]?.id;
-
-      if (!collectionId) {
-        throw new Error('Saved collection does not exist.');
-      }
-
-      const collectionBookLink: CollectionBookLink = {
-        collection_id: collectionId,
-        book_id: book.book.id,
-      };
-
-      if (bookmarked) {
-        await collectionsApi.deleteCollectionBookLinkCollectionBookLinkDelete(
-          collectionBookLink,
-        );
-      } else {
-        await collectionsApi.postCollectionBookLinkCollectionBookLinkPost(
-          collectionBookLink,
-        );
-      }
-
-      setBookmarked(!bookmarked);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  return (
+  return bibliUser ? (
     <View style={styles.rightContainer}>
-      {reviewScoped || hasComplete ? (
-        <ReviewIndicator completed={hasComplete} review={reviewScoped} />
+      {book.review ? (
+        <ReviewIndicator review={book.review} />
+      ) : hasComplete ? (
+        <CompleteIndicator hasComplete={hasComplete} />
       ) : (
         <>
-          {visible && (
-            <ReviewModal
-              visible={visible}
-              setVisible={setVisible}
-              userBook={book}
+          <RateIndicator book={book} />
+          {hasActive ? (
+            <ActiveIndicator hasActive={hasActive} />
+          ) : (
+            <SavedIndicator
+              bibliUser={bibliUser}
+              collectionsApi={collectionsApi}
+              book={book}
+              refreshBook={refreshBook}
+              hasSaved={hasSaved}
             />
           )}
-          <IconButton
-            style={styles.rightIcon}
-            icon={'star-plus-outline'}
-            onPress={() => setVisible(true)}
-          />
-          {/*<IconButton*/}
-          {/*  style={styles.rightIcon}*/}
-          {/*  icon={bookmarked ? 'bookmark' : 'bookmark-outline'}*/}
-          {/*  onPress={bookmarkOnPress}*/}
-          {/*/>*/}
-          <SavedIndicator
-            bibliUser={bibliUser}
-            collectionsApi={collectionsApi}
-            book={book}
-            refreshBook={refreshBook}
-            hasSaved={hasSaved}
-          />
-          <ActiveIndicator hasActive={hasActive} />
         </>
       )}
-      <MenuButton />
+      <MenuButton
+        bibliUser={bibliUser}
+        book={book}
+        collectionsApi={collectionsApi}
+        reviewsApi={reviewsApi}
+        hasComplete={hasComplete}
+        hasSaved={hasSaved}
+        hasActive={hasActive}
+        refreshBook={refreshBook}
+        removeCollection={
+          currentOwnedCollection?.type ? undefined : currentOwnedCollection
+        }
+      />
     </View>
-  );
+  ) : null;
 };
 
 const CardPress = (userBook: UserBookRead) => {
@@ -257,9 +162,17 @@ interface Props {
   userBook: UserBookRead;
   booksApi: BooksApi;
   collectionsApi: CollectionsApi;
+  reviewsApi: ReviewsApi;
+  currentOwnedCollection?: CollectionRead;
 }
 
-export const Item = ({userBook, booksApi, collectionsApi}: Props) => {
+export const Item = ({
+  userBook,
+  booksApi,
+  collectionsApi,
+  reviewsApi,
+  currentOwnedCollection,
+}: Props) => {
   const [book, setBook] = useState<UserBookRead>(userBook);
   const refreshBook = RefreshBook(booksApi, book, setBook);
   const title = userBook.book.subtitle
@@ -289,10 +202,12 @@ export const Item = ({userBook, booksApi, collectionsApi}: Props) => {
           )
         }
         right={() => (
-          <RightIndicators
-            book={userBook}
+          <Indicators
+            book={book}
             collectionsApi={collectionsApi}
+            reviewsApi={reviewsApi}
             refreshBook={refreshBook}
+            currentOwnedCollection={currentOwnedCollection}
           />
         )}
       />
@@ -319,19 +234,5 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
     alignSelf: 'center',
-  },
-  ratingIndicatorContainer: {
-    borderColor: LightTheme.colors.outlineVariant,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 5,
-  },
-  ratingIndicatorText: {
-    fontSize: 13,
-    fontWeight: 'bold',
   },
 });
