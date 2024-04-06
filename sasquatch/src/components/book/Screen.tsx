@@ -11,7 +11,7 @@ import {
 import {
   BooksApi,
   CollectionRead, CollectionsApi,
-  CollectionType,
+  CollectionType, ReviewsApi,
   TagBookLink,
   UserBookRead,
   UserRead,
@@ -28,7 +28,8 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useHeaderHeight} from '@react-navigation/elements';
-import {RightIndicators, ReviewIndicator} from './Item';
+import {Indicators, RefreshBook, useHasCollections} from './Item';
+import {ActiveIndicator, CompleteIndicator, ReviewIndicator, SavedIndicator} from './Indicators';
 import {useApi} from '../../api';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -57,25 +58,23 @@ export const Background = ({userBook}: {userBook: UserBookRead}) => {
 
 interface HeadlineProps {
   userBook: UserBookRead;
+  refreshBook: () => void;
   collectionsApi: CollectionsApi;
+  reviewsApi: ReviewsApi;
 }
 
-export const Headline = ({userBook, collectionsApi}: HeadlineProps) => {
+export const Headline = ({
+  userBook,
+  refreshBook,
+  collectionsApi,
+  reviewsApi,
+}: HeadlineProps) => {
   const title = userBook.book.subtitle
     ? `${userBook.book.title}: ${userBook.book.subtitle}`
     : userBook.book.title;
   const headerHeight = useHeaderHeight();
   const marginTop = -headerHeight * 1.5;
   const authors = userBook.authors?.map(author => author.name).join(', ');
-
-  const hasCompleteCollection =
-    userBook.collections?.some(
-      collection => collection.type === CollectionType.Complete,
-    ) ?? false;
-  const hasSavedCollection =
-    userBook.collections?.some(
-      collection => collection.type === CollectionType.Saved,
-    ) ?? false;
 
   return (
     <View style={{...styles.headlineContainer, marginTop: marginTop}}>
@@ -88,11 +87,11 @@ export const Headline = ({userBook, collectionsApi}: HeadlineProps) => {
         <Text style={styles.headlineTitleFont}>{title}</Text>
         <Text style={styles.headlineAuthorFont}>by: {authors}</Text>
         <View style={styles.headlineButtonContainer}>
-          <RightIndicators
+          <Indicators
             book={userBook}
-            hasCompleteCollection={hasCompleteCollection}
-            hasSavedCollection={hasSavedCollection}
             collectionsApi={collectionsApi}
+            reviewsApi={reviewsApi}
+            refreshBook={refreshBook}
           />
         </View>
       </View>
@@ -102,16 +101,28 @@ export const Headline = ({userBook, collectionsApi}: HeadlineProps) => {
 
 interface TopSectionProps {
   userBook: UserBookRead;
+  refreshBook: () => void;
   collectionsApi: CollectionsApi;
+  reviewsApi: ReviewsApi;
 }
 
-export const TopSection = ({userBook, collectionsApi}: TopSectionProps) => {
+export const TopSection = ({
+  userBook,
+  refreshBook,
+  collectionsApi,
+  reviewsApi,
+}: TopSectionProps) => {
   const headerHeight = useHeaderHeight();
   const marginTop = -backgroundHeight + headerHeight * 3;
   return (
     <View style={{...styles.topSection, marginTop: marginTop}}>
       <Background userBook={userBook} />
-      <Headline userBook={userBook} collectionsApi={collectionsApi} />
+      <Headline
+        userBook={userBook}
+        refreshBook={refreshBook}
+        collectionsApi={collectionsApi}
+        reviewsApi={reviewsApi}
+      />
     </View>
   );
 };
@@ -412,7 +423,7 @@ export const FollowingBookItem = ({
   const [parsedCollections, setParsedCollections] = useState<CollectionRead[]>(
     [],
   );
-  const [completed, setCompleted] = useState<boolean>(false);
+  const {hasActive, hasComplete} = useHasCollections(followingBook);
 
   useEffect(() => {
     if (!followingBook.collections) {
@@ -424,12 +435,6 @@ export const FollowingBookItem = ({
       collection => collection.type !== CollectionType.Complete,
     );
     setParsedCollections(filteredCollections);
-
-    // Check if any collection with type 'Complete' exists
-    const hasCompleted = followingBook.collections.some(
-      collection => collection.type === CollectionType.Complete,
-    );
-    setCompleted(hasCompleted);
   }, [followingBook]);
 
   useEffect(() => {
@@ -477,10 +482,12 @@ export const FollowingBookItem = ({
                 onPress={handleExpandPress}
               />
             )}
-            <ReviewIndicator
-              completed={completed}
-              review={followingBook.review}
-            />
+            {hasComplete &&
+              (followingBook.review ? (
+                <ReviewIndicator review={followingBook.review} />
+              ) : (
+                <CompleteIndicator hasComplete={hasComplete} />
+              ))}
           </View>
         )}
       />
@@ -571,18 +578,18 @@ interface ScreenProps {
 // try using the useNavigation hook with navigation.setOptions to improve.
 export const Screen = ({userBook: initBook}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {booksApi, usersApi, collectionsApi} = useApi();
+  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
   const [userBook, setUserBook] = useState<UserBookRead>(initBook);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const refreshBook = RefreshBook(booksApi, userBook, setUserBook);
+
+  useEffect(() => {
+    RefreshBook(booksApi, initBook, setUserBook)().catch(e => console.log(e));
+  }, [booksApi, initBook]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    try {
-      const response = await booksApi.getBookBookBookIdGet(userBook.book.id);
-      setUserBook(response.data);
-    } catch (error) {
-      console.log(`Error fetching book ${userBook.book.id}`);
-    }
+    await refreshBook();
     setRefreshing(false);
   };
 
@@ -592,7 +599,12 @@ export const Screen = ({userBook: initBook}: ScreenProps) => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }>
-      <TopSection userBook={userBook} collectionsApi={collectionsApi} />
+      <TopSection
+        userBook={userBook}
+        refreshBook={refreshBook}
+        collectionsApi={collectionsApi}
+        reviewsApi={reviewsApi}
+      />
       <CollectionSection userBook={userBook} />
       <InfoSection userBook={userBook} />
       <TagSection userBook={userBook} booksApi={booksApi} />

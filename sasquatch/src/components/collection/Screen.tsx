@@ -28,7 +28,7 @@ interface ScreenProps {
 
 export const Screen = ({collection}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {booksApi, usersApi, collectionsApi} = useApi();
+  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
   const [bookPage, setBookPage] = useState<BookPage>();
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
@@ -123,6 +123,10 @@ export const Screen = ({collection}: ScreenProps) => {
           userBooks={bookPage?.books ?? []}
           booksApi={booksApi}
           collectionsApi={collectionsApi}
+          reviewsApi={reviewsApi}
+          currentOwnedCollection={
+            owner?.id === bibliUser?.id ? collection : undefined
+          }
         />
       </ScrollView>
     </SafeAreaView>

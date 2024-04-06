@@ -37,9 +37,7 @@ import {
   TextInput,
   TouchableRipple,
 } from 'react-native-paper';
-import {RightIndicators} from './Item';
 import {useApi} from '../../api';
-import {User} from 'react-native-auth0';
 
 const {width, height} = Dimensions.get('window');
 
@@ -413,19 +411,21 @@ interface ReviewModalProps {
   setVisible: Dispatch<SetStateAction<boolean>>;
   userBook: UserBookRead;
   currentReview?: ReviewRead;
+  onSubmit?: () => void;
 }
 
 export const ReviewModal = ({
   visible,
   setVisible,
   userBook,
+  onSubmit,
 }: ReviewModalProps) => {
   const {user: bibliUser} = useContext(UserContext);
   const {reviewsApi} = useApi();
   const [reactionType, setReactionType] = useState<Reaction | null>(null);
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const [reviews, setReviews] = useState<ReviewRead[]>([]);
-  const [notes, setNotes] = useState<string>("");
+  const [notes, setNotes] = useState<string>('');
 
   useEffect(() => {
     setReviews([]);
@@ -485,7 +485,7 @@ export const ReviewModal = ({
     setVisible(false);
   };
 
-  const onSubmit = async () => {
+  const onSubmitPress = async () => {
     if (reactionType && comparison) {
       const reviewPut: ReviewPut = {
         user_id: bibliUser?.id,
@@ -500,6 +500,9 @@ export const ReviewModal = ({
       } catch (e) {
         console.log(`Error fetching reviews for user ${bibliUser?.id}:`, e);
       }
+    }
+    if (onSubmit) {
+      onSubmit();
     }
   };
 
@@ -582,7 +585,7 @@ export const ReviewModal = ({
                       <Button
                         style={{alignSelf: 'flex-end', margin: 5}}
                         labelStyle={{fontSize: 17}}
-                        onPress={onSubmit}>
+                        onPress={onSubmitPress}>
                         Submit
                       </Button>
                     </View>
