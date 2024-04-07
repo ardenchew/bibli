@@ -1,13 +1,15 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {Card, Avatar} from 'react-native-paper';
-import {CollectionRead} from '../../generated/jericho';
+import {CollectionRead, CollectionUserLinkType, UsersApi} from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack'; // Adjust the import path
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useApi} from '../../api'; // Adjust the import path
 
 interface Props {
   collection: CollectionRead;
+  usersApi: UsersApi;
 }
 
 const CardPress = (collection: CollectionRead) => {
@@ -20,7 +22,33 @@ const CardPress = (collection: CollectionRead) => {
   };
 };
 
-const Item = ({collection}: Props) => {
+const Item = ({collection, usersApi}: Props) => {
+  const booksCount = `${collection.count ?? 0} Books`;
+  const [subtitle, setSubtitle] = useState<string>(booksCount);
+
+  const ownerLinks = collection.user_links.filter(
+    link => link.type === CollectionUserLinkType.Owner,
+  );
+
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      try {
+        const userPromises = ownerLinks.map(link =>
+          usersApi.getUserByIdUserUserIdGet(link.user_id),
+        );
+        const users = await Promise.all(userPromises);
+        const names = users.map(response => response.data.name);
+        if (names && names.length > 0) {
+          setSubtitle(`${booksCount} • ${names.join(', ')}`);
+        }
+      } catch (error) {
+        console.error('Error fetching user names:', error);
+      }
+    };
+
+    fetchUserNames().catch(e => console.log(e));
+  }, [booksCount, ownerLinks, usersApi]);
+
   return (
     <Card
       mode={'contained'}
@@ -31,7 +59,11 @@ const Item = ({collection}: Props) => {
       }}>
       <Card.Title
         title={collection.name}
-        subtitle={collection.type}
+        titleVariant={'titleMedium'}
+        subtitle={subtitle}
+        subtitleStyle={{
+          fontWeight: '300',
+        }}
         left={props => <Avatar.Icon {...props} icon="book" />}
       />
     </Card>

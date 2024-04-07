@@ -203,6 +203,12 @@ export interface CollectionPut {
      * @memberof CollectionPut
      */
     'name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionPut
+     */
+    'id'?: number;
 }
 /**
  * 
@@ -228,6 +234,12 @@ export interface CollectionRead {
      * @memberof CollectionRead
      */
     'type'?: CollectionType;
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionRead
+     */
+    'count'?: number;
     /**
      * 
      * @type {Array<CollectionUserLinkRead>}

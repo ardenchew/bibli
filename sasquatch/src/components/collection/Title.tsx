@@ -1,13 +1,14 @@
 import * as React from 'react';
-import {Avatar, Card, IconButton, Menu, TextInput} from 'react-native-paper';
-import {StyleProp, View, ViewStyle} from 'react-native';
-import {CollectionRead, CollectionType, UserRead} from '../../generated/jericho';
+import {Avatar, Button, Card, IconButton, Menu, Modal, Portal, TextInput} from 'react-native-paper';
+import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
+import {CollectionPut, CollectionRead, CollectionType, UserRead} from '../../generated/jericho';
 import {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
 import {useApi} from '../../api';
+import {LightTheme} from '../../styles/themes/LightTheme';
 
-const excludeCollectionDeletionTypes: CollectionType[] = [
+const nonEditableCollectionTypes: CollectionType[] = [
   CollectionType.Saved,
   CollectionType.Active,
   CollectionType.Complete,
@@ -15,15 +16,40 @@ const excludeCollectionDeletionTypes: CollectionType[] = [
 
 interface MenuButtonProps {
   collection: CollectionRead;
+  setCollection: Dispatch<SetStateAction<CollectionRead>>;
   owner?: UserRead;
-  currentUser: UserRead;
-  onEditPress: () => void;
 }
 
-const MenuButton = ({collection, owner, currentUser, onEditPress}: MenuButtonProps) => {
+const MenuButton = ({
+  collection,
+  setCollection,
+  owner,
+}: MenuButtonProps) => {
+  const {user: bibliUser} = useContext(UserContext);
   const navigation = useNavigation();
   const {collectionsApi} = useApi();
   const [visible, setVisible] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [collectionPut, setCollectionPut] = useState<CollectionPut>();
+
+  const isOwner = owner?.id === bibliUser?.id;
+  const editable =
+    isOwner &&
+    (!collection?.type ||
+      !nonEditableCollectionTypes.includes(collection?.type));
+
+  useEffect(() => {
+    if (editable) {
+      setCollectionPut({
+        id: collection.id,
+        name: collection.name,
+      });
+    }
+  }, [collection.id, collection.name, editable]);
+
+  if (!editable) {
+    return null;
+  }
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -40,51 +66,86 @@ const MenuButton = ({collection, owner, currentUser, onEditPress}: MenuButtonPro
   };
 
   const editPress = () => {
-    setVisible(false);
-    onEditPress();
+    closeMenu();
+    setEditMode(true);
+  };
+
+  const onEditSubmit = async () => {
+    if (collectionPut) {
+      try {
+        const result = await collectionsApi.putCollectionCollectionPut(
+          collectionPut,
+        );
+        setCollection(result.data);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    setEditMode(false);
+  };
+
+  const clearModal = () => {
+    setEditMode(false);
   };
 
   return (
-    <Menu
-      visible={visible}
-      onDismiss={closeMenu}
-      anchor={<IconButton icon="dots-horizontal" onPress={openMenu} />}>
-      <Menu.Item leadingIcon={'pencil'} onPress={editPress} title="Rename" />
-      {(!collection.type ||
-        !excludeCollectionDeletionTypes.includes(collection.type)) && (
-        <Menu.Item
-          leadingIcon={'trash-can-outline'}
-          onPress={deletePress}
-          title="Delete"
-          theme={{
-            colors: {
-              onSurface: 'red',
-              onSurfaceVariant: 'red',
-            },
-          }}
-        />
-      )}
-    </Menu>
-  );
-};
-
-type TitleEditProps = {
-  value: string;
-  onChangeText: (text: string) => void;
-  onSubmitEditing: () => void;
-};
-
-const TitleEdit = ({value, onChangeText, onSubmitEditing}: TitleEditProps) => {
-  return (
-    <TextInput
-      value={value}
-      onChangeText={onChangeText}
-      onSubmitEditing={onSubmitEditing}
-      mode={'outlined'}
-      style={{
-        width: '100%',
-      }}
-    />
+    <>
+      <Portal>
+        <Modal visible={editMode} onDismiss={clearModal}>
+          <View style={styles.modalContainer}>
+            <TextInput
+              style={styles.input}
+              autoFocus={true}
+              label="Collection Name"
+              value={collectionPut?.name}
+              onChangeText={name =>
+                setCollectionPut({...collectionPut, name: name})
+              }
+            />
+            <Button mode="contained" onPress={onEditSubmit}>
+              Submit
+            </Button>
+            <IconButton
+              style={styles.closeButton}
+              icon="close"
+              iconColor={LightTheme.colors.outline}
+              onPress={clearModal}
+            />
+          </View>
+        </Modal>
+      </Portal>
+      <Menu
+        visible={visible}
+        onDismiss={closeMenu}
+        anchor={
+          <IconButton
+            icon="dots-horizontal"
+            onPress={openMenu}
+            // disabled={disabled ?? true}
+          />
+        }>
+        {editable && (
+          <>
+            <Menu.Item
+              leadingIcon={'pencil'}
+              onPress={editPress}
+              title="Rename"
+            />
+            <Menu.Item
+              leadingIcon={'trash-can-outline'}
+              onPress={deletePress}
+              title="Delete"
+              theme={{
+                colors: {
+                  onSurface: 'red',
+                  onSurfaceVariant: 'red',
+                },
+              }}
+            />
+          </>
+        )}
+      </Menu>
+    </>
   );
 };
 
@@ -94,57 +155,59 @@ interface Props {
   owner?: UserRead;
 }
 
-export const Title = ({style, collection, owner}: Props) => {
-  // TODO replace owner tagline with clickable profile picture
-  const {user: bibliUser} = useContext(UserContext);
-  const isCurrentUser = bibliUser && owner?.id === bibliUser?.id;
-  const [editMode, setEditMode] = useState<boolean>(false);
-  const [newName, setNewName] = useState<string>(collection.name);
-
-  const onEditPress = () => {
-    setEditMode(!editMode);
-  };
+export const Title = ({style, collection: initialCollection, owner}: Props) => {
+  const [collection, setCollection] =
+    useState<CollectionRead>(initialCollection);
 
   useEffect(() => {
-    console.log(editMode);
-  }, [editMode]);
-
-  const onSubmit = () => {
-    // Update the collection name
-    // Assuming setCollection is a function that updates the current collection
-    // setCollection({ ...collection, name: newName });
-    setEditMode(false); // Exit edit mode
-  };
+    setCollection(initialCollection);
+  }, [initialCollection]);
 
   return (
     <Card.Title
       style={style}
-      title={
-        editMode ? (
-          <TitleEdit
-            value={newName}
-            onChangeText={setNewName}
-            onSubmitEditing={onSubmit}
-          />
-        ) : (
-          collection.name
-        )
-      }
-      // title={collection.name}
+      title={collection.name}
       titleVariant={'headlineMedium'}
       subtitle={owner ? `Owned by @${owner.tag}` : null}
       subtitleVariant={'labelLarge'}
       left={props => <Avatar.Icon {...props} icon="book" />}
-      right={() =>
-        isCurrentUser && (
-          <MenuButton
-            collection={collection}
-            owner={owner}
-            currentUser={bibliUser}
-            onEditPress={onEditPress}
-          />
-        )
-      }
+      right={() => (
+        <MenuButton
+          collection={collection}
+          setCollection={setCollection}
+          owner={owner}
+        />
+      )}
     />
   );
 };
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    backgroundColor: LightTheme.colors.surface,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    alignSelf: 'center',
+    padding: 15,
+    borderRadius: 20,
+    shadowRadius: 4,
+    elevation: 5,
+    gap: 10,
+  },
+  input: {
+    marginHorizontal: 20,
+    width: 200,
+  },
+  closeButton: {
+    position: 'absolute',
+    alignSelf: 'flex-end',
+    top: -5,
+  },
+  addButton: {
+    position: 'absolute',
+    alignSelf: 'center',
+    bottom: 20,
+  },
+});

@@ -32,7 +32,7 @@ const CollectionsRoute = ({
 }: CollectionsProps) => {
   const isFocused = useIsFocused();
   const {user: bibliUser} = useContext(UserContext);
-  const {collectionsApi} = useApi();
+  const {collectionsApi, usersApi} = useApi();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = async () => {
@@ -76,7 +76,7 @@ const CollectionsRoute = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <CollectionsList collections={collections} />
+        <CollectionsList collections={collections} usersApi={usersApi} />
       </ScrollView>
       {user.id === bibliUser?.id && (
         <NewCollection

@@ -32,7 +32,7 @@ def get_collection(
     c = session.get(schema.collections.Collection, collection_id)
     cr = schema.collections.CollectionRead.from_orm(c)
     cr.user_links = [schema.collections.CollectionUserLinkRead.from_orm(l) for l in c.user_links]
-
+    cr.count = len(c.book_links)
     return cr
 
 
@@ -47,6 +47,7 @@ def get_collections(
     for c in collections:
         cr = schema.collections.CollectionRead.from_orm(c)
         cr.user_links = [schema.collections.CollectionUserLinkRead.from_orm(l) for l in c.user_links]
+        cr.count = len(c.book_links)
         collections_read.append(cr)
     return collections_read
 
@@ -110,6 +111,10 @@ def delete_collection(
 ):
     stmt = delete(schema.collections.CollectionUserLink).where(
         schema.collections.CollectionUserLink.collection_id == collection.id
+    )
+    session.execute(stmt)
+    stmt = delete(schema.collections.CollectionBookLink).where(
+        schema.collections.CollectionBookLink.collection_id == collection.id
     )
     session.execute(stmt)
     session.delete(collection)

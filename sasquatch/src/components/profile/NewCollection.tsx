@@ -72,7 +72,7 @@ export const NewCollection = ({
               autoFocus={true}
               label="Collection Name"
               value={newCollectionName}
-              onChangeText={text => setNewCollectionName(text)}
+              onChangeText={setNewCollectionName}
             />
             <Button
               mode="contained"
