@@ -4,11 +4,12 @@ import {
   CollectionsApi,
   CollectionType,
   Reaction,
-  ReviewRead, ReviewsApi,
+  ReviewRead,
+  ReviewsApi,
   UserBookRead,
   UserRead,
 } from '../../generated/jericho';
-import {IconButton} from 'react-native-paper';
+import {IconButton, Tooltip} from 'react-native-paper';
 import {StyleSheet, Text, View} from 'react-native';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {ReviewModal} from './Review';
@@ -164,6 +165,24 @@ export const ReviewIndicator = ({review}: ReviewIndicatorProps) => {
   if (!review) {
     return null;
   }
+  if (review.hide_rank) {
+    return (
+      <Tooltip
+        title={'Ratings are hidden until 5 reviews are complete.'}
+        enterTouchDelay={0}>
+        <View style={styles.ratingIndicatorContainer}>
+          <Text
+            style={[
+              styles.ratingIndicatorText,
+              {color: LightTheme.colors.onSurface},
+            ]}>
+            ?
+          </Text>
+        </View>
+      </Tooltip>
+    );
+  }
+
   const color = reactionColorMap[review.reaction];
   return (
     <View style={styles.ratingIndicatorContainer}>
@@ -236,7 +255,13 @@ export const SavedIndicator = ({
     refreshBook();
   };
 
-  return <IconButton style={styles.icon} icon={icon} onPress={bibliUser?.id === book.user_id ? onPress : undefined} />;
+  return (
+    <IconButton
+      style={styles.icon}
+      icon={icon}
+      onPress={bibliUser?.id === book.user_id ? onPress : undefined}
+    />
+  );
 };
 
 const styles = StyleSheet.create({

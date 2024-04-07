@@ -29,6 +29,7 @@ class CollectionBookLink(SQLModel, table=True):
         default=None, primary_key=True, foreign_key="collection.id"
     )
     book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
+    collection: "Collection" = Relationship(back_populates="book_links")
 
 
 class CollectionUserLinkBase(SQLModel):
@@ -65,17 +66,19 @@ class Collection(CollectionBase, table=True):
     type: Optional[str] = None
 
     user_links: List[CollectionUserLink] = Relationship(back_populates="collection")
+    book_links: List[CollectionBookLink] = Relationship(back_populates="collection")
 
 
 class CollectionRead(CollectionBase):
     id: int
     type: Optional[CollectionType]
+    count: Optional[int]
 
     user_links: List[CollectionUserLinkRead]
 
 
 class CollectionPut(CollectionBase):
-    pass
+    id: Optional[int]
 
 
 class CollectionsFilter(SQLModel):
