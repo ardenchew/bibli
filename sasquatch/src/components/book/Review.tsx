@@ -1,13 +1,9 @@
 import {
-  BookRead,
-  BooksApi,
   Comparison,
   Reaction,
   ReviewPut,
   ReviewRead,
-  ReviewsApi,
   UserBookRead,
-  UserRead,
 } from '../../generated/jericho';
 import React, {
   Dispatch,
@@ -16,17 +12,15 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {
   Dimensions,
   Image,
   StyleSheet,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {
-  Avatar,
   Button,
   Card,
   Divider,
@@ -37,7 +31,6 @@ import {
   TextInput,
   TouchableRipple,
 } from 'react-native-paper';
-import {useApi} from '../../api';
 
 const {width, height} = Dimensions.get('window');
 
@@ -223,7 +216,7 @@ export const Compare = ({
   setComparisonStates,
   setComparison,
 }: CompareProps) => {
-  const {booksApi} = useApi();
+  const {booksApi} = useContext(ApiContext);
   const initIdx = getIndexToCompare(
     comparisonStates[comparisonStates.length - 1],
   );
@@ -421,7 +414,7 @@ export const ReviewModal = ({
   onSubmit,
 }: ReviewModalProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {reviewsApi} = useApi();
+  const {reviewsApi} = useContext(ApiContext);
   const [reactionType, setReactionType] = useState<Reaction | null>(null);
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const [reviews, setReviews] = useState<ReviewRead[]>([]);

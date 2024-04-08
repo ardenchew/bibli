@@ -11,7 +11,7 @@ import {
   UserBookRead, UserRead,
 } from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ReviewModal} from './Review';
@@ -93,16 +93,12 @@ export const RefreshBook = (
 
 interface IndicatorsProps {
   book: UserBookRead;
-  collectionsApi: CollectionsApi;
-  reviewsApi: ReviewsApi;
   refreshBook: () => void;
   currentOwnedCollection?: CollectionRead;
 }
 
 export const Indicators = ({
   book,
-  collectionsApi,
-  reviewsApi,
   refreshBook,
   currentOwnedCollection,
 }: IndicatorsProps) => {
@@ -123,7 +119,6 @@ export const Indicators = ({
           ) : (
             <SavedIndicator
               bibliUser={bibliUser}
-              collectionsApi={collectionsApi}
               book={book}
               refreshBook={refreshBook}
               hasSaved={hasSaved}
@@ -134,8 +129,6 @@ export const Indicators = ({
       <MenuButton
         bibliUser={bibliUser}
         book={book}
-        collectionsApi={collectionsApi}
-        reviewsApi={reviewsApi}
         hasComplete={hasComplete}
         hasSaved={hasSaved}
         hasActive={hasActive}
@@ -160,19 +153,11 @@ const CardPress = (userBook: UserBookRead) => {
 
 interface Props {
   userBook: UserBookRead;
-  booksApi: BooksApi;
-  collectionsApi: CollectionsApi;
-  reviewsApi: ReviewsApi;
   currentOwnedCollection?: CollectionRead;
 }
 
-export const Item = ({
-  userBook,
-  booksApi,
-  collectionsApi,
-  reviewsApi,
-  currentOwnedCollection,
-}: Props) => {
+export const Item = ({userBook, currentOwnedCollection}: Props) => {
+  const {booksApi} = useContext(ApiContext);
   const [book, setBook] = useState<UserBookRead>(userBook);
   const refreshBook = RefreshBook(booksApi, book, setBook);
   const title = userBook.book.subtitle
@@ -204,8 +189,6 @@ export const Item = ({
         right={() => (
           <Indicators
             book={book}
-            collectionsApi={collectionsApi}
-            reviewsApi={reviewsApi}
             refreshBook={refreshBook}
             currentOwnedCollection={currentOwnedCollection}
           />

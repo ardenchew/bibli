@@ -1,18 +1,17 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import {Title} from './Title';
 import {UserTabView} from './TabView';
 import {TitleButtons} from './Buttons';
 import {CollectionRead, UserLinkType, UserRead} from '../../generated/jericho';
-import {useApi} from '../../api';
 
 interface ScreenProps {
   user: UserRead;
 }
 
 export const Screen = ({user}: ScreenProps) => {
-  const {collectionsApi, usersApi} = useApi();
+  const {collectionsApi, usersApi} = useContext(ApiContext);
   const {user: bibliUser} = useContext(UserContext);
   const isCurrentUser = user.id === bibliUser?.id;
 
@@ -89,7 +88,6 @@ export const Screen = ({user}: ScreenProps) => {
             style={styles.profileButtons}
             user={user}
             currentUser={bibliUser}
-            usersApi={usersApi}
           />
         )}
       </View>

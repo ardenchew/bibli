@@ -3,9 +3,8 @@ import {Avatar, Button, Card, IconButton, Menu, Modal, Portal, TextInput} from '
 import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
 import {CollectionPut, CollectionRead, CollectionType, UserRead} from '../../generated/jericho';
 import {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
-import {useApi} from '../../api';
 import {LightTheme} from '../../styles/themes/LightTheme';
 
 const nonEditableCollectionTypes: CollectionType[] = [
@@ -23,7 +22,7 @@ interface MenuButtonProps {
 const MenuButton = ({collection, setCollection, owner}: MenuButtonProps) => {
   const {user: bibliUser} = useContext(UserContext);
   const navigation = useNavigation();
-  const {collectionsApi} = useApi();
+  const {collectionsApi} = useContext(ApiContext);
   const [visible, setVisible] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [collectionPut, setCollectionPut] = useState<CollectionPut>();

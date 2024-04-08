@@ -9,13 +9,11 @@ import {
   View,
 } from 'react-native';
 import {
-  BooksApi,
-  CollectionRead, CollectionsApi,
-  CollectionType, ReviewsApi,
+  CollectionRead,
+  CollectionType,
   TagBookLink,
   UserBookRead,
   UserRead,
-  UsersApi,
 } from '../../generated/jericho';
 import {
   Avatar,
@@ -29,11 +27,10 @@ import LinearGradient from 'react-native-linear-gradient';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useHeaderHeight} from '@react-navigation/elements';
 import {Indicators, RefreshBook, useHasCollections} from './Item';
-import {ActiveIndicator, CompleteIndicator, ReviewIndicator, SavedIndicator} from './Indicators';
-import {useApi} from '../../api';
+import {CompleteIndicator, ReviewIndicator} from './Indicators';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 
 const {height} = Dimensions.get('window');
 const backgroundHeight = height;
@@ -59,16 +56,9 @@ export const Background = ({userBook}: {userBook: UserBookRead}) => {
 interface HeadlineProps {
   userBook: UserBookRead;
   refreshBook: () => void;
-  collectionsApi: CollectionsApi;
-  reviewsApi: ReviewsApi;
 }
 
-export const Headline = ({
-  userBook,
-  refreshBook,
-  collectionsApi,
-  reviewsApi,
-}: HeadlineProps) => {
+export const Headline = ({userBook, refreshBook}: HeadlineProps) => {
   const title = userBook.book.subtitle
     ? `${userBook.book.title}: ${userBook.book.subtitle}`
     : userBook.book.title;
@@ -87,12 +77,7 @@ export const Headline = ({
         <Text style={styles.headlineTitleFont}>{title}</Text>
         <Text style={styles.headlineAuthorFont}>by: {authors}</Text>
         <View style={styles.headlineButtonContainer}>
-          <Indicators
-            book={userBook}
-            collectionsApi={collectionsApi}
-            reviewsApi={reviewsApi}
-            refreshBook={refreshBook}
-          />
+          <Indicators book={userBook} refreshBook={refreshBook} />
         </View>
       </View>
     </View>
@@ -102,27 +87,15 @@ export const Headline = ({
 interface TopSectionProps {
   userBook: UserBookRead;
   refreshBook: () => void;
-  collectionsApi: CollectionsApi;
-  reviewsApi: ReviewsApi;
 }
 
-export const TopSection = ({
-  userBook,
-  refreshBook,
-  collectionsApi,
-  reviewsApi,
-}: TopSectionProps) => {
+export const TopSection = ({userBook, refreshBook}: TopSectionProps) => {
   const headerHeight = useHeaderHeight();
   const marginTop = -backgroundHeight + headerHeight * 3;
   return (
     <View style={{...styles.topSection, marginTop: marginTop}}>
       <Background userBook={userBook} />
-      <Headline
-        userBook={userBook}
-        refreshBook={refreshBook}
-        collectionsApi={collectionsApi}
-        reviewsApi={reviewsApi}
-      />
+      <Headline userBook={userBook} refreshBook={refreshBook} />
     </View>
   );
 };
@@ -292,10 +265,10 @@ export const TagPills = ({tags}: {tags: TagBookLink[] | undefined}) => {
 
 interface TagSectionProps {
   userBook: UserBookRead;
-  booksApi: BooksApi;
 }
 
-export const TagSection = ({userBook, booksApi}: TagSectionProps) => {
+export const TagSection = ({userBook}: TagSectionProps) => {
+  const {booksApi} = useContext(ApiContext);
   const [tags, setTags] = useState<TagBookLink[]>();
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -423,7 +396,7 @@ export const FollowingBookItem = ({
   const [parsedCollections, setParsedCollections] = useState<CollectionRead[]>(
     [],
   );
-  const {hasActive, hasComplete} = useHasCollections(followingBook);
+  const {hasComplete} = useHasCollections(followingBook);
 
   useEffect(() => {
     if (!followingBook.collections) {
@@ -506,16 +479,10 @@ export const FollowingBookItem = ({
 interface FollowingSectionProps {
   userId: number;
   userBook: UserBookRead;
-  usersApi: UsersApi;
-  booksApi: BooksApi;
 }
 
-export const FollowingSection = ({
-  userId,
-  userBook,
-  usersApi,
-  booksApi,
-}: FollowingSectionProps) => {
+export const FollowingSection = ({userId, userBook}: FollowingSectionProps) => {
+  const {booksApi, usersApi} = useContext(ApiContext);
   const [followingBookItems, setFollowingBookItems] = useState<
     FollowingBookItemProps[]
   >([]);
@@ -578,7 +545,7 @@ interface ScreenProps {
 // try using the useNavigation hook with navigation.setOptions to improve.
 export const Screen = ({userBook: initBook}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
+  const {booksApi} = useContext(ApiContext);
   const [userBook, setUserBook] = useState<UserBookRead>(initBook);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const refreshBook = RefreshBook(booksApi, userBook, setUserBook);
@@ -599,21 +566,14 @@ export const Screen = ({userBook: initBook}: ScreenProps) => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }>
-      <TopSection
-        userBook={userBook}
-        refreshBook={refreshBook}
-        collectionsApi={collectionsApi}
-        reviewsApi={reviewsApi}
-      />
+      <TopSection userBook={userBook} refreshBook={refreshBook} />
       <CollectionSection userBook={userBook} />
       <InfoSection userBook={userBook} />
-      <TagSection userBook={userBook} booksApi={booksApi} />
+      <TagSection userBook={userBook} />
       <ReviewSection userBook={userBook} />
       <FollowingSection
         userId={bibliUser?.id ?? userBook.user_id}
         userBook={userBook}
-        usersApi={usersApi}
-        booksApi={booksApi}
       />
     </ScrollView>
   );

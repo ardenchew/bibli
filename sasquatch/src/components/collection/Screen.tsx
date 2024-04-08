@@ -17,8 +17,7 @@ import {
 import {List as BooksList} from '../book';
 import {Divider} from 'react-native-paper';
 import {LightTheme} from '../../styles/themes/LightTheme';
-import {useApi} from '../../api';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {TitleButtons} from './Buttons';
 import {useIsFocused} from '@react-navigation/native';
 
@@ -28,7 +27,7 @@ interface ScreenProps {
 
 export const Screen = ({collection}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
+  const {booksApi, usersApi} = useContext(ApiContext);
   const [bookPage, setBookPage] = useState<BookPage>();
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
@@ -97,11 +96,7 @@ export const Screen = ({collection}: ScreenProps) => {
           owner={owner}
         />
         {bibliUser && isLoaded && (
-          <TitleButtons
-            collection={collection}
-            collectionsApi={collectionsApi}
-            bibliUser={bibliUser}
-          />
+          <TitleButtons collection={collection} bibliUser={bibliUser} />
         )}
         {isLoaded && (
           <Text style={styles.socialText}>
@@ -121,9 +116,6 @@ export const Screen = ({collection}: ScreenProps) => {
         }>
         <BooksList
           userBooks={bookPage?.books ?? []}
-          booksApi={booksApi}
-          collectionsApi={collectionsApi}
-          reviewsApi={reviewsApi}
           currentOwnedCollection={
             owner?.id === bibliUser?.id ? collection : undefined
           }

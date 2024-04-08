@@ -1,20 +1,19 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {Card, Avatar, Button} from 'react-native-paper';
 import {
   UserLinkPut,
   UserLinkType,
   UserRead,
-  UsersApi,
 } from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {ApiContext} from '../../context';
 
 interface UserItemProps {
   user: UserRead;
   currentUser: UserRead;
-  api: UsersApi;
 }
 
 const CardPress = (user: UserRead) => {
@@ -27,7 +26,8 @@ const CardPress = (user: UserRead) => {
   };
 };
 
-const UserItem = ({user, currentUser, api}: UserItemProps) => {
+const UserItem = ({user, currentUser}: UserItemProps) => {
+  const {usersApi} = useContext(ApiContext);
   const [userLink, setUserLink] = useState<UserLinkType | null>(
     user.link ?? null,
   );
@@ -39,7 +39,7 @@ const UserItem = ({user, currentUser, api}: UserItemProps) => {
         child_id: user.id,
         type: 'follow',
       };
-      const response = await api.putUserLinkUsersLinkPut(userLinkPut);
+      const response = await usersApi.putUserLinkUsersLinkPut(userLinkPut);
       setUserLink(response.data.type);
     } catch (error) {
       console.error('Error creating user link:', error);
@@ -48,7 +48,7 @@ const UserItem = ({user, currentUser, api}: UserItemProps) => {
 
   const handleUnlinkPress = async () => {
     try {
-      await api.deleteUserLinkUsersLinkParentUserIdChildUserIdDelete(
+      await usersApi.deleteUserLinkUsersLinkParentUserIdChildUserIdDelete(
         currentUser.id,
         user.id,
       );

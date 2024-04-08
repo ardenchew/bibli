@@ -14,8 +14,7 @@ import {CollectionRead, UserLinkType, UserRead} from '../../generated/jericho';
 import {default as CollectionsList} from '../collection/List';
 import UserList from '../social/List';
 import {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
-import {useApi} from '../../api';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {NewCollection} from './NewCollection';
 import {useIsFocused} from '@react-navigation/native';
 
@@ -32,7 +31,7 @@ const CollectionsRoute = ({
 }: CollectionsProps) => {
   const isFocused = useIsFocused();
   const {user: bibliUser} = useContext(UserContext);
-  const {collectionsApi, usersApi} = useApi();
+  const {collectionsApi} = useContext(ApiContext);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = async () => {
@@ -76,7 +75,7 @@ const CollectionsRoute = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <CollectionsList collections={collections} usersApi={usersApi} />
+        <CollectionsList collections={collections} />
       </ScrollView>
       {user.id === bibliUser?.id && (
         <NewCollection
@@ -103,7 +102,7 @@ const SocialRoute = ({
   followers,
   setFollowers,
 }: SocialProps) => {
-  const {usersApi} = useApi();
+  const {usersApi} = useContext(ApiContext);
   const layout = useWindowDimensions();
   const socialSegments = [
     {

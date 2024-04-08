@@ -1,11 +1,10 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {BottomNavigator} from './screens/primary';
 import {BioScreen, LoginScreen, UsernameScreen} from './screens/setup';
 import {useAuth0} from 'react-native-auth0';
 import {useEffect, useState} from 'react';
 import {UserRead} from './generated/jericho';
-import {useApi} from './api';
-import {UserContext, UserContextInterface} from './context';
+import {ApiContext, UserContext, UserContextInterface} from './context';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
@@ -13,7 +12,7 @@ const Stack = createNativeStackNavigator();
 
 export default function Router() {
   const {user} = useAuth0();
-  const {usersApi} = useApi();
+  const {usersApi} = useContext(ApiContext);
   const [bibliUser, setBibliUser] = useState<UserRead | null>(null);
 
   const bibliUserContext: UserContextInterface = {

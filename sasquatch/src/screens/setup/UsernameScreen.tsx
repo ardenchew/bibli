@@ -5,9 +5,8 @@ import {StyleSheet, View} from 'react-native';
 import {useAuth0} from 'react-native-auth0';
 import {Text, TextInput, HelperText} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useApi} from '../../api';
 import {UserPut, UserRead} from '../../generated/jericho';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 
 interface Props {
   navigation: NativeStackNavigationProp<any>;
@@ -19,7 +18,7 @@ interface ContinueButtonProps {
 }
 
 const ContinueButton = ({username, valid}: ContinueButtonProps) => {
-  const {usersApi} = useApi();
+  const {usersApi} = useContext(ApiContext);
   const {user: bibliUser, setUser: setBibliUser} = useContext(UserContext);
 
   const fetchUser = async () => {
@@ -66,7 +65,7 @@ const ContinueButton = ({username, valid}: ContinueButtonProps) => {
 };
 
 const UserText = () => {
-  const {usersApi} = useApi();
+  const {usersApi} = useContext(ApiContext);
   const [bibliUser, setBibliUser] = useState<UserRead | null>(null);
 
   useEffect(() => {
@@ -84,7 +83,7 @@ const UserText = () => {
 
 const UsernameScreen = ({navigation}: Props) => {
   const {user} = useAuth0();
-  const {usersApi} = useApi();
+  const {usersApi} = useContext(ApiContext);
   const [username, setUsername] = useState('');
   const [valid, setValid] = useState(false);
   const [warning, setWarning] = useState('');

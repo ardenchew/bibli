@@ -1,13 +1,13 @@
 import {Button} from 'react-native-paper';
 import * as React from 'react';
 import {StyleProp, ViewStyle, View, StyleSheet} from 'react-native';
-import {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {
   CollectionRead,
-  CollectionsApi,
   CollectionUserLinkType,
   UserRead,
 } from '../../generated/jericho';
+import {ApiContext} from '../../context';
 
 interface ProfileButtonProps {
   style?: StyleProp<ViewStyle>;
@@ -15,7 +15,6 @@ interface ProfileButtonProps {
   setLink?: Dispatch<SetStateAction<CollectionUserLinkType | undefined>>;
   collection?: CollectionRead;
   bibliUser?: UserRead;
-  collectionsApi?: CollectionsApi;
 }
 
 const OwnerButton = ({style}: ProfileButtonProps) => {
@@ -49,10 +48,10 @@ const FollowerButton = ({
   collection,
   setLink,
   bibliUser,
-  collectionsApi,
 }: ProfileButtonProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const onPress = async () => {
-    if (!collectionsApi || !setLink || !collection || !bibliUser) {
+    if (!setLink || !collection || !bibliUser) {
       return null;
     }
 
@@ -85,10 +84,10 @@ const FollowButton = ({
   collection,
   setLink,
   bibliUser,
-  collectionsApi,
 }: ProfileButtonProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const onPress = async () => {
-    if (!collectionsApi || !setLink || !collection || !bibliUser) {
+    if (!setLink || !collection || !bibliUser) {
       return null;
     }
 
@@ -121,17 +120,12 @@ const FollowButton = ({
 interface Props {
   style?: StyleProp<ViewStyle>;
   collection: CollectionRead;
-  collectionsApi: CollectionsApi;
   bibliUser: UserRead;
 }
 
 // Profile button container - dynamically allow for different profile buttons.
-export const TitleButtons = ({
-  style,
-  collection,
-  collectionsApi,
-  bibliUser,
-}: Props) => {
+export const TitleButtons = ({style, collection, bibliUser}: Props) => {
+  const {collectionsApi} = useContext(ApiContext);
   const [loading, setLoading] = useState<boolean>(true);
   const [link, setLink] = useState<CollectionUserLinkType | undefined>();
 
@@ -169,7 +163,6 @@ export const TitleButtons = ({
             collection={collection}
             setLink={setLink}
             bibliUser={bibliUser ?? undefined}
-            collectionsApi={collectionsApi}
           />
         )}
         {!link && (
@@ -178,7 +171,6 @@ export const TitleButtons = ({
             collection={collection}
             setLink={setLink}
             bibliUser={bibliUser ?? undefined}
-            collectionsApi={collectionsApi}
           />
         )}
       </View>

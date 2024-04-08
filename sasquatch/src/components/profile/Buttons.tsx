@@ -2,8 +2,8 @@ import {Button} from 'react-native-paper';
 import * as React from 'react';
 import {StyleProp, ViewStyle, View, StyleSheet, TextStyle} from 'react-native';
 import {useContext, useState} from 'react';
-import {UserLinkPut, UserRead, UsersApi} from '../../generated/jericho';
-import {UserContext} from '../../context';
+import {UserLinkPut, UserRead} from '../../generated/jericho';
+import {ApiContext, UserContext} from '../../context';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 
@@ -12,7 +12,6 @@ interface ProfileButtonProps {
   labelStyle?: StyleProp<TextStyle>;
   user?: UserRead;
   currentUser?: UserRead;
-  usersApi?: UsersApi;
 }
 
 const DiscoverButton = ({style, labelStyle}: ProfileButtonProps) => {
@@ -52,8 +51,8 @@ const FollowButton = ({
   labelStyle,
   user,
   currentUser,
-  usersApi,
 }: ProfileButtonProps) => {
+  const {usersApi} = useContext(ApiContext);
   if (!currentUser || !user || currentUser?.id === user?.id) {
     return null;
   }
@@ -108,11 +107,10 @@ interface Props {
   style: StyleProp<ViewStyle>;
   user: UserRead;
   currentUser: UserRead;
-  usersApi: UsersApi;
 }
 
 // Profile button container - dynamically allow for different profile buttons.
-export const TitleButtons = ({style, user, currentUser, usersApi}: Props) => {
+export const TitleButtons = ({style, user, currentUser}: Props) => {
   const {user: bibliUser} = useContext(UserContext);
   const isCurrentUser = bibliUser?.id === user.id;
 
@@ -129,7 +127,6 @@ export const TitleButtons = ({style, user, currentUser, usersApi}: Props) => {
             <FollowButton
               user={user}
               currentUser={currentUser}
-              usersApi={usersApi}
             />
             {/*<BlockButton />*/}
           </>

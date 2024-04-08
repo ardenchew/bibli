@@ -2,8 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {HelperText, Text, TextInput} from 'react-native-paper';
 import Button from '../../components/button/Button';
-import {UserContext} from '../../context';
-import {useApi} from '../../api';
+import {ApiContext, UserContext} from '../../context';
 import {UserPut, UserRead} from '../../generated/jericho';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -14,7 +13,7 @@ interface SubmitButtonProps {
 }
 
 const SubmitButton = ({updateUser, disabled}: SubmitButtonProps) => {
-  const {usersApi} = useApi();
+  const {usersApi} = useContext(ApiContext);
   const {setUser: setBibliUser} = useContext(UserContext);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
@@ -44,7 +43,7 @@ const SubmitButton = ({updateUser, disabled}: SubmitButtonProps) => {
 };
 
 const EditScreen = () => {
-  const {usersApi} = useApi();
+  const {usersApi} = useContext(ApiContext);
   const {user: bibliUser} = useContext(UserContext);
 
   const [updateUser, setUpdateUser] = useState<UserPut>({

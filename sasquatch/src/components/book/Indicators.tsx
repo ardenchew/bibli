@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   CollectionBookLink,
   CollectionsApi,
@@ -13,6 +13,7 @@ import {IconButton, Tooltip} from 'react-native-paper';
 import {StyleSheet, Text, View} from 'react-native';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {ReviewModal} from './Review';
+import {ApiContext} from '../../context';
 
 export const IdCollectionOnPress = (
   collectionsApi: CollectionsApi,
@@ -55,6 +56,8 @@ export const TypedCollectionOnPress = (
         bibliUser?.id,
         type,
       );
+
+      // THIS INCLUDES NON OWNED COLLECTIONS.
       const collectionId = response.data[0]?.id;
 
       if (!collectionId) {
@@ -219,7 +222,6 @@ export const ActiveIndicator = ({hasActive}: ActiveIndicatorProps) => {
 
 interface SavedIndicatorProps {
   bibliUser: UserRead | null;
-  collectionsApi: CollectionsApi;
   book: UserBookRead;
   hasSaved: boolean;
   refreshBook: () => void;
@@ -227,11 +229,11 @@ interface SavedIndicatorProps {
 
 export const SavedIndicator = ({
   bibliUser,
-  collectionsApi,
   book,
   refreshBook,
   hasSaved,
 }: SavedIndicatorProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const [icon, setIcon] = useState<string>(
     hasSaved ? 'bookmark' : 'bookmark-outline',
   );

@@ -1,20 +1,19 @@
 import React from 'react';
 import {View} from 'react-native';
 import Item from './Item';
-import {CollectionRead, UsersApi} from '../../generated/jericho';
+import {CollectionRead} from '../../generated/jericho';
 import {Divider} from 'react-native-paper';
 
 interface Props {
   collections: CollectionRead[];
-  usersApi: UsersApi;
 }
 
-const List = ({collections, usersApi}: Props) => {
+const List = ({collections}: Props) => {
   return (
     <View>
       {collections.map((item, index) => (
         <View key={item.id.toString()}>
-          <Item collection={item} usersApi={usersApi} />
+          <Item collection={item} />
           {index !== collections.length - 1 && <Divider bold={true} />}
         </View>
       ))}
