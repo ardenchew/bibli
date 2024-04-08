@@ -1,6 +1,6 @@
 import {Button} from 'react-native-paper';
 import * as React from 'react';
-import {StyleProp, ViewStyle, View, StyleSheet, TextStyle} from 'react-native';
+import {StyleProp, ViewStyle, View, StyleSheet} from 'react-native';
 import {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import {
   CollectionRead,
@@ -12,7 +12,7 @@ import {
 interface ProfileButtonProps {
   style?: StyleProp<ViewStyle>;
   link?: CollectionUserLinkType;
-  setLink?: Dispatch<SetStateAction<CollectionUserLinkType | null>>;
+  setLink?: Dispatch<SetStateAction<CollectionUserLinkType | undefined>>;
   collection?: CollectionRead;
   bibliUser?: UserRead;
   collectionsApi?: CollectionsApi;
@@ -61,7 +61,7 @@ const FollowerButton = ({
         collection?.id,
         bibliUser?.id,
       );
-      setLink(null);
+      setLink(undefined);
     } catch (error) {
       console.error('Error deleting collection user link: ', error);
     }
@@ -132,7 +132,8 @@ export const TitleButtons = ({
   collectionsApi,
   bibliUser,
 }: Props) => {
-  const [link, setLink] = useState<CollectionUserLinkType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [link, setLink] = useState<CollectionUserLinkType | undefined>();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -143,9 +144,11 @@ export const TitleButtons = ({
               collection.id,
               bibliUser?.id,
             );
-          setLink(response.data ? response.data.type : null);
+          setLink(response.data ? response.data.type : undefined);
+          setLoading(false);
         } catch (error) {
           console.error('Error fetching user:', error);
+          setLoading(false);
         }
       }
     };
@@ -153,7 +156,7 @@ export const TitleButtons = ({
     fetchUser().catch(error => console.log(error));
   }, [bibliUser, collection.id, collectionsApi]);
 
-  return (
+  return loading ? null : (
     <View style={style}>
       <View style={styles.container}>
         {link === CollectionUserLinkType.Owner && <OwnerButton style={style} />}
@@ -169,7 +172,7 @@ export const TitleButtons = ({
             collectionsApi={collectionsApi}
           />
         )}
-        {link === null && (
+        {!link && (
           <FollowButton
             style={[style, {marginBottom: 5}]}
             collection={collection}
@@ -195,5 +198,5 @@ const styles = StyleSheet.create({
   },
   buttonLabelStyle: {
     marginVertical: 5,
-  }
+  },
 });

@@ -117,7 +117,7 @@ export const Indicators = ({
         <CompleteIndicator hasComplete={hasComplete} />
       ) : (
         <>
-          <RateIndicator book={book} />
+          <RateIndicator book={book} refreshBook={refreshBook} />
           {hasActive ? (
             <ActiveIndicator hasActive={hasActive} />
           ) : (

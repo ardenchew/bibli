@@ -20,11 +20,7 @@ interface MenuButtonProps {
   owner?: UserRead;
 }
 
-const MenuButton = ({
-  collection,
-  setCollection,
-  owner,
-}: MenuButtonProps) => {
+const MenuButton = ({collection, setCollection, owner}: MenuButtonProps) => {
   const {user: bibliUser} = useContext(UserContext);
   const navigation = useNavigation();
   const {collectionsApi} = useApi();

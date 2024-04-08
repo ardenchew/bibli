@@ -127,9 +127,10 @@ export const DeleteReviewOnPress = (
 
 interface RateIndicatorProps {
   book: UserBookRead;
+  refreshBook: () => void;
 }
 
-export const RateIndicator = ({book}: RateIndicatorProps) => {
+export const RateIndicator = ({book, refreshBook}: RateIndicatorProps) => {
   const [visible, setVisible] = useState<boolean>(false);
 
   return (
@@ -139,6 +140,7 @@ export const RateIndicator = ({book}: RateIndicatorProps) => {
           visible={visible}
           setVisible={setVisible}
           userBook={book}
+          onSubmit={refreshBook}
         />
       )}
       <IconButton
@@ -200,10 +202,7 @@ interface CompleteIndicatorProps {
 export const CompleteIndicator = ({hasComplete}: CompleteIndicatorProps) => {
   return hasComplete ? (
     <View style={styles.ratingIndicatorContainer}>
-      <IconButton
-        iconColor={reactionColorMap[Reaction.Positive]}
-        icon={'check'}
-      />
+      <IconButton icon={'check'} />
     </View>
   ) : null;
 };

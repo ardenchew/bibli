@@ -83,9 +83,6 @@ def get_book(session: Session, book_id: int, user_id: int) -> schema.books.UserB
 
 
 def get_books(session: Session, f: schema.books.BookFilter, user_id: int) -> schema.books.BookPage:
-    if not f.limit:
-        f.limit = DEFAULT_PAGE_LIMIT
-
     stmt = select(schema.books.Book)
 
     if f.collection_ids:
@@ -97,7 +94,8 @@ def get_books(session: Session, f: schema.books.BookFilter, user_id: int) -> sch
             col(schema.collections.CollectionBookLink.collection_id).in_(f.collection_ids)
         )
 
-    stmt = stmt.limit(f.limit)
+    if not f.limit:
+        stmt = stmt.limit(f.limit)
 
     if not f.offset:
         stmt = stmt.offset(f.offset)

@@ -1,6 +1,6 @@
 import {
   CollectionBookLink,
-  CollectionRead,
+  CollectionRead, CollectionType, CollectionUserLinkType,
   UserBookRead,
 } from '../../generated/jericho';
 import React, {
@@ -82,8 +82,18 @@ export const ManageModal = ({
       const response = await collectionsApi.getCollectionsCollectionsGet(
         bibliUser?.id,
       );
-      setCollections(response.data);
-      console.log(response.data);
+      // Filter out results that bibliUser does not own.
+      const ownedCollections = response.data.filter(collection => {
+        if (collection.user_links && collection.user_links.length > 0) {
+          return collection.user_links.some(
+            link =>
+              link.user_id === bibliUser?.id &&
+              link.type === CollectionUserLinkType.Owner,
+          );
+        }
+        return false;
+      });
+      setCollections(ownedCollections);
     };
     initCollections().catch(e => console.log(e));
   }, [bibliUser?.id, collectionsApi]);
