@@ -2,6 +2,7 @@
 
 an app for book recs, reviews, and clubs
 
-<img src="https://github.com/ardenchew/bibli/assets/33589231/65e72284-8ffc-4d89-888a-b60c6add5f68" width="153" height="320"> 
-<img src="https://github.com/ardenchew/bibli/assets/33589231/4fe5e422-a3bd-4aa5-95b5-75d375b79ae2" width="153" height="320"> 
-<img src="https://github.com/ardenchew/bibli/assets/33589231/2c24fdb2-4d5c-4a75-9f26-0cacd538a313" width="153" height="320">
+<img src="https://github.com/ardenchew/bibli/assets/33589231/4857f5d8-16a4-4f6a-89b1-e1d7d7582c43" width="153" height="320"> 
+<img src="https://github.com/ardenchew/bibli/assets/33589231/059784f6-91ed-4923-8ea1-a1d90eb2ec58" width="153" height="320"> 
+<img src="https://github.com/ardenchew/bibli/assets/33589231/9df270e1-8037-4299-8a61-f3a6b7604ebb" width="153" height="320"> 
+<img src="https://github.com/ardenchew/bibli/assets/33589231/b41c4215-6e89-4b05-8fdc-f0d12c49bf72" width="153" height="320"> 
