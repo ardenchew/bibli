@@ -74,10 +74,7 @@ export const Screen = ({collection}: ScreenProps) => {
 
   useEffect(() => {
     if (isFocused) {
-      console.log('focused');
       fetchBooks().catch(error => console.log(error));
-    } else {
-      console.log('not focused');
     }
   }, [isFocused, fetchBooks]);
 

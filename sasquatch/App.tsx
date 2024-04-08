@@ -48,7 +48,6 @@ const ApiProvider = ({children}: Props) => {
           reviewsApi: new ReviewsApi(apiConfig),
         };
         setApiContext(newApiContext);
-        console.log(newApiContext);
       } catch (error) {
         console.error('Error fetching credentials:', error);
         // Handle the error as appropriate
