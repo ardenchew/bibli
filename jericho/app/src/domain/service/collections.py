@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete, col
 
 import src.db.schema as schema
 from resources.exceptions import InvalidArgumentException, NotFoundException
@@ -32,7 +32,7 @@ def get_collection(
     c = session.get(schema.collections.Collection, collection_id)
     cr = schema.collections.CollectionRead.from_orm(c)
     cr.user_links = [schema.collections.CollectionUserLinkRead.from_orm(l) for l in c.user_links]
-
+    cr.count = len(c.book_links)
     return cr
 
 
@@ -47,6 +47,7 @@ def get_collections(
     for c in collections:
         cr = schema.collections.CollectionRead.from_orm(c)
         cr.user_links = [schema.collections.CollectionUserLinkRead.from_orm(l) for l in c.user_links]
+        cr.count = len(c.book_links)
         collections_read.append(cr)
     return collections_read
 
@@ -67,8 +68,7 @@ def upsert_collection_user_link(
         session: Session,
         link: schema.collections.CollectionUserLink,
 ) -> schema.collections.CollectionUserLinkRead:
-    if link.type != schema.collections.CollectionUserLinkType.FOLLOWER:
-        raise InvalidArgumentException
+    # TODO prevent people from adding themselves as owner/collaborator.
     session.merge(link)
     session.commit()
     return schema.collections.CollectionUserLinkRead.from_orm(link)
@@ -109,7 +109,15 @@ def delete_collection(
     session: Session,
     collection: schema.collections.Collection,
 ):
-    session.delete(collection)  # TODO(arden) sqlalchemy cascade on delete.
+    stmt = delete(schema.collections.CollectionUserLink).where(
+        schema.collections.CollectionUserLink.collection_id == collection.id
+    )
+    session.execute(stmt)
+    stmt = delete(schema.collections.CollectionBookLink).where(
+        schema.collections.CollectionBookLink.collection_id == collection.id
+    )
+    session.execute(stmt)
+    session.delete(collection)
     session.commit()
 
 
@@ -158,3 +166,4 @@ def delete_collection_book_link(
 ):
     session.delete(link)
     session.commit()
+

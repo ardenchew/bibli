@@ -7,9 +7,10 @@ import {List as BookList} from '../../components/book';
 import UserList from '../../components/social/List';
 import {useApi} from '../../api';
 import {UserBookRead, UserRead} from '../../generated/jericho';
+import {useIsFocused} from '@react-navigation/native';
 
 const SearchScreen = () => {
-  const {booksApi, usersApi} = useApi();
+  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
   const includedSearchTypes: SearchType[] = [
     SearchType.Books,
     SearchType.Members,
@@ -23,10 +24,13 @@ const SearchScreen = () => {
   const [booksResults, setBooksResults] = useState<UserBookRead[]>([]);
   const [membersResults, setMembersResults] = useState<UserRead[]>([]);
   const [noResults, setNoResults] = useState<boolean>(false);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (searchQuery.length > 1) {
+    let delayDebounceFn: NodeJS.Timeout;
+
+    if (searchQuery.length > 1 && isFocused) {
+      delayDebounceFn = setTimeout(() => {
         setLoading(true);
         const searchPromise =
           searchType === SearchType.Books
@@ -34,31 +38,36 @@ const SearchScreen = () => {
             : usersApi.searchUsersUserSearchQGet(searchQuery);
 
         searchPromise
-          .then(response => {
-            if (searchType === SearchType.Books) {
-              setBooksResults(response.data.books ?? []);
-              setNoResults(response.data.books.length === 0);
-            } else {
-              setMembersResults(response.data.users ?? []);
-              setNoResults(response.data.users.length === 0);
-            }
-          })
-          .catch(error => {
+          .then(
+            (response: {
+              data: {books?: UserBookRead[]; users?: UserRead[]};
+            }) => {
+              if (searchType === SearchType.Books) {
+                setBooksResults(response.data.books ?? []);
+                setNoResults(response.data.books?.length === 0 ?? false);
+              } else {
+                setMembersResults(response.data.users ?? []);
+                setNoResults(response.data.users?.length === 0 ?? false);
+              }
+            },
+          )
+          .catch((error: Error) => {
             console.error(error);
             setNoResults(true);
           })
           .finally(() => {
             setLoading(false);
           });
-      } else {
-        setBooksResults([]);
-        setMembersResults([]);
-        setNoResults(false);
-      }
-    }, 1000);
+      }, 500);
+    } else {
+      setLoading(false);
+      setBooksResults([]);
+      setMembersResults([]);
+      setNoResults(false);
+    }
 
     return () => clearTimeout(delayDebounceFn);
-  }, [booksApi, usersApi, searchQuery, searchType]);
+  }, [isFocused, booksApi, usersApi, searchQuery, searchType]);
 
   const renderNoResults = () => {
     return (
@@ -87,7 +96,12 @@ const SearchScreen = () => {
       }
       return (
         <ScrollView keyboardShouldPersistTaps={'handled'}>
-          <BookList userBooks={booksResults} />
+          <BookList
+            userBooks={booksResults}
+            booksApi={booksApi}
+            collectionsApi={collectionsApi}
+            reviewsApi={reviewsApi}
+          />
         </ScrollView>
       );
     }

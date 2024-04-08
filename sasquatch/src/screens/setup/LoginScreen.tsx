@@ -14,6 +14,7 @@ const LoginButton = () => {
     try {
       await authorize({
         audience: config.jerichoApiAuth0Audience,
+        scope: 'openid profile email offline_access',
         additionalParameters: {
           prompt: 'login',
         },
@@ -37,6 +38,7 @@ const SignUpButton = () => {
     try {
       await authorize({
         audience: config.jerichoApiAuth0Audience,
+        scope: 'openid profile email offline_access',
         additionalParameters: {
           prompt: 'login',
           screen_hint: 'signup',

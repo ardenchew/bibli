@@ -21,6 +21,12 @@ REACTION_INTERVAL = {
 }
 
 
+class Comparison(SQLModel):
+    less_than_id: Optional[int] = None
+    equal_to_id: Optional[int] = None
+    greater_than_id: Optional[int] = None
+
+
 class ReviewBase(SQLModel):
     user_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
     book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
@@ -38,17 +44,13 @@ class ReviewRead(ReviewBase):
     rating: float
     reaction: Reaction
     hide_rank: bool
+    rank: int
     # Include book object for comparison searching here.
 
 
 class ReviewPut(ReviewBase):
     reaction: Reaction
-
-
-class Comparison(SQLModel):
-    less_than_id: Optional[int] = None
-    equal_to_id: Optional[int] = None
-    greater_than_id: Optional[int] = None
+    comparison: Comparison
 
 
 class ComparisonReviews(SQLModel):

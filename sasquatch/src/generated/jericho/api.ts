@@ -37,12 +37,6 @@ export interface AuthorRead {
     'name': string;
     /**
      * 
-     * @type {string}
-     * @memberof AuthorRead
-     */
-    'olid'?: string;
-    /**
-     * 
      * @type {number}
      * @memberof AuthorRead
      */
@@ -158,19 +152,25 @@ export interface BookRead {
      * @type {string}
      * @memberof BookRead
      */
-    'olid'?: string;
+    'gid'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'isbn13'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BookRead
+     */
+    'isbn10'?: string;
     /**
      * 
      * @type {number}
      * @memberof BookRead
      */
     'id': number;
-    /**
-     * 
-     * @type {Array<TagBase>}
-     * @memberof BookRead
-     */
-    'tags'?: Array<TagBase>;
 }
 /**
  * 
@@ -203,6 +203,12 @@ export interface CollectionPut {
      * @memberof CollectionPut
      */
     'name': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionPut
+     */
+    'id'?: number;
 }
 /**
  * 
@@ -228,6 +234,12 @@ export interface CollectionRead {
      * @memberof CollectionRead
      */
     'type'?: CollectionType;
+    /**
+     * 
+     * @type {number}
+     * @memberof CollectionRead
+     */
+    'count'?: number;
     /**
      * 
      * @type {Array<CollectionUserLinkRead>}
@@ -330,6 +342,31 @@ export type CollectionUserLinkType = typeof CollectionUserLinkType[keyof typeof 
 /**
  * 
  * @export
+ * @interface Comparison
+ */
+export interface Comparison {
+    /**
+     * 
+     * @type {number}
+     * @memberof Comparison
+     */
+    'less_than_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Comparison
+     */
+    'equal_to_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Comparison
+     */
+    'greater_than_id'?: number;
+}
+/**
+ * 
+ * @export
  * @interface HTTPValidationError
  */
 export interface HTTPValidationError {
@@ -385,6 +422,12 @@ export interface ReviewPut {
      * @memberof ReviewPut
      */
     'reaction': Reaction;
+    /**
+     * 
+     * @type {Comparison}
+     * @memberof ReviewPut
+     */
+    'comparison': Comparison;
 }
 
 
@@ -430,31 +473,37 @@ export interface ReviewRead {
      * @memberof ReviewRead
      */
     'hide_rank': boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReviewRead
+     */
+    'rank': number;
 }
 
 
 /**
  * 
  * @export
- * @interface TagBase
+ * @interface TagBookLink
  */
-export interface TagBase {
+export interface TagBookLink {
     /**
      * 
      * @type {string}
-     * @memberof TagBase
+     * @memberof TagBookLink
      */
-    'name'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TagBase
-     */
-    'verified': boolean;
+    'tag_name'?: string;
     /**
      * 
      * @type {number}
-     * @memberof TagBase
+     * @memberof TagBookLink
+     */
+    'book_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TagBookLink
      */
     'count': number;
 }
@@ -750,6 +799,44 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Get Book
+         * @param {number} bookId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getBookTagsBookIdGet: async (bookId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'bookId' is not null or undefined
+            assertParamExists('getBookTagsBookIdGet', 'bookId', bookId)
+            const localVarPath = `/tags/{book_id}`
+                .replace(`{${"book_id"}}`, encodeURIComponent(String(bookId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Get Books
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
@@ -759,6 +846,134 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
             // verify required parameter 'bookFilter' is not null or undefined
             assertParamExists('getBooksBooksPost', 'bookFilter', bookFilter)
             const localVarPath = `/books`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(bookFilter, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Following User Books
+         * @param {number} bookId 
+         * @param {number} parentId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getFollowingUserBooksFollowingBooksBookIdParentIdGet: async (bookId: number, parentId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'bookId' is not null or undefined
+            assertParamExists('getFollowingUserBooksFollowingBooksBookIdParentIdGet', 'bookId', bookId)
+            // verify required parameter 'parentId' is not null or undefined
+            assertParamExists('getFollowingUserBooksFollowingBooksBookIdParentIdGet', 'parentId', parentId)
+            const localVarPath = `/following/books/{book_id}/{parent_id}`
+                .replace(`{${"book_id"}}`, encodeURIComponent(String(bookId)))
+                .replace(`{${"parent_id"}}`, encodeURIComponent(String(parentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get User Book
+         * @param {number} bookId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserBookBookBookIdUserIdGet: async (bookId: number, userId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'bookId' is not null or undefined
+            assertParamExists('getUserBookBookBookIdUserIdGet', 'bookId', bookId)
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getUserBookBookBookIdUserIdGet', 'userId', userId)
+            const localVarPath = `/book/{book_id}/{user_id}`
+                .replace(`{${"book_id"}}`, encodeURIComponent(String(bookId)))
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get User Books
+         * @param {number} userId 
+         * @param {BookFilter} bookFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserBooksBooksUserIdPost: async (userId: number, bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getUserBooksBooksUserIdPost', 'userId', userId)
+            // verify required parameter 'bookFilter' is not null or undefined
+            assertParamExists('getUserBooksBooksUserIdPost', 'bookFilter', bookFilter)
+            const localVarPath = `/books/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -859,6 +1074,17 @@ export const BooksApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get Book
+         * @param {number} bookId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getBookTagsBookIdGet(bookId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TagBookLink>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getBookTagsBookIdGet(bookId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Get Books
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
@@ -866,6 +1092,42 @@ export const BooksApiFp = function(configuration?: Configuration) {
          */
         async getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getBooksBooksPost(bookFilter, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get Following User Books
+         * @param {number} bookId 
+         * @param {number} parentId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getFollowingUserBooksFollowingBooksBookIdParentIdGet(bookId: number, parentId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<UserBookRead>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getFollowingUserBooksFollowingBooksBookIdParentIdGet(bookId, parentId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get User Book
+         * @param {number} bookId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserBookBookBookIdUserIdGet(bookId: number, userId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserBookRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserBookBookBookIdUserIdGet(bookId, userId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get User Books
+         * @param {number} userId 
+         * @param {BookFilter} bookFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserBooksBooksUserIdPost(userId, bookFilter, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -903,6 +1165,16 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
+         * @summary Get Book
+         * @param {number} bookId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getBookTagsBookIdGet(bookId: number, options?: any): AxiosPromise<Array<TagBookLink>> {
+            return localVarFp.getBookTagsBookIdGet(bookId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get Books
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
@@ -910,6 +1182,39 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
          */
         getBooksBooksPost(bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
             return localVarFp.getBooksBooksPost(bookFilter, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Following User Books
+         * @param {number} bookId 
+         * @param {number} parentId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getFollowingUserBooksFollowingBooksBookIdParentIdGet(bookId: number, parentId: number, options?: any): AxiosPromise<Array<UserBookRead>> {
+            return localVarFp.getFollowingUserBooksFollowingBooksBookIdParentIdGet(bookId, parentId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get User Book
+         * @param {number} bookId 
+         * @param {number} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserBookBookBookIdUserIdGet(bookId: number, userId: number, options?: any): AxiosPromise<UserBookRead> {
+            return localVarFp.getUserBookBookBookIdUserIdGet(bookId, userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get User Books
+         * @param {number} userId 
+         * @param {BookFilter} bookFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
+            return localVarFp.getUserBooksBooksUserIdPost(userId, bookFilter, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -947,6 +1252,18 @@ export class BooksApi extends BaseAPI {
 
     /**
      * 
+     * @summary Get Book
+     * @param {number} bookId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public getBookTagsBookIdGet(bookId: number, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getBookTagsBookIdGet(bookId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Get Books
      * @param {BookFilter} bookFilter 
      * @param {*} [options] Override http request option.
@@ -955,6 +1272,45 @@ export class BooksApi extends BaseAPI {
      */
     public getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig) {
         return BooksApiFp(this.configuration).getBooksBooksPost(bookFilter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Following User Books
+     * @param {number} bookId 
+     * @param {number} parentId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public getFollowingUserBooksFollowingBooksBookIdParentIdGet(bookId: number, parentId: number, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getFollowingUserBooksFollowingBooksBookIdParentIdGet(bookId, parentId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get User Book
+     * @param {number} bookId 
+     * @param {number} userId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public getUserBookBookBookIdUserIdGet(bookId: number, userId: number, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getUserBookBookBookIdUserIdGet(bookId, userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get User Books
+     * @param {number} userId 
+     * @param {BookFilter} bookFilter 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BooksApi
+     */
+    public getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getUserBooksBooksUserIdPost(userId, bookFilter, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1951,13 +2307,10 @@ export const ReviewsApiAxiosParamCreator = function (configuration?: Configurati
          * 
          * @summary Put Review
          * @param {ReviewPut} reviewPut 
-         * @param {number} [lessThanId] 
-         * @param {number} [equalToId] 
-         * @param {number} [greaterThanId] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putReviewReviewPut: async (reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        putReviewReviewPut: async (reviewPut: ReviewPut, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'reviewPut' is not null or undefined
             assertParamExists('putReviewReviewPut', 'reviewPut', reviewPut)
             const localVarPath = `/review`;
@@ -1975,18 +2328,6 @@ export const ReviewsApiAxiosParamCreator = function (configuration?: Configurati
             // authentication HTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (lessThanId !== undefined) {
-                localVarQueryParameter['less_than_id'] = lessThanId;
-            }
-
-            if (equalToId !== undefined) {
-                localVarQueryParameter['equal_to_id'] = equalToId;
-            }
-
-            if (greaterThanId !== undefined) {
-                localVarQueryParameter['greater_than_id'] = greaterThanId;
-            }
 
 
     
@@ -2040,14 +2381,11 @@ export const ReviewsApiFp = function(configuration?: Configuration) {
          * 
          * @summary Put Review
          * @param {ReviewPut} reviewPut 
-         * @param {number} [lessThanId] 
-         * @param {number} [equalToId] 
-         * @param {number} [greaterThanId] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async putReviewReviewPut(reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ReviewRead>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.putReviewReviewPut(reviewPut, lessThanId, equalToId, greaterThanId, options);
+        async putReviewReviewPut(reviewPut: ReviewPut, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ReviewRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putReviewReviewPut(reviewPut, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -2086,14 +2424,11 @@ export const ReviewsApiFactory = function (configuration?: Configuration, basePa
          * 
          * @summary Put Review
          * @param {ReviewPut} reviewPut 
-         * @param {number} [lessThanId] 
-         * @param {number} [equalToId] 
-         * @param {number} [greaterThanId] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putReviewReviewPut(reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options?: any): AxiosPromise<ReviewRead> {
-            return localVarFp.putReviewReviewPut(reviewPut, lessThanId, equalToId, greaterThanId, options).then((request) => request(axios, basePath));
+        putReviewReviewPut(reviewPut: ReviewPut, options?: any): AxiosPromise<ReviewRead> {
+            return localVarFp.putReviewReviewPut(reviewPut, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2135,15 +2470,12 @@ export class ReviewsApi extends BaseAPI {
      * 
      * @summary Put Review
      * @param {ReviewPut} reviewPut 
-     * @param {number} [lessThanId] 
-     * @param {number} [equalToId] 
-     * @param {number} [greaterThanId] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ReviewsApi
      */
-    public putReviewReviewPut(reviewPut: ReviewPut, lessThanId?: number, equalToId?: number, greaterThanId?: number, options?: AxiosRequestConfig) {
-        return ReviewsApiFp(this.configuration).putReviewReviewPut(reviewPut, lessThanId, equalToId, greaterThanId, options).then((request) => request(this.axios, this.basePath));
+    public putReviewReviewPut(reviewPut: ReviewPut, options?: AxiosRequestConfig) {
+        return ReviewsApiFp(this.configuration).putReviewReviewPut(reviewPut, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

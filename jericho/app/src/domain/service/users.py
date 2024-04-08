@@ -46,9 +46,8 @@ def search_users(
         f.offset = 0
 
     count_query = select(func.count(schema.users.User.id)) \
-        .where((col(schema.users.User.name).ilike(f"{f.q}%") |
-                col(schema.users.User.tag).ilike(f"{f.q}%")) &
-               (schema.users.User.id != user_id))
+        .where(col(schema.users.User.name).ilike(f"{f.q}%") |
+                col(schema.users.User.tag).ilike(f"{f.q}%"))
 
     page = schema.users.UserPage(
         total_count=session.exec(count_query).one()
@@ -59,9 +58,8 @@ def search_users(
               (schema.users.User.id == schema.users.UserLink.child_id) &
               (schema.users.UserLink.parent_id == user_id),
               isouter=True) \
-        .where((col(schema.users.User.name).ilike(f"{f.q}%") |
-                col(schema.users.User.tag).ilike(f"{f.q}%")) &
-               (schema.users.User.id != user_id)) \
+        .where(col(schema.users.User.name).ilike(f"{f.q}%") |
+                col(schema.users.User.tag).ilike(f"{f.q}%")) \
         .order_by(col(schema.users.UserLink.type).asc(),
                   col(schema.users.User.tag).asc()) \
         .limit(f.limit) \

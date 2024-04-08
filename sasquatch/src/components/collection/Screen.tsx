@@ -20,6 +20,7 @@ import {LightTheme} from '../../styles/themes/LightTheme';
 import {useApi} from '../../api';
 import {UserContext} from '../../context';
 import {TitleButtons} from './Buttons';
+import {useIsFocused} from '@react-navigation/native';
 
 interface ScreenProps {
   collection: CollectionRead;
@@ -27,11 +28,12 @@ interface ScreenProps {
 
 export const Screen = ({collection}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {booksApi, usersApi, collectionsApi} = useApi();
+  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
   const [bookPage, setBookPage] = useState<BookPage>();
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [owner, setOwner] = useState<UserRead>();
+  const isFocused = useIsFocused();
 
   const owner_id = collection.user_links.find(
     link => link.type === CollectionUserLinkType.Owner,
@@ -72,8 +74,13 @@ export const Screen = ({collection}: ScreenProps) => {
   }, [booksApi, collection.id, collection.name]);
 
   useEffect(() => {
-    fetchBooks().catch(error => console.log(error));
-  }, [fetchBooks]);
+    if (isFocused) {
+      console.log('focused');
+      fetchBooks().catch(error => console.log(error));
+    } else {
+      console.log('not focused');
+    }
+  }, [isFocused, fetchBooks]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -112,7 +119,15 @@ export const Screen = ({collection}: ScreenProps) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
-        <BooksList userBooks={bookPage?.books ?? []} />
+        <BooksList
+          userBooks={bookPage?.books ?? []}
+          booksApi={booksApi}
+          collectionsApi={collectionsApi}
+          reviewsApi={reviewsApi}
+          currentOwnedCollection={
+            owner?.id === bibliUser?.id ? collection : undefined
+          }
+        />
       </ScrollView>
     </SafeAreaView>
   );
