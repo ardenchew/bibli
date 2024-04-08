@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {Card, Avatar} from 'react-native-paper';
 import {CollectionRead, CollectionUserLinkType, UsersApi} from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useApi} from '../../api'; // Adjust the import path
+import {useApi} from '../../api';
+import {UserContext} from '../../context'; // Adjust the import path
 
 interface Props {
   collection: CollectionRead;
@@ -23,6 +24,7 @@ const CardPress = (collection: CollectionRead) => {
 };
 
 const Item = ({collection, usersApi}: Props) => {
+  const {user: bibliUser} = useContext(UserContext);
   const booksCount = `${collection.count ?? 0} Books`;
   const [subtitle, setSubtitle] = useState<string>(booksCount);
 
@@ -33,11 +35,17 @@ const Item = ({collection, usersApi}: Props) => {
   useEffect(() => {
     const fetchUserNames = async () => {
       try {
-        const userPromises = ownerLinks.map(link =>
-          usersApi.getUserByIdUserUserIdGet(link.user_id),
-        );
-        const users = await Promise.all(userPromises);
-        const names = users.map(response => response.data.name);
+        const userPromises = ownerLinks.map(async link => {
+          if (link.user_id === bibliUser?.id) {
+            return bibliUser?.name;
+          } else {
+            const response = await usersApi.getUserByIdUserUserIdGet(
+              link.user_id,
+            );
+            return response.data.name;
+          }
+        });
+        const names = await Promise.all(userPromises);
         if (names && names.length > 0) {
           setSubtitle(`${booksCount} • ${names.join(', ')}`);
         }
@@ -47,7 +55,7 @@ const Item = ({collection, usersApi}: Props) => {
     };
 
     fetchUserNames().catch(e => console.log(e));
-  }, [booksCount, ownerLinks, usersApi]);
+  }, [bibliUser?.id, bibliUser?.name, booksCount, ownerLinks, usersApi]);
 
   return (
     <Card

@@ -161,4 +161,4 @@ def _update_collections_from_review_insertion(
         collection_id=complete_collection.id,
         book_id=book_id,
     )
-    session.add(link)
+    session.merge(link)
