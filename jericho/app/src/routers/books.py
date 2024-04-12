@@ -48,15 +48,6 @@ async def get_book(
     return book
 
 
-@router.post("/books", response_model=schema.books.BookPage)
-async def get_books(
-    request: Request,
-    f: schema.books.BookFilter,
-    session: Session = Depends(get_session),
-):
-    return books.get_books(session, f, request.state.user.id)
-
-
 @router.get("/tags/{book_id}", response_model=List[schema.books.TagBookLink])
 async def get_book(
         book_id: int,
@@ -77,13 +68,12 @@ async def get_user_book(
     return book
 
 
-@router.post("/books/{user_id}", response_model=schema.books.BookPage)
+@router.post("/books", response_model=schema.books.BookPage)
 async def get_user_books(
-        user_id: int,
         f: schema.books.BookFilter,
         session: Session = Depends(get_session),
 ):
-    return books.get_books(session, f, user_id)
+    return books.get_user_books(session, f)
 
 
 @router.get("/following/books/{book_id}/{parent_id}", response_model=List[schema.books.UserBookRead])

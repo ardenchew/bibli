@@ -69,6 +69,12 @@ export interface BodyPatchCollectionBookLinkCollectionBookLinkPatch {
 export interface BookFilter {
     /**
      * 
+     * @type {number}
+     * @memberof BookFilter
+     */
+    'user_id': number;
+    /**
+     * 
      * @type {Array<number>}
      * @memberof BookFilter
      */
@@ -837,46 +843,6 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
-         * @summary Get Books
-         * @param {BookFilter} bookFilter 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBooksBooksPost: async (bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'bookFilter' is not null or undefined
-            assertParamExists('getBooksBooksPost', 'bookFilter', bookFilter)
-            const localVarPath = `/books`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(bookFilter, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary Get Following User Books
          * @param {number} bookId 
          * @param {number} parentId 
@@ -962,18 +928,14 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * 
          * @summary Get User Books
-         * @param {number} userId 
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserBooksBooksUserIdPost: async (userId: number, bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userId' is not null or undefined
-            assertParamExists('getUserBooksBooksUserIdPost', 'userId', userId)
+        getUserBooksBooksPost: async (bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'bookFilter' is not null or undefined
-            assertParamExists('getUserBooksBooksUserIdPost', 'bookFilter', bookFilter)
-            const localVarPath = `/books/{user_id}`
-                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            assertParamExists('getUserBooksBooksPost', 'bookFilter', bookFilter)
+            const localVarPath = `/books`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1085,17 +1047,6 @@ export const BooksApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get Books
-         * @param {BookFilter} bookFilter 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBooksBooksPost(bookFilter, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
          * @summary Get Following User Books
          * @param {number} bookId 
          * @param {number} parentId 
@@ -1121,13 +1072,12 @@ export const BooksApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Get User Books
-         * @param {number} userId 
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserBooksBooksUserIdPost(userId, bookFilter, options);
+        async getUserBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserBooksBooksPost(bookFilter, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1175,16 +1125,6 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get Books
-         * @param {BookFilter} bookFilter 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBooksBooksPost(bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
-            return localVarFp.getBooksBooksPost(bookFilter, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get Following User Books
          * @param {number} bookId 
          * @param {number} parentId 
@@ -1208,13 +1148,12 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
         /**
          * 
          * @summary Get User Books
-         * @param {number} userId 
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
-            return localVarFp.getUserBooksBooksUserIdPost(userId, bookFilter, options).then((request) => request(axios, basePath));
+        getUserBooksBooksPost(bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
+            return localVarFp.getUserBooksBooksPost(bookFilter, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1264,18 +1203,6 @@ export class BooksApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get Books
-     * @param {BookFilter} bookFilter 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof BooksApi
-     */
-    public getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig) {
-        return BooksApiFp(this.configuration).getBooksBooksPost(bookFilter, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get Following User Books
      * @param {number} bookId 
      * @param {number} parentId 
@@ -1303,14 +1230,13 @@ export class BooksApi extends BaseAPI {
     /**
      * 
      * @summary Get User Books
-     * @param {number} userId 
      * @param {BookFilter} bookFilter 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof BooksApi
      */
-    public getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: AxiosRequestConfig) {
-        return BooksApiFp(this.configuration).getUserBooksBooksUserIdPost(userId, bookFilter, options).then((request) => request(this.axios, this.basePath));
+    public getUserBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getUserBooksBooksPost(bookFilter, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1540,11 +1466,12 @@ export const CollectionsApiAxiosParamCreator = function (configuration?: Configu
          * 
          * @summary Get Collections
          * @param {number} [userId] 
+         * @param {CollectionUserLinkType} [userLinkType] 
          * @param {CollectionType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCollectionsCollectionsGet: async (userId?: number, type?: CollectionType, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getCollectionsCollectionsGet: async (userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/collections`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1563,6 +1490,10 @@ export const CollectionsApiAxiosParamCreator = function (configuration?: Configu
 
             if (userId !== undefined) {
                 localVarQueryParameter['user_id'] = userId;
+            }
+
+            if (userLinkType !== undefined) {
+                localVarQueryParameter['user_link_type'] = userLinkType;
             }
 
             if (type !== undefined) {
@@ -1811,12 +1742,13 @@ export const CollectionsApiFp = function(configuration?: Configuration) {
          * 
          * @summary Get Collections
          * @param {number} [userId] 
+         * @param {CollectionUserLinkType} [userLinkType] 
          * @param {CollectionType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getCollectionsCollectionsGet(userId?: number, type?: CollectionType, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CollectionRead>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getCollectionsCollectionsGet(userId, type, options);
+        async getCollectionsCollectionsGet(userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CollectionRead>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCollectionsCollectionsGet(userId, userLinkType, type, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1929,12 +1861,13 @@ export const CollectionsApiFactory = function (configuration?: Configuration, ba
          * 
          * @summary Get Collections
          * @param {number} [userId] 
+         * @param {CollectionUserLinkType} [userLinkType] 
          * @param {CollectionType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCollectionsCollectionsGet(userId?: number, type?: CollectionType, options?: any): AxiosPromise<Array<CollectionRead>> {
-            return localVarFp.getCollectionsCollectionsGet(userId, type, options).then((request) => request(axios, basePath));
+        getCollectionsCollectionsGet(userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options?: any): AxiosPromise<Array<CollectionRead>> {
+            return localVarFp.getCollectionsCollectionsGet(userId, userLinkType, type, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2052,13 +1985,14 @@ export class CollectionsApi extends BaseAPI {
      * 
      * @summary Get Collections
      * @param {number} [userId] 
+     * @param {CollectionUserLinkType} [userLinkType] 
      * @param {CollectionType} [type] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CollectionsApi
      */
-    public getCollectionsCollectionsGet(userId?: number, type?: CollectionType, options?: AxiosRequestConfig) {
-        return CollectionsApiFp(this.configuration).getCollectionsCollectionsGet(userId, type, options).then((request) => request(this.axios, this.basePath));
+    public getCollectionsCollectionsGet(userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options?: AxiosRequestConfig) {
+        return CollectionsApiFp(this.configuration).getCollectionsCollectionsGet(userId, userLinkType, type, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

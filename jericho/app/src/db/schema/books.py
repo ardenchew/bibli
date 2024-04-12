@@ -78,6 +78,7 @@ class BookPage(SQLModel):
 
 
 class BookFilter(SQLModel):
+    user_id: int
     collection_ids: Optional[List[int]]
     offset: Optional[int] = None
     limit: Optional[int] = None

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {
   CollectionBookLink,
   CollectionsApi,
-  CollectionType,
+  CollectionType, CollectionUserLinkType,
   Reaction,
   ReviewRead,
   ReviewsApi,
@@ -54,10 +54,10 @@ export const TypedCollectionOnPress = (
     try {
       const response = await collectionsApi.getCollectionsCollectionsGet(
         bibliUser?.id,
+        CollectionUserLinkType.Owner,
         type,
       );
 
-      // THIS INCLUDES NON OWNED COLLECTIONS.
       const collectionId = response.data[0]?.id;
 
       if (!collectionId) {
@@ -166,6 +166,19 @@ interface ReviewIndicatorProps {
   review?: ReviewRead;
 }
 
+export const ReviewIndicatorText = ({review}: ReviewIndicatorProps) => {
+  if (!review) {
+    return null;
+  }
+
+  const color = reactionColorMap[review.reaction];
+  return (
+    <Text style={[styles.ratingIndicatorText, {color}]}>
+      {review.rating.toFixed(1)}
+    </Text>
+  );
+};
+
 export const ReviewIndicator = ({review}: ReviewIndicatorProps) => {
   if (!review) {
     return null;
@@ -188,12 +201,9 @@ export const ReviewIndicator = ({review}: ReviewIndicatorProps) => {
     );
   }
 
-  const color = reactionColorMap[review.reaction];
   return (
     <View style={styles.ratingIndicatorContainer}>
-      <Text style={[styles.ratingIndicatorText, {color}]}>
-        {review.rating.toFixed(1)}
-      </Text>
+      <ReviewIndicatorText review={review} />
     </View>
   );
 };

@@ -32,6 +32,7 @@ export const Screen = ({collection}: ScreenProps) => {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [owner, setOwner] = useState<UserRead>();
+  const [ownerBookPage, setOwnerBookPage] = useState<BookPage>();
   const isFocused = useIsFocused();
 
   const owner_id = collection.user_links.find(
@@ -58,19 +59,29 @@ export const Screen = ({collection}: ScreenProps) => {
   }, [bibliUser, owner_id, usersApi]);
 
   const fetchBooks = useCallback(async () => {
-    try {
-      const response = await booksApi.getBooksBooksPost({
-        collection_ids: [collection.id],
-      });
-      setBookPage(response.data);
-      setIsLoaded(true);
-    } catch (error) {
-      console.log(
-        `Error fetching books for collection ${collection.name}:`,
-        error,
-      );
+    if (bibliUser) {
+      try {
+        const response = await booksApi.getUserBooksBooksPost({
+          user_id: bibliUser?.id,
+          collection_ids: [collection.id],
+        });
+        setBookPage(response.data);
+        if (owner && bibliUser?.id !== owner?.id) {
+          const response = await booksApi.getUserBooksBooksPost({
+            user_id: owner?.id,
+            collection_ids: [collection.id],
+          });
+          setOwnerBookPage(response.data);
+        }
+        setIsLoaded(true);
+      } catch (error) {
+        console.log(
+          `Error fetching books for collection ${collection.name}:`,
+          error,
+        );
+      }
     }
-  }, [booksApi, collection.id, collection.name]);
+  }, [bibliUser, booksApi, collection.id, collection.name, owner]);
 
   useEffect(() => {
     if (isFocused) {
@@ -116,6 +127,8 @@ export const Screen = ({collection}: ScreenProps) => {
           currentOwnedCollection={
             owner?.id === bibliUser?.id ? collection : undefined
           }
+          owner={owner}
+          ownerBooks={ownerBookPage?.books}
         />
       </ScrollView>
     </SafeAreaView>

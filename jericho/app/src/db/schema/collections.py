@@ -83,4 +83,5 @@ class CollectionPut(CollectionBase):
 
 class CollectionsFilter(SQLModel):
     user_id: Optional[int] = None
+    user_link_type: Optional[CollectionUserLinkType]
     type: Optional[CollectionType]
