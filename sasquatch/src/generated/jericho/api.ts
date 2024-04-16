@@ -26,6 +26,119 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 /**
  * 
  * @export
+ * @interface ActivityCursor
+ */
+export interface ActivityCursor {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityCursor
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ActivityCursor
+     */
+    'created_at': string;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityFilter
+ */
+export interface ActivityFilter {
+    /**
+     * 
+     * @type {ActivityCursor}
+     * @memberof ActivityFilter
+     */
+    'cursor'?: ActivityCursor;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityFilter
+     */
+    'limit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityFilter
+     */
+    'following_user_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityFilter
+     */
+    'primary_user_id'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityPage
+ */
+export interface ActivityPage {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityPage
+     */
+    'total_count': number;
+    /**
+     * 
+     * @type {Array<ActivityRead>}
+     * @memberof ActivityPage
+     */
+    'activities': Array<ActivityRead>;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityRead
+ */
+export interface ActivityRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityRead
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ActivityRead
+     */
+    'created_at': string;
+    /**
+     * 
+     * @type {AddToCollectionActivityRead}
+     * @memberof ActivityRead
+     */
+    'add_to_collection'?: AddToCollectionActivityRead;
+}
+/**
+ * 
+ * @export
+ * @interface AddToCollectionActivityRead
+ */
+export interface AddToCollectionActivityRead {
+    /**
+     * 
+     * @type {UserRead}
+     * @memberof AddToCollectionActivityRead
+     */
+    'user': UserRead;
+    /**
+     * 
+     * @type {CollectionRead}
+     * @memberof AddToCollectionActivityRead
+     */
+    'collection': CollectionRead;
+}
+/**
+ * 
+ * @export
  * @interface AuthorRead
  */
 export interface AuthorRead {
@@ -409,13 +522,13 @@ export interface ReviewPut {
      * @type {number}
      * @memberof ReviewPut
      */
-    'user_id'?: number;
+    'user_id': number;
     /**
      * 
      * @type {number}
      * @memberof ReviewPut
      */
-    'book_id'?: number;
+    'book_id': number;
     /**
      * 
      * @type {string}
@@ -448,19 +561,25 @@ export interface ReviewRead {
      * @type {number}
      * @memberof ReviewRead
      */
-    'user_id'?: number;
+    'user_id': number;
     /**
      * 
      * @type {number}
      * @memberof ReviewRead
      */
-    'book_id'?: number;
+    'book_id': number;
     /**
      * 
      * @type {string}
      * @memberof ReviewRead
      */
     'notes'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReviewRead
+     */
+    'id'?: number;
     /**
      * 
      * @type {number}
@@ -758,6 +877,118 @@ export interface ValidationError {
  */
 export interface ValidationErrorLocInner {
 }
+
+/**
+ * ActivityApi - axios parameter creator
+ * @export
+ */
+export const ActivityApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Get Activities
+         * @param {ActivityFilter} activityFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getActivitiesActivitiesPost: async (activityFilter: ActivityFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'activityFilter' is not null or undefined
+            assertParamExists('getActivitiesActivitiesPost', 'activityFilter', activityFilter)
+            const localVarPath = `/activities`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(activityFilter, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ActivityApi - functional programming interface
+ * @export
+ */
+export const ActivityApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ActivityApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Get Activities
+         * @param {ActivityFilter} activityFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getActivitiesActivitiesPost(activityFilter: ActivityFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ActivityPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getActivitiesActivitiesPost(activityFilter, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * ActivityApi - factory interface
+ * @export
+ */
+export const ActivityApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ActivityApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Get Activities
+         * @param {ActivityFilter} activityFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getActivitiesActivitiesPost(activityFilter: ActivityFilter, options?: any): AxiosPromise<ActivityPage> {
+            return localVarFp.getActivitiesActivitiesPost(activityFilter, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ActivityApi - object-oriented interface
+ * @export
+ * @class ActivityApi
+ * @extends {BaseAPI}
+ */
+export class ActivityApi extends BaseAPI {
+    /**
+     * 
+     * @summary Get Activities
+     * @param {ActivityFilter} activityFilter 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ActivityApi
+     */
+    public getActivitiesActivitiesPost(activityFilter: ActivityFilter, options?: AxiosRequestConfig) {
+        return ActivityApiFp(this.configuration).getActivitiesActivitiesPost(activityFilter, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
 
 /**
  * BooksApi - axios parameter creator

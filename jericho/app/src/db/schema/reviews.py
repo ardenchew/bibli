@@ -28,12 +28,13 @@ class Comparison(SQLModel):
 
 
 class ReviewBase(SQLModel):
-    user_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
-    book_id: int = Field(default=None, primary_key=True, foreign_key="book.id")
+    user_id: int = Field(foreign_key="user.id")
+    book_id: int = Field(foreign_key="book.id")
     notes: Optional[str] = None
 
 
 class Review(ReviewBase, table=True):
+    id: int = Field(default=None, primary_key=True)
     rating: float = Field(default=None, index=True)
     hide_rank: bool = Field(default=False)
     rank: int = Field(default=None)
@@ -41,6 +42,7 @@ class Review(ReviewBase, table=True):
 
 
 class ReviewRead(ReviewBase):
+    id: Optional[int]
     rating: float
     reaction: Reaction
     hide_rank: bool

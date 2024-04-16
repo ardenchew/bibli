@@ -1,3 +1,4 @@
+import src.db.schema.activity
 import src.db.schema.books
 import src.db.schema.collections
 import src.db.schema.reviews
