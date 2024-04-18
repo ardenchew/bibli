@@ -184,6 +184,17 @@ def upsert_user_link(
         session: Session,
         user_link: schema.users.UserLink,
 ) -> schema.users.UserLink:
+    if user_link.type == schema.users.UserLinkType.FOLLOW:
+        activity = schema.activity.Activity()
+        session.add(activity)
+        session.flush()
+        fu = schema.activity.FollowUserActivity(
+            activity_id=activity.id,
+            follower_user_id=user_link.parent_id,
+            following_user_id=user_link.child_id,
+        )
+        session.add(fu)
+
     session.merge(user_link)
     session.commit()
     return user_link

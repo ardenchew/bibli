@@ -19,6 +19,8 @@ interface ActivityItemProps {
   activity_id: number;
 }
 
+const KEYBOARD_NAV_OFFSET = 98;
+
 const ActivityItemScreen = ({activity_id}: ActivityItemProps) => {
   const {user: bibliUser} = useContext(UserContext);
   const {activityApi} = useContext(ApiContext);
@@ -51,20 +53,17 @@ const ActivityItemScreen = ({activity_id}: ActivityItemProps) => {
 
   const onSubmit = async () => {
     if (activity && bibliUser && comment !== '') {
+      const saved = comment;
+      setComment('');
       try {
         const response = await activityApi.putActivityCommentActivityCommentPut(
           {
             activity_id: activity.id,
             user_id: bibliUser.id,
-            comment: comment,
+            comment: saved,
           },
         );
-        setComment('');
-        if (comments) {
-          setComments([...comments, response.data]);
-        } else {
-          setComments([response.data]);
-        }
+        setComments(comments ? [...comments, response.data] : [response.data]);
       } catch (e) {
         console.log(e);
       }
@@ -96,15 +95,17 @@ const ActivityItemScreen = ({activity_id}: ActivityItemProps) => {
             ))}
           </View>
         )}
+        {comments && <View style={{height: KEYBOARD_NAV_OFFSET}} />}
       </ScrollView>
       <KeyboardAvoidingView
         style={{
           bottom: 0,
         }}
         behavior={'position'}
-        keyboardVerticalOffset={98} // must match the bottom tab height
+        keyboardVerticalOffset={KEYBOARD_NAV_OFFSET} // must match the bottom tab height
       >
         <TextInput
+          autoFocus={true}
           right={
             <TextInput.Icon
               icon={'send'}
@@ -112,7 +113,7 @@ const ActivityItemScreen = ({activity_id}: ActivityItemProps) => {
               onPress={onSubmit}
             />
           }
-          defaultValue={comment}
+          value={comment}
           onChangeText={setComment}
         />
       </KeyboardAvoidingView>

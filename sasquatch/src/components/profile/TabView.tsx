@@ -5,7 +5,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  RefreshControl,
+  RefreshControl, FlatList,
 } from 'react-native';
 import {TabBar, TabView} from 'react-native-tab-view';
 import {LightTheme} from '../../styles/themes/LightTheme';
@@ -17,6 +17,7 @@ import {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
 import {ApiContext, UserContext} from '../../context';
 import {NewCollection} from './NewCollection';
 import {useIsFocused} from '@react-navigation/native';
+import {FeedList} from '../../screens/primary/Feed';
 
 interface CollectionsProps {
   user: UserRead;
@@ -168,8 +169,14 @@ const SocialRoute = ({
   );
 };
 
-const ActivityRoute = () => (
-  <View style={{backgroundColor: LightTheme.colors.background, flex: 1}} />
+interface ActivityProps {
+  user: UserRead;
+}
+
+const ActivityRoute = ({user}: ActivityProps) => (
+  <SafeAreaView style={styles.routeContainer}>
+    <FeedList user={user} userType={'primary'} pageSize={10} />
+  </SafeAreaView>
 );
 
 interface Props {
@@ -212,7 +219,7 @@ export const UserTabView = ({
           />
         );
       case 'third':
-        return <ActivityRoute />;
+        return <ActivityRoute user={user} />;
       default:
         return null;
     }

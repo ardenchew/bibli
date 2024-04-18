@@ -1,7 +1,7 @@
 import {Button} from 'react-native-paper';
 import * as React from 'react';
 import {StyleProp, ViewStyle, View, StyleSheet, TextStyle} from 'react-native';
-import {useContext, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {UserLinkPut, UserRead} from '../../generated/jericho';
 import {ApiContext, UserContext} from '../../context';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -48,18 +48,25 @@ const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
   );
 };
 
+interface FollowButtonProps {
+  user: UserRead;
+  currentUser: UserRead;
+  style?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
+}
+
 const FollowButton = ({
-  style,
-  labelStyle,
   user,
   currentUser,
-}: ProfileButtonProps) => {
+  style,
+  labelStyle,
+}: FollowButtonProps) => {
   const {usersApi} = useContext(ApiContext);
-  if (!currentUser || !user || currentUser?.id === user?.id) {
-    return null;
-  }
+  const [active, setActive] = useState<Boolean>();
 
-  const [active, setActive] = useState<Boolean>(user?.link === 'follow');
+  useEffect(() => {
+    setActive(user?.link === 'follow');
+  }, [user?.link]);
 
   const onPress = async () => {
     if (!usersApi) {
@@ -69,8 +76,8 @@ const FollowButton = ({
     if (active) {
       try {
         await usersApi.deleteUserLinkUsersLinkParentUserIdChildUserIdDelete(
-          currentUser?.id,
-          user?.id,
+          currentUser.id,
+          user.id,
         );
         setActive(false);
       } catch (error) {
@@ -91,7 +98,7 @@ const FollowButton = ({
     }
   };
 
-  return (
+  return active !== undefined ? (
     <Button
       mode={active ? 'contained' : 'outlined'}
       compact={true}
@@ -102,7 +109,7 @@ const FollowButton = ({
       onPress={onPress}>
       {active ? 'Following' : 'Follow'}
     </Button>
-  );
+  ) : null;
 };
 
 interface Props {
@@ -114,7 +121,13 @@ interface Props {
 // Profile button container - dynamically allow for different profile buttons.
 export const TitleButtons = ({style, user, currentUser}: Props) => {
   const {user: bibliUser} = useContext(UserContext);
-  const isCurrentUser = bibliUser?.id === user.id;
+  const [isCurrentUser, setIsCurrentUser] = useState<boolean>(
+    bibliUser?.id === user.id,
+  );
+
+  useEffect(() => {
+    setIsCurrentUser(bibliUser?.id === user.id);
+  }, [bibliUser?.id, user.id]);
 
   return (
     <View style={style}>
@@ -126,10 +139,7 @@ export const TitleButtons = ({style, user, currentUser}: Props) => {
           </>
         ) : (
           <>
-            <FollowButton
-              user={user}
-              currentUser={currentUser}
-            />
+            <FollowButton user={user} currentUser={currentUser} />
             {/*<BlockButton />*/}
           </>
         )}

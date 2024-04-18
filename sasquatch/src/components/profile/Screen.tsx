@@ -10,14 +10,29 @@ interface ScreenProps {
   user: UserRead;
 }
 
-export const Screen = ({user}: ScreenProps) => {
+export const Screen = ({user: defaultUser}: ScreenProps) => {
   const {collectionsApi, usersApi} = useContext(ApiContext);
   const {user: bibliUser} = useContext(UserContext);
+  const [user, setUser] = useState<UserRead>(defaultUser);
   const isCurrentUser = user.id === bibliUser?.id;
 
   const [collections, setCollections] = useState<CollectionRead[]>([]);
   const [following, setFollowing] = useState<UserRead[]>([]);
   const [followers, setFollowers] = useState<UserRead[]>([]);
+
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        const response = await usersApi.getUserByIdUserUserIdGet(
+          defaultUser.id,
+        );
+        setUser(response.data);
+      } catch (error) {
+        console.log(`Error fetching user ${defaultUser.id}:`, error);
+      }
+    };
+    initializeUser().catch(error => console.log(error));
+  }, [defaultUser.id, usersApi]);
 
   useEffect(() => {
     const initializeCollections = async () => {

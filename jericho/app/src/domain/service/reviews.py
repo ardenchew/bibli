@@ -93,6 +93,16 @@ def upsert_review(
 
     _update_collections_from_review_insertion(session, review.user_id, review.book_id)
 
+    activity = schema.activity.Activity()
+    session.add(activity)
+    session.flush()
+    ra = schema.activity.ReviewActivity(
+        activity_id=activity.id,
+        user_id=review.user_id,
+        review_id=review.id,
+    )
+    session.add(ra)
+
     session.commit()
 
     return get_review(session, review.user_id, review.book_id)

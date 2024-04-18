@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
 import src.db.schema as schema
@@ -93,10 +93,12 @@ async def delete_collection(
     response_model=schema.collections.CollectionBookLink,
 )
 async def post_collection_book_link(
-    link: schema.collections.CollectionBookLink, session: Session = Depends(get_session)
+    request: Request,
+    link: schema.collections.CollectionBookLink,
+    session: Session = Depends(get_session),
 ):
     db_link = schema.collections.CollectionBookLink.from_orm(link)
-    return collections.insert_collection_book_link(session, db_link)
+    return collections.insert_collection_book_link(session, db_link, request.state.user.id)
 
 
 @router.patch(

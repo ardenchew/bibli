@@ -9,7 +9,7 @@ import {
 import {Divider, IconButton, Text} from 'react-native-paper';
 import {SharedNavigator} from './Shared';
 import {useNavigation} from '@react-navigation/native';
-import {ActivityCursor, ActivityRead} from '../../generated/jericho';
+import {ActivityCursor, ActivityRead, UserRead} from '../../generated/jericho';
 import {ApiContext, UserContext} from '../../context';
 import ActivityItem from '../../components/activity/Item';
 import {LightTheme} from '../../styles/themes/LightTheme';
@@ -89,50 +89,37 @@ const HeaderRight = ({style}: {style?: StyleProp<ViewStyle>}) => {
   );
 };
 
-const Header = () => {
-  return (
-    <SafeAreaView style={styles.headerContainer}>
-      <HeaderLeft style={styles.headerLeft} />
-      <HeaderTitle style={styles.headerTitle} />
-      <HeaderRight style={styles.headerRight} />
-    </SafeAreaView>
-  );
-};
+interface FeedListProps {
+  user: UserRead;
+  userType: 'primary' | 'follow';
+  pageSize?: number;
+}
 
 const FEED_PAGE_SIZE = 15;
 
-const FeedScreen = () => {
-  const navigation = useNavigation();
-  const {user: bibliUser} = useContext(UserContext);
+export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
   const {activityApi} = useContext(ApiContext);
-
   const [activities, setActivities] = useState<ActivityRead[]>([]);
   const [cursor, setCursor] = useState<ActivityCursor>();
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      header: Header,
-    });
-  }, [bibliUser, navigation]);
-
   const initActivities = useCallback(async () => {
     try {
       const response = await activityApi.getActivitiesActivitiesPost({
-        limit: FEED_PAGE_SIZE,
-        following_user_id: bibliUser?.id,
+        limit: pageSize ?? FEED_PAGE_SIZE,
+        following_user_id: userType === 'follow' ? user.id : undefined,
+        primary_user_id: userType === 'primary' ? user.id : undefined,
       });
       setActivities(response.data.activities);
       setCursor(response.data.next_cursor);
     } catch (error) {
       console.error(
-        `Error fetching activity page for user ${bibliUser?.tag}:`,
+        `Error fetching activity page for user ${user.tag}:`,
         error,
       );
     }
-  }, [activityApi, bibliUser?.id, bibliUser?.tag]);
+  }, [activityApi, user.id, user.tag, userType]);
 
   useEffect(() => {
     initActivities().catch(e => console.error(e));
@@ -149,8 +136,9 @@ const FeedScreen = () => {
       try {
         const response = await activityApi.getActivitiesActivitiesPost({
           cursor: cursor,
-          limit: 10,
-          following_user_id: bibliUser?.id,
+          limit: pageSize ?? FEED_PAGE_SIZE,
+          following_user_id: userType === 'follow' ? user.id : undefined,
+          primary_user_id: userType === 'primary' ? user.id : undefined,
         });
         setActivities(prevActivities => [
           ...prevActivities,
@@ -159,14 +147,14 @@ const FeedScreen = () => {
         setCursor(response.data.next_cursor);
       } catch (error) {
         console.error(
-          `Error fetching more activity page for user ${bibliUser?.tag}:`,
+          `Error fetching more activity page for user ${user.tag}:`,
           error,
         );
       } finally {
         setLoading(false);
       }
     }
-  }, [activityApi, bibliUser?.id, bibliUser?.tag, cursor, loading]);
+  }, [activityApi, cursor, loading, user.id, user.tag, userType]);
 
   const onEndReached = useCallback(() => {
     loadMoreActivities().catch(e => console.error(e));
@@ -190,7 +178,7 @@ const FeedScreen = () => {
       } finally {
         setLoading(false);
       }
-    }
+    };
   };
 
   const renderActivityItem = ({item}: {item: ActivityRead}) => {
@@ -203,17 +191,43 @@ const FeedScreen = () => {
   };
 
   return (
+    <FlatList
+      data={activities}
+      renderItem={renderActivityItem}
+      keyExtractor={item => item.id.toString()}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      onEndReached={onEndReached}
+      onEndReachedThreshold={0.7}
+    />
+  );
+};
+
+const Header = () => {
+  return (
+    <SafeAreaView style={styles.headerContainer}>
+      <HeaderLeft style={styles.headerLeft} />
+      <HeaderTitle style={styles.headerTitle} />
+      <HeaderRight style={styles.headerRight} />
+    </SafeAreaView>
+  );
+};
+
+const FeedScreen = () => {
+  const navigation = useNavigation();
+  const {user: bibliUser} = useContext(UserContext);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      header: Header,
+    });
+  }, [bibliUser, navigation]);
+
+  return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={activities}
-        renderItem={renderActivityItem}
-        keyExtractor={item => item.id.toString()}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        onEndReached={onEndReached}
-        onEndReachedThreshold={0.7}
-      />
+      {bibliUser && <FeedList user={bibliUser} userType={'follow'} />}
     </SafeAreaView>
   );
 };
