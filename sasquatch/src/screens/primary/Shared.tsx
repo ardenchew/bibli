@@ -4,6 +4,7 @@ import {Screen as ProfileScreen} from '../../components/profile';
 import {Screen as CollectionScreen} from '../../components/collection';
 import {Screen as BookScreen} from '../../components/book';
 import EditScreen from '../../components/profile/EditScreen';
+import FeedbackScreen from '../../components/profile/FeedbackScreen';
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
@@ -11,6 +12,7 @@ import {
 import {CollectionRead, UserBookRead, UserRead} from '../../generated/jericho';
 import {NavigationLightTheme} from '../../styles/themes/NavigationLightTheme';
 import {NavigationContainer} from '@react-navigation/native';
+import ActivityItemScreen from '../../components/activity/ItemScreen';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -24,6 +26,10 @@ export type RootStackParamList = {
     userBook: UserBookRead;
   };
   EditProfile: undefined;
+  SubmitFeedback: undefined;
+  Activity: {
+    activity_id: number;
+  };
 };
 
 const defaultStackScreenOptions = {
@@ -59,6 +65,14 @@ const Book = ({route}: NativeStackScreenProps<RootStackParamList, 'Book'>) => {
   );
 };
 
+const Activity = ({route}: NativeStackScreenProps<RootStackParamList, 'Activity'>) => {
+  return (
+    <View style={styles.container}>
+      <ActivityItemScreen activity_id={route.params.activity_id} />
+    </View>
+  );
+};
+
 export const SharedNavigator = (home: any) => {
   const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -84,6 +98,16 @@ export const SharedNavigator = (home: any) => {
           <Stack.Screen
             name="EditProfile"
             component={EditScreen}
+            options={defaultStackScreenOptions}
+          />
+          <Stack.Screen
+            name="SubmitFeedback"
+            component={FeedbackScreen}
+            options={defaultStackScreenOptions}
+          />
+          <Stack.Screen
+            name="Activity"
+            component={Activity}
             options={defaultStackScreenOptions}
           />
           <Stack.Screen

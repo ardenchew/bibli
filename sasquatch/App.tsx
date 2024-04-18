@@ -6,6 +6,7 @@ import Router from './src';
 import {LightTheme} from './src/styles/themes/LightTheme';
 import config from './src/config';
 import {
+  ActivityApi,
   BooksApi,
   CollectionsApi,
   Configuration,
@@ -17,6 +18,7 @@ import {
   ApiContextInterface,
   DefaultApiContext,
 } from './src/context';
+import Toast, {BaseToast, ToastConfig} from 'react-native-toast-message';
 
 // const auth0 = new Auth0({
 //   domain: config.auth0ProviderDomain,
@@ -46,6 +48,7 @@ const ApiProvider = ({children}: Props) => {
           collectionsApi: new CollectionsApi(apiConfig),
           booksApi: new BooksApi(apiConfig),
           reviewsApi: new ReviewsApi(apiConfig),
+          activityApi: new ActivityApi(apiConfig),
         };
         setApiContext(newApiContext);
       } catch (error) {

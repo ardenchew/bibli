@@ -14,17 +14,19 @@ interface ProfileButtonProps {
   currentUser?: UserRead;
 }
 
-const DiscoverButton = ({style, labelStyle}: ProfileButtonProps) => {
+const FeedbackButton = ({style, labelStyle}: ProfileButtonProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
   return (
     <Button
       mode={'outlined'}
       compact={true}
-      icon={'book-multiple-outline'}
+      icon={'message-text'}
       style={style}
       labelStyle={labelStyle}
       contentStyle={styles.content}
-      onPress={() => {}}>
-      Discover
+      onPress={() => navigation.push('SubmitFeedback')}>
+      Feedback
     </Button>
   );
 };
@@ -120,7 +122,7 @@ export const TitleButtons = ({style, user, currentUser}: Props) => {
         {isCurrentUser ? (
           <>
             <EditButton />
-            <DiscoverButton />
+            <FeedbackButton />
           </>
         ) : (
           <>

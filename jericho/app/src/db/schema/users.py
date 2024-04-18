@@ -1,7 +1,8 @@
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 
 
 class UserLinkType(str, Enum):
@@ -103,3 +104,27 @@ class UserPage(SQLModel):
 class TagValidation(SQLModel):
     valid: bool
     warning: Optional[str]
+
+
+class FeedbackBase(SQLModel):
+    user_id: int = Field(foreign_key="user.id")
+    comment: str
+
+
+class Feedback(FeedbackBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        # sa_column=Column(DateTime(timezone=True)),
+        nullable=False,
+        index=True,
+    )
+
+
+class FeedbackRead(FeedbackBase):
+    id: int
+    created_at: datetime
+
+
+class FeedbackWrite(FeedbackBase):
+    pass

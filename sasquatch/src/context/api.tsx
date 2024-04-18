@@ -1,5 +1,6 @@
 import {createContext} from 'react';
 import {
+  ActivityApi,
   BooksApi,
   CollectionsApi,
   Configuration,
@@ -13,6 +14,7 @@ export interface ApiContextInterface {
   collectionsApi: CollectionsApi;
   booksApi: BooksApi;
   reviewsApi: ReviewsApi;
+  activityApi: ActivityApi;
 }
 
 const defaultApiConfig = new Configuration({
@@ -24,6 +26,7 @@ export const DefaultApiContext: ApiContextInterface = {
   collectionsApi: new CollectionsApi(defaultApiConfig),
   booksApi: new BooksApi(defaultApiConfig),
   reviewsApi: new ReviewsApi(defaultApiConfig),
+  activityApi: new ActivityApi(defaultApiConfig),
 };
 
 export const ApiContext = createContext<ApiContextInterface>(DefaultApiContext);

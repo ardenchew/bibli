@@ -129,6 +129,7 @@ const SearchScreen = () => {
         }}
         value={searchQuery}
         onClearIconPress={clearSearchQuery}
+        returnKeyType={'done'}
       />
       <View style={styles.searchButtons}>
         <OmniSearchTypeButtons

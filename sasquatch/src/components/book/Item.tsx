@@ -223,6 +223,7 @@ interface Props {
   currentOwnedCollection?: CollectionRead;
   owner?: UserRead;
   ownerBook?: UserBookRead;
+  mode?: 'elevated' | 'outlined' | 'contained';
 }
 
 export const Item = ({
@@ -230,6 +231,7 @@ export const Item = ({
   currentOwnedCollection,
   owner,
   ownerBook,
+  mode,
 }: Props) => {
   const {booksApi} = useContext(ApiContext);
   const [book, setBook] = useState<UserBookRead>(userBook);
@@ -240,7 +242,7 @@ export const Item = ({
 
   return (
     <Card
-      mode={'contained'}
+      mode={mode ?? 'contained'}
       style={styles.container}
       theme={{
         colors: {surfaceVariant: LightTheme.colors.surface},

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {StyleSheet} from 'react-native';
-import {Card, Avatar} from 'react-native-paper';
+import {Card} from 'react-native-paper';
 import {CollectionRead, CollectionUserLinkType} from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useNavigation} from '@react-navigation/native';
@@ -71,7 +71,7 @@ const Item = ({collection}: Props) => {
         subtitleStyle={{
           fontWeight: '300',
         }}
-        left={props => <Avatar.Icon {...props} icon="book" />}
+        // left={props => <Avatar.Icon {...props} icon="book" />}
       />
     </Card>
   );

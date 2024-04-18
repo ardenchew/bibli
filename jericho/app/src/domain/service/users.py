@@ -250,3 +250,13 @@ def validate_new_tag(session: Session, tag: str) -> schema.users.TagValidation:
     return schema.users.TagValidation(
         valid=True,
     )
+
+
+def insert_feedback(
+    session: Session,
+    feedback: schema.users.FeedbackWrite,
+) -> schema.users.FeedbackRead:
+    db_feedback = schema.users.Feedback.from_orm(feedback)
+    session.add(db_feedback)
+    session.commit()
+    return schema.users.FeedbackRead.from_orm(db_feedback)

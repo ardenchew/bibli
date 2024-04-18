@@ -96,7 +96,10 @@ const EditScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      automaticallyAdjustKeyboardInsets={true}
+      keyboardShouldPersistTaps={'handled'}>
       <Text variant="headlineSmall" style={styles.headline}>
         Edit Profile
       </Text>

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from sqlmodel import Field, Relationship, SQLModel, col
+from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 from src.db.schema.users import UserRead, User
 from src.db.schema.collections import CollectionRead, Collection
 from src.db.schema.reviews import ReviewRead, Review
@@ -88,9 +88,55 @@ class AddToCollectionActivityRead(SQLModel):
     book: BookRead
 
 
+class ActivityReaction(SQLModel, table=True):
+    activity_id: int = Field(default=None, primary_key=True, foreign_key="activity.id")
+    user_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
+
+    activity: "Activity" = Relationship(back_populates="reactions")
+
+
+class ActivityReactionRead(SQLModel):
+    user_id: int
+
+
+class ActivityCommentBase(SQLModel):
+    activity_id: int = Field(foreign_key="activity.id")
+    user_id: int = Field(foreign_key="user.id")
+    comment: str
+
+
+class ActivityComment(ActivityCommentBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        # sa_column=Column(DateTime(timezone=True)),
+        nullable=False,
+        index=True,
+    )
+
+    activity: "Activity" = Relationship(back_populates="comments")
+
+
+class ActivityCommentRead(ActivityCommentBase):
+    id: int
+    created_at: datetime
+
+
+class ActivityCommentWrite(ActivityCommentBase):
+    pass
+
+
 class Activity(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow, nullable=False, index=True)
+    created_at: Optional[datetime] = Field(
+        default_factory=datetime.utcnow,
+        # sa_column=Column(DateTime(timezone=True)),
+        nullable=False,
+        index=True,
+    )
+
+    reactions: List[ActivityReaction] = Relationship(back_populates="activity")
+    comments: List[ActivityComment] = Relationship(back_populates="activity")
 
 
 class ActivityRead(SQLModel):
@@ -99,6 +145,8 @@ class ActivityRead(SQLModel):
     add_to_collection: Optional[AddToCollectionActivityRead] = None
     review: Optional[ReviewActivityRead] = None
     follow_user: Optional[FollowUserActivityRead] = None
+    reactions: List[ActivityReactionRead] = None
+    comments: List[ActivityCommentRead] = None
 
 
 class ActivityCursor(SQLModel):

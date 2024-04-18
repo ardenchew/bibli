@@ -134,6 +134,14 @@ users_router = APIRouter(
 )
 
 
+@user_router.post("/feedback", response_model=schema.users.FeedbackRead)
+async def post_feedback(
+    feedback: schema.users.FeedbackWrite,
+    session: Session = Depends(get_session),
+):
+    return users.insert_feedback(session, feedback)
+
+
 @users_router.get("/linked", response_model=List[schema.users.UserRead])
 async def get_linked_users(
     request: Request,
