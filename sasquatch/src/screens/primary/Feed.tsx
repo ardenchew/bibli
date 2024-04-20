@@ -72,8 +72,7 @@ const HeaderRight = ({style}: {style?: StyleProp<ViewStyle>}) => {
       <IconButton
         icon={'bell-outline'}
         iconColor={LightTheme.colors.outlineVariant}
-        // containerColor={LightTheme.colors.surface}
-        // underlayColor={LightTheme.colors.surface}
+        rippleColor={LightTheme.colors.onSurfaceDisabled}
         onPress={() => {
           Toast.showWithGravityAndOffset(
             'BING BONG',
@@ -83,7 +82,6 @@ const HeaderRight = ({style}: {style?: StyleProp<ViewStyle>}) => {
             -98,
           );
         }}
-        // disabled={true}
       />
     </View>
   );
@@ -214,9 +212,11 @@ export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
 const Header = () => {
   return (
     <SafeAreaView style={styles.headerContainer}>
-      <HeaderLeft style={styles.headerLeft} />
-      <HeaderTitle style={styles.headerTitle} />
-      <HeaderRight style={styles.headerRight} />
+      <View style={styles.safeHeaderContainer}>
+        <HeaderLeft style={styles.headerLeft} />
+        <HeaderTitle style={styles.headerTitle} />
+        <HeaderRight style={styles.headerRight} />
+      </View>
     </SafeAreaView>
   );
 };
@@ -251,29 +251,25 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   headerContainer: {
+    backgroundColor: LightTheme.colors.onTertiaryContainer,
+  },
+  safeHeaderContainer: {
+    height: 70, // MUST MATCH HEADER TITLE
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: LightTheme.colors.onTertiaryContainer,
-    borderBottomWidth: 8,
-    borderBottomColor: LightTheme.colors.onTertiaryContainer,
   },
   headerLeft: {
     maxWidth: width / 3,
-    marginLeft: 12,
-    // borderColor: 'white',
-    // borderWidth: 1,
+    margin: 10,
   },
   headerTitle: {
-    maxWidth: width / 3,
-    height: 76,
-    marginVertical: -15,
+    position: 'absolute',
+    left: 5,
+    right: 0,
+    height: 80, // MUST MATCH SAFE HEADER CONTAINER
   },
-  headerRight: {
-    marginRight: 2,
-    // borderColor: 'white',
-    // borderWidth: 1,
-  },
+  headerRight: {},
   logo: {
     height: '100%',
     aspectRatio: 1,
