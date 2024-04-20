@@ -268,9 +268,6 @@ const styles = StyleSheet.create({
     maxWidth: width / 3,
     height: 76,
     marginVertical: -15,
-    left: -17,
-    // borderColor: 'white',
-    // borderWidth: 1,
   },
   headerRight: {
     marginRight: 2,
