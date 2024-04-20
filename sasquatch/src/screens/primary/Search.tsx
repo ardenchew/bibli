@@ -84,9 +84,10 @@ const SearchScreen = () => {
   const renderResults = () => {
     if (loading) {
       return (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator />
-        </View>
+        <ActivityIndicator
+          size={'large'}
+          style={{top: 100, justifyContent: 'center', alignSelf: 'center'}}
+        />
       );
     }
 
@@ -95,10 +96,11 @@ const SearchScreen = () => {
         return renderNoResults();
       }
       return (
-        <ScrollView keyboardShouldPersistTaps={'handled'}>
-          <BookList
-            userBooks={booksResults}
-          />
+        <ScrollView
+          automaticallyAdjustKeyboardInsets={true}
+          keyboardDismissMode={'on-drag'}
+          keyboardShouldPersistTaps={'handled'}>
+          <BookList userBooks={booksResults} />
         </ScrollView>
       );
     }
@@ -160,11 +162,5 @@ const styles = StyleSheet.create({
   },
   headline: {
     alignSelf: 'center',
-  },
-  loaderContainer: {
-    marginTop: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
   },
 });

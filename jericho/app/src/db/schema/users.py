@@ -70,6 +70,7 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     sub: str = Field(unique=True, index=True)
+    avatar_filepath: Optional[str] = Field(unique=True)
 
     parent_user_links: List[UserLink] = Relationship(
         back_populates="child_user",
@@ -90,6 +91,7 @@ class User(UserBase, table=True):
 class UserRead(UserBase):
     id: int
     link: Optional[UserLinkType]
+    avatar_filepath: Optional[str]
 
 
 class UserPut(UserBase):

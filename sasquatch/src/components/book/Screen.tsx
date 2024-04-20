@@ -31,6 +31,7 @@ import {CompleteIndicator, ReviewIndicator} from './Indicators';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ApiContext, UserContext} from '../../context';
+import {UserAvatarCallback} from '../profile/Avatar';
 
 const {height} = Dimensions.get('window');
 const backgroundHeight = height;
@@ -438,7 +439,7 @@ export const FollowingBookItem = ({
       <Card.Title
         title={following.name}
         subtitle={`@${following.tag}`}
-        left={props => <Avatar.Icon {...props} icon="account-outline" />}
+        left={UserAvatarCallback({user: following})}
         right={() => (
           <View
             style={{

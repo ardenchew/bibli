@@ -93,6 +93,8 @@ def upsert_review(
 
     _update_collections_from_review_insertion(session, review.user_id, review.book_id)
 
+    review = get_review(session, review.user_id, review.book_id)
+
     activity = schema.activity.Activity()
     session.add(activity)
     session.flush()
@@ -105,10 +107,14 @@ def upsert_review(
 
     session.commit()
 
-    return get_review(session, review.user_id, review.book_id)
+    return review
 
 
 def delete_review(session: Session, review: schema.reviews.Review):
+    stmt = select(schema.activity.ReviewActivity).where(schema.activity.ReviewActivity.review_id == review.id)
+    activities = session.exec(stmt).all()
+    [session.delete(activity) for activity in activities]
+
     user_id = review.user_id
     ratings.delete_review_sync_ratings(session, review)
     ratings.sync_hide_rank(session, user_id)

@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import {KeyboardAvoidingView, SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
+import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
 import {Text, TextInput} from 'react-native-paper';
 import Button from '../../components/button/Button';
 import {ApiContext, UserContext} from '../../context';
@@ -32,7 +32,7 @@ const SubmitButton = ({comment}: SubmitButtonProps) => {
       Toast.LONG,
       Toast.BOTTOM,
       0,
-      -70,
+      -98,
     );
   };
 

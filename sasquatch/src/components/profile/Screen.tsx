@@ -5,6 +5,7 @@ import {Title} from './Title';
 import {UserTabView} from './TabView';
 import {TitleButtons} from './Buttons';
 import {CollectionRead, UserLinkType, UserRead} from '../../generated/jericho';
+import {useIsFocused} from '@react-navigation/native';
 
 interface ScreenProps {
   user: UserRead;
@@ -15,24 +16,27 @@ export const Screen = ({user: defaultUser}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
   const [user, setUser] = useState<UserRead>(defaultUser);
   const isCurrentUser = user.id === bibliUser?.id;
+  const isFocused = useIsFocused();
 
   const [collections, setCollections] = useState<CollectionRead[]>([]);
   const [following, setFollowing] = useState<UserRead[]>([]);
   const [followers, setFollowers] = useState<UserRead[]>([]);
 
   useEffect(() => {
-    const initializeUser = async () => {
-      try {
-        const response = await usersApi.getUserByIdUserUserIdGet(
-          defaultUser.id,
-        );
-        setUser(response.data);
-      } catch (error) {
-        console.log(`Error fetching user ${defaultUser.id}:`, error);
-      }
-    };
-    initializeUser().catch(error => console.log(error));
-  }, [defaultUser.id, usersApi]);
+    if (isFocused) {
+      const initializeUser = async () => {
+        try {
+          const response = await usersApi.getUserByIdUserUserIdGet(
+            defaultUser.id,
+          );
+          setUser(response.data);
+        } catch (error) {
+          console.log(`Error fetching user ${defaultUser.id}:`, error);
+        }
+      };
+      initializeUser().catch(error => console.log(error));
+    }
+  }, [isFocused, defaultUser, usersApi]);
 
   useEffect(() => {
     const initializeCollections = async () => {
@@ -92,7 +96,6 @@ export const Screen = ({user: defaultUser}: ScreenProps) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Title
-          style={styles.profileBanner}
           user={user}
           isCurrentUser={isCurrentUser}
         />
@@ -135,9 +138,6 @@ const styles = StyleSheet.create({
   },
   socialText: {
     textAlign: 'center',
-  },
-  profileBanner: {
-    paddingTop: 5,
   },
   profileButtons: {
     padding: 10,

@@ -34,7 +34,7 @@ export const ActivityComment = ({activity, comment}: ActivityCommentProps) => {
     <View style={{marginBottom: 10, marginHorizontal: 20}}>
       <Text>
         <Text onPress={UserPress(user)} style={{fontWeight: 'bold'}}>
-          {user.name}
+          {user.tag}
         </Text>
         <Text> </Text>
         <Text>{comment.comment}</Text>

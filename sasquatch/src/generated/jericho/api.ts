@@ -301,6 +301,19 @@ export interface BodyPatchCollectionBookLinkCollectionBookLinkPatch {
 /**
  * 
  * @export
+ * @interface BodyPutAvatarUserAvatarUserIdPut
+ */
+export interface BodyPutAvatarUserAvatarUserIdPut {
+    /**
+     * 
+     * @type {File}
+     * @memberof BodyPutAvatarUserAvatarUserIdPut
+     */
+    'file': File;
+}
+/**
+ * 
+ * @export
  * @interface BookFilter
  */
 export interface BookFilter {
@@ -1054,6 +1067,12 @@ export interface UserRead {
      * @memberof UserRead
      */
     'link'?: UserLinkType;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserRead
+     */
+    'avatar_filepath'?: string;
 }
 
 
@@ -3508,6 +3527,55 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Put Avatar
+         * @param {number} userId 
+         * @param {File} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putAvatarUserAvatarUserIdPut: async (userId: number, file: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('putAvatarUserAvatarUserIdPut', 'userId', userId)
+            // verify required parameter 'file' is not null or undefined
+            assertParamExists('putAvatarUserAvatarUserIdPut', 'file', file)
+            const localVarPath = `/user/avatar/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+            if (file !== undefined) { 
+                localVarFormParams.append('file', file as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Put User Link
          * @param {UserLinkPut} userLinkPut 
          * @param {*} [options] Override http request option.
@@ -3766,6 +3834,18 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Put Avatar
+         * @param {number} userId 
+         * @param {File} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putAvatarUserAvatarUserIdPut(userId: number, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putAvatarUserAvatarUserIdPut(userId, file, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Put User Link
          * @param {UserLinkPut} userLinkPut 
          * @param {*} [options] Override http request option.
@@ -3891,6 +3971,17 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         postFeedbackUserFeedbackPost(feedbackWrite: FeedbackWrite, options?: any): AxiosPromise<FeedbackRead> {
             return localVarFp.postFeedbackUserFeedbackPost(feedbackWrite, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Put Avatar
+         * @param {number} userId 
+         * @param {File} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putAvatarUserAvatarUserIdPut(userId: number, file: File, options?: any): AxiosPromise<string> {
+            return localVarFp.putAvatarUserAvatarUserIdPut(userId, file, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -4028,6 +4119,19 @@ export class UsersApi extends BaseAPI {
      */
     public postFeedbackUserFeedbackPost(feedbackWrite: FeedbackWrite, options?: AxiosRequestConfig) {
         return UsersApiFp(this.configuration).postFeedbackUserFeedbackPost(feedbackWrite, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Put Avatar
+     * @param {number} userId 
+     * @param {File} file 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public putAvatarUserAvatarUserIdPut(userId: number, file: File, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).putAvatarUserAvatarUserIdPut(userId, file, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

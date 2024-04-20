@@ -10,6 +10,7 @@ import {LightTheme} from '../../styles/themes/LightTheme';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ApiContext} from '../../context';
+import {UserAvatarCallback} from '../profile/Avatar';
 
 interface UserItemProps {
   user: UserRead;
@@ -26,7 +27,7 @@ const CardPress = (user: UserRead) => {
   };
 };
 
-const UserItem = ({user, currentUser}: UserItemProps) => {
+export const UserItem = ({user, currentUser}: UserItemProps) => {
   const {usersApi} = useContext(ApiContext);
   const [userLink, setUserLink] = useState<UserLinkType | null>(
     user.link ?? null,
@@ -123,7 +124,7 @@ const UserItem = ({user, currentUser}: UserItemProps) => {
       <Card.Title
         title={user.name}
         subtitle={`@${user.tag}`}
-        left={props => <Avatar.Icon {...props} icon="account-outline" />}
+        left={UserAvatarCallback({user})}
         right={renderRightButton}
       />
     </Card>

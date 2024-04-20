@@ -6,7 +6,7 @@ import {
   StyleSheet,
   View, ViewStyle,
 } from 'react-native';
-import {Divider, IconButton, Text} from 'react-native-paper';
+import {ActivityIndicator, Divider, IconButton, Text} from 'react-native-paper';
 import {SharedNavigator} from './Shared';
 import {useNavigation} from '@react-navigation/native';
 import {ActivityCursor, ActivityRead, UserRead} from '../../generated/jericho';
@@ -80,7 +80,7 @@ const HeaderRight = ({style}: {style?: StyleProp<ViewStyle>}) => {
             Toast.SHORT,
             Toast.BOTTOM,
             0,
-            -70,
+            -98,
           );
         }}
         // disabled={true}
@@ -95,16 +95,17 @@ interface FeedListProps {
   pageSize?: number;
 }
 
-const FEED_PAGE_SIZE = 15;
+const FEED_PAGE_SIZE = 10;
 
 export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
   const {activityApi} = useContext(ApiContext);
   const [activities, setActivities] = useState<ActivityRead[]>([]);
   const [cursor, setCursor] = useState<ActivityCursor>();
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
 
   const initActivities = useCallback(async () => {
+    setRefreshing(true);
     try {
       const response = await activityApi.getActivitiesActivitiesPost({
         limit: pageSize ?? FEED_PAGE_SIZE,
@@ -118,21 +119,22 @@ export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
         `Error fetching activity page for user ${user.tag}:`,
         error,
       );
+    } finally {
+      setRefreshing(false);
     }
-  }, [activityApi, user.id, user.tag, userType]);
+  }, [activityApi, pageSize, user.id, user.tag, userType]);
 
   useEffect(() => {
     initActivities().catch(e => console.error(e));
   }, [initActivities]);
 
   const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    initActivities().finally(() => setRefreshing(false));
+    initActivities().catch(e => console.log(e));
   }, [initActivities]);
 
   const loadMoreActivities = useCallback(async () => {
-    if (!loading && cursor) {
-      setLoading(true);
+    if (!loadingMore && cursor) {
+      setLoadingMore(true);
       try {
         const response = await activityApi.getActivitiesActivitiesPost({
           cursor: cursor,
@@ -151,10 +153,10 @@ export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
           error,
         );
       } finally {
-        setLoading(false);
+        setLoadingMore(false);
       }
     }
-  }, [activityApi, cursor, loading, user.id, user.tag, userType]);
+  }, [activityApi, cursor, loadingMore, pageSize, user.id, user.tag, userType]);
 
   const onEndReached = useCallback(() => {
     loadMoreActivities().catch(e => console.error(e));
@@ -163,7 +165,7 @@ export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
   const updateActivity = (activity: ActivityRead) => {
     return async () => {
       try {
-        setLoading(true);
+        setLoadingMore(true);
         const newActivities = [...activities];
         const index = newActivities.findIndex(item => item.id === activity.id);
         const response = await activityApi.getActivityActivityActivityIdGet(
@@ -176,7 +178,7 @@ export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
       } catch (e) {
         console.log(e);
       } finally {
-        setLoading(false);
+        setLoadingMore(false);
       }
     };
   };
@@ -185,12 +187,15 @@ export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
     return (
       <>
         <ActivityItem activity={item} refresh={updateActivity(item)} />
-        <Divider bold={true} />
       </>
     );
   };
 
-  return (
+  const itemSeparator = () => <Divider bold={true} />;
+
+  return activities.length === 0 && refreshing ? (
+    <ActivityIndicator style={{flex: 1}} size={'large'} />
+  ) : (
     <FlatList
       data={activities}
       renderItem={renderActivityItem}
@@ -200,6 +205,8 @@ export const FeedList = ({user, userType, pageSize}: FeedListProps) => {
       }
       onEndReached={onEndReached}
       onEndReachedThreshold={0.7}
+      ListFooterComponent={loadingMore ? <ActivityIndicator /> : undefined}
+      ItemSeparatorComponent={itemSeparator}
     />
   );
 };

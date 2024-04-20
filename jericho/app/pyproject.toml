@@ -28,6 +28,7 @@ jsonschema = "^4.21.1"
 backoff = "^2.2.1"
 alembic = "^1.13.1"
 google-books-api-wrapper = "^1.0.5"
+python-multipart = "^0.0.9"
 
 
 [build-system]

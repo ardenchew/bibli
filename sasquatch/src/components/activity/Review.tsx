@@ -12,6 +12,7 @@ import {ApiContext, UserContext} from '../../context';
 import {UserPress, BookPress} from './Navigation';
 import {ActivityBottomBar} from './BottomBar';
 import {ReviewIndicatorText} from '../book/Indicators';
+import {UserAvatarCallback} from '../profile/Avatar';
 
 interface ReviewTitleProps {
   subActivity: ReviewActivityRead;
@@ -90,7 +91,7 @@ export const ReviewCard = ({
         style={{marginVertical: -5}}
         title={title}
         titleNumberOfLines={3}
-        left={props => <Avatar.Icon {...props} icon="account-outline" />}
+        left={UserAvatarCallback({user: subActivity.user, pressable: true})}
       />
       <Card.Content
         style={{

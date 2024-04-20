@@ -25,7 +25,9 @@ export type RootStackParamList = {
   Book: {
     userBook: UserBookRead;
   };
-  EditProfile: undefined;
+  EditProfile: {
+    user: UserRead;
+  };
   SubmitFeedback: undefined;
   Activity: {
     activity_id: number;
@@ -47,6 +49,12 @@ const Profile = ({
   );
 };
 
+const EditProfile = ({
+  route,
+}: NativeStackScreenProps<RootStackParamList, 'EditProfile'>) => {
+  return <EditScreen user={route.params.user} />;
+};
+
 const Collection = ({
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Collection'>) => {
@@ -65,7 +73,9 @@ const Book = ({route}: NativeStackScreenProps<RootStackParamList, 'Book'>) => {
   );
 };
 
-const Activity = ({route}: NativeStackScreenProps<RootStackParamList, 'Activity'>) => {
+const Activity = ({
+  route,
+}: NativeStackScreenProps<RootStackParamList, 'Activity'>) => {
   return (
     <View style={styles.container}>
       <ActivityItemScreen activity_id={route.params.activity_id} />
@@ -97,7 +107,7 @@ export const SharedNavigator = (home: any) => {
           />
           <Stack.Screen
             name="EditProfile"
-            component={EditScreen}
+            component={EditProfile}
             options={defaultStackScreenOptions}
           />
           <Stack.Screen

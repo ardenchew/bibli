@@ -8,6 +8,7 @@ import {
 } from '../../generated/jericho';
 import {UserPress} from './Navigation';
 import {ActivityBottomBar} from './BottomBar';
+import {UserAvatarCallback} from '../profile/Avatar';
 
 interface FollowUserTitleProps {
   subActivity: FollowUserActivityRead;
@@ -64,7 +65,7 @@ export const FollowUserCard = ({
         style={{marginVertical: -5}}
         title={title}
         titleNumberOfLines={3}
-        left={props => <Avatar.Icon {...props} icon="account-outline" />}
+        left={UserAvatarCallback({user: subActivity.follower, pressable: true})}
       />
       <Card.Content
         style={{

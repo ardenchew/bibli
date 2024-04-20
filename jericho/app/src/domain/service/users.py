@@ -1,6 +1,9 @@
 import re
+from datetime import datetime
+from pathlib import Path
 from typing import List
 
+from fastapi import UploadFile
 from python_usernames import is_safe_username
 from sqlalchemy import func
 from sqlmodel import Session, select, col
@@ -68,11 +71,7 @@ def search_users(
     users = session.exec(user_query).all()
 
     for user, user_link in users:
-        page_user = schema.users.UserRead(
-            id=user.id,
-            name=user.name,
-            tag=user.tag,
-        )
+        page_user = schema.users.UserRead.from_orm(user)
         if user_link:
             page_user.link = user_link.type
 
@@ -149,7 +148,6 @@ def upsert_user(
         user: schema.users.User,
 ) -> schema.users.User:
     new_user = user.id is None
-    print(new_user)
 
     if user.tag:
         if not validate_tag(user.tag).valid:
@@ -271,3 +269,23 @@ def insert_feedback(
     session.add(db_feedback)
     session.commit()
     return schema.users.FeedbackRead.from_orm(db_feedback)
+
+
+def upsert_avatar(
+    session: Session,
+    user_id: int,
+    file: UploadFile,
+) -> str:
+    filepath = f"//Users/achew/Pictures/avatar_user_id_{user_id}_{datetime.now().strftime('%Y%M%d%H%M%S')}.jpg"
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+
+    with open(filepath, 'xb') as fp:
+        fp.write(file.file.read())
+
+    user = get_user(session, user_id)
+    user.avatar_filepath = filepath
+
+    user = session.merge(user)
+    session.commit()
+
+    return user.avatar_filepath

@@ -32,7 +32,16 @@ const FeedbackButton = ({style, labelStyle}: ProfileButtonProps) => {
 };
 
 const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
+  const {user: bibliUser} = useContext(UserContext);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  const onPress = () => {
+    if (bibliUser) {
+      navigation.push('EditProfile', {
+        user: bibliUser,
+      });
+    }
+  };
 
   return (
     <Button
@@ -42,7 +51,7 @@ const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
       style={style}
       labelStyle={labelStyle}
       contentStyle={styles.content}
-      onPress={() => navigation.push('EditProfile')}>
+      onPress={onPress}>
       Edit
     </Button>
   );
