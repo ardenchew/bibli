@@ -1,16 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {StyleSheet} from 'react-native';
-import {Card, Avatar} from 'react-native-paper';
-import {CollectionRead, CollectionUserLinkType, UsersApi} from '../../generated/jericho';
+import {Card} from 'react-native-paper';
+import {CollectionRead, CollectionUserLinkType} from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useApi} from '../../api';
-import {UserContext} from '../../context'; // Adjust the import path
+import {ApiContext, UserContext} from '../../context'; // Adjust the import path
 
 interface Props {
   collection: CollectionRead;
-  usersApi: UsersApi;
 }
 
 const CardPress = (collection: CollectionRead) => {
@@ -23,8 +21,9 @@ const CardPress = (collection: CollectionRead) => {
   };
 };
 
-const Item = ({collection, usersApi}: Props) => {
+const Item = ({collection}: Props) => {
   const {user: bibliUser} = useContext(UserContext);
+  const {usersApi} = useContext(ApiContext);
   const booksCount = `${collection.count ?? 0} Books`;
   const [subtitle, setSubtitle] = useState<string>(booksCount);
 
@@ -72,7 +71,7 @@ const Item = ({collection, usersApi}: Props) => {
         subtitleStyle={{
           fontWeight: '300',
         }}
-        left={props => <Avatar.Icon {...props} icon="book" />}
+        // left={props => <Avatar.Icon {...props} icon="book" />}
       />
     </Card>
   );

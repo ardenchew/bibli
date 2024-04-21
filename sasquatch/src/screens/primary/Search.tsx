@@ -1,16 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
 import {ActivityIndicator, Searchbar, Text} from 'react-native-paper';
 import {OmniSearchTypeButtons, SearchType} from '../../components/search';
 import {SharedNavigator} from './Shared';
 import {List as BookList} from '../../components/book';
 import UserList from '../../components/social/List';
-import {useApi} from '../../api';
 import {UserBookRead, UserRead} from '../../generated/jericho';
 import {useIsFocused} from '@react-navigation/native';
+import {ApiContext} from '../../context';
 
 const SearchScreen = () => {
-  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
+  const {booksApi, usersApi} = useContext(ApiContext);
   const includedSearchTypes: SearchType[] = [
     SearchType.Books,
     SearchType.Members,
@@ -84,9 +84,10 @@ const SearchScreen = () => {
   const renderResults = () => {
     if (loading) {
       return (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator />
-        </View>
+        <ActivityIndicator
+          size={'large'}
+          style={{top: 100, justifyContent: 'center', alignSelf: 'center'}}
+        />
       );
     }
 
@@ -95,13 +96,11 @@ const SearchScreen = () => {
         return renderNoResults();
       }
       return (
-        <ScrollView keyboardShouldPersistTaps={'handled'}>
-          <BookList
-            userBooks={booksResults}
-            booksApi={booksApi}
-            collectionsApi={collectionsApi}
-            reviewsApi={reviewsApi}
-          />
+        <ScrollView
+          automaticallyAdjustKeyboardInsets={true}
+          keyboardDismissMode={'on-drag'}
+          keyboardShouldPersistTaps={'handled'}>
+          <BookList userBooks={booksResults} />
         </ScrollView>
       );
     }
@@ -132,6 +131,7 @@ const SearchScreen = () => {
         }}
         value={searchQuery}
         onClearIconPress={clearSearchQuery}
+        returnKeyType={'done'}
       />
       <View style={styles.searchButtons}>
         <OmniSearchTypeButtons
@@ -162,11 +162,5 @@ const styles = StyleSheet.create({
   },
   headline: {
     alignSelf: 'center',
-  },
-  loaderContainer: {
-    marginTop: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
   },
 });

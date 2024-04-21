@@ -82,7 +82,7 @@ def get_book(session: Session, book_id: int, user_id: int) -> schema.books.UserB
     return page.books[0]
 
 
-def get_books(session: Session, f: schema.books.BookFilter, user_id: int) -> schema.books.BookPage:
+def get_user_books(session: Session, f: schema.books.BookFilter) -> schema.books.BookPage:
     stmt = select(schema.books.Book)
 
     if f.collection_ids:
@@ -102,7 +102,7 @@ def get_books(session: Session, f: schema.books.BookFilter, user_id: int) -> sch
 
     results = session.exec(stmt).all()
 
-    return _books_to_page(session, results, user_id, 0)
+    return _books_to_page(session, results, f.user_id, 0)
 
 
 def upsert_book(session: Session, book: schema.books.Book) -> schema.books.Book:

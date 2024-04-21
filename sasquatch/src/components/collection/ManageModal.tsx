@@ -1,6 +1,7 @@
 import {
   CollectionBookLink,
-  CollectionRead, CollectionType, CollectionUserLinkType,
+  CollectionRead,
+  CollectionUserLinkType,
   UserBookRead,
 } from '../../generated/jericho';
 import React, {
@@ -10,7 +11,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {Dimensions, Image, ScrollView, StyleSheet, View} from 'react-native';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {
@@ -21,7 +22,6 @@ import {
   Modal,
   Portal,
 } from 'react-native-paper';
-import {useApi} from '../../api';
 
 const {width, height} = Dimensions.get('window');
 
@@ -72,7 +72,7 @@ export const ManageModal = ({
   onSubmit,
 }: ManageModalProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {collectionsApi} = useApi();
+  const {collectionsApi} = useContext(ApiContext);
   const [collections, setCollections] = useState<CollectionRead[]>();
   const [collectionStates, setCollectionStates] =
     useState<Record<number, CollectionState>>();
@@ -81,19 +81,9 @@ export const ManageModal = ({
     const initCollections = async () => {
       const response = await collectionsApi.getCollectionsCollectionsGet(
         bibliUser?.id,
+        CollectionUserLinkType.Owner,
       );
-      // Filter out results that bibliUser does not own.
-      const ownedCollections = response.data.filter(collection => {
-        if (collection.user_links && collection.user_links.length > 0) {
-          return collection.user_links.some(
-            link =>
-              link.user_id === bibliUser?.id &&
-              link.type === CollectionUserLinkType.Owner,
-          );
-        }
-        return false;
-      });
-      setCollections(ownedCollections);
+      setCollections(response.data);
     };
     initCollections().catch(e => console.log(e));
   }, [bibliUser?.id, collectionsApi]);

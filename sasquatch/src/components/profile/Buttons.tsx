@@ -1,9 +1,9 @@
 import {Button} from 'react-native-paper';
 import * as React from 'react';
 import {StyleProp, ViewStyle, View, StyleSheet, TextStyle} from 'react-native';
-import {useContext, useState} from 'react';
-import {UserLinkPut, UserRead, UsersApi} from '../../generated/jericho';
-import {UserContext} from '../../context';
+import {useContext, useEffect, useState} from 'react';
+import {UserLinkPut, UserRead} from '../../generated/jericho';
+import {ApiContext, UserContext} from '../../context';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 
@@ -12,26 +12,36 @@ interface ProfileButtonProps {
   labelStyle?: StyleProp<TextStyle>;
   user?: UserRead;
   currentUser?: UserRead;
-  usersApi?: UsersApi;
 }
 
-const DiscoverButton = ({style, labelStyle}: ProfileButtonProps) => {
+const FeedbackButton = ({style, labelStyle}: ProfileButtonProps) => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
   return (
     <Button
       mode={'outlined'}
       compact={true}
-      icon={'book-multiple-outline'}
+      icon={'message-text'}
       style={style}
       labelStyle={labelStyle}
       contentStyle={styles.content}
-      onPress={() => {}}>
-      Discover
+      onPress={() => navigation.push('SubmitFeedback')}>
+      Feedback
     </Button>
   );
 };
 
 const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
+  const {user: bibliUser} = useContext(UserContext);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  const onPress = () => {
+    if (bibliUser) {
+      navigation.push('EditProfile', {
+        user: bibliUser,
+      });
+    }
+  };
 
   return (
     <Button
@@ -41,24 +51,31 @@ const EditButton = ({style, labelStyle}: ProfileButtonProps) => {
       style={style}
       labelStyle={labelStyle}
       contentStyle={styles.content}
-      onPress={() => navigation.push('EditProfile')}>
+      onPress={onPress}>
       Edit
     </Button>
   );
 };
 
+interface FollowButtonProps {
+  user: UserRead;
+  currentUser: UserRead;
+  style?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
+}
+
 const FollowButton = ({
-  style,
-  labelStyle,
   user,
   currentUser,
-  usersApi,
-}: ProfileButtonProps) => {
-  if (!currentUser || !user || currentUser?.id === user?.id) {
-    return null;
-  }
+  style,
+  labelStyle,
+}: FollowButtonProps) => {
+  const {usersApi} = useContext(ApiContext);
+  const [active, setActive] = useState<Boolean>();
 
-  const [active, setActive] = useState<Boolean>(user?.link === 'follow');
+  useEffect(() => {
+    setActive(user?.link === 'follow');
+  }, [user?.link]);
 
   const onPress = async () => {
     if (!usersApi) {
@@ -68,8 +85,8 @@ const FollowButton = ({
     if (active) {
       try {
         await usersApi.deleteUserLinkUsersLinkParentUserIdChildUserIdDelete(
-          currentUser?.id,
-          user?.id,
+          currentUser.id,
+          user.id,
         );
         setActive(false);
       } catch (error) {
@@ -90,7 +107,7 @@ const FollowButton = ({
     }
   };
 
-  return (
+  return active !== undefined ? (
     <Button
       mode={active ? 'contained' : 'outlined'}
       compact={true}
@@ -101,20 +118,25 @@ const FollowButton = ({
       onPress={onPress}>
       {active ? 'Following' : 'Follow'}
     </Button>
-  );
+  ) : null;
 };
 
 interface Props {
   style: StyleProp<ViewStyle>;
   user: UserRead;
   currentUser: UserRead;
-  usersApi: UsersApi;
 }
 
 // Profile button container - dynamically allow for different profile buttons.
-export const TitleButtons = ({style, user, currentUser, usersApi}: Props) => {
+export const TitleButtons = ({style, user, currentUser}: Props) => {
   const {user: bibliUser} = useContext(UserContext);
-  const isCurrentUser = bibliUser?.id === user.id;
+  const [isCurrentUser, setIsCurrentUser] = useState<boolean>(
+    bibliUser?.id === user.id,
+  );
+
+  useEffect(() => {
+    setIsCurrentUser(bibliUser?.id === user.id);
+  }, [bibliUser?.id, user.id]);
 
   return (
     <View style={style}>
@@ -122,15 +144,11 @@ export const TitleButtons = ({style, user, currentUser, usersApi}: Props) => {
         {isCurrentUser ? (
           <>
             <EditButton />
-            <DiscoverButton />
+            <FeedbackButton />
           </>
         ) : (
           <>
-            <FollowButton
-              user={user}
-              currentUser={currentUser}
-              usersApi={usersApi}
-            />
+            <FollowButton user={user} currentUser={currentUser} />
             {/*<BlockButton />*/}
           </>
         )}

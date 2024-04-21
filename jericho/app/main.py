@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import Response
 
 from src.database import create_db_and_tables
-from src.routers import books, collections, internal, reviews, users
+from src.routers import activity, books, collections, internal, reviews, users
 
 app = FastAPI()
 
@@ -26,6 +26,7 @@ def read_openapi_yaml() -> Response:
     return Response(yaml_s.getvalue(), media_type="text/yaml")
 
 
+app.include_router(activity.router)
 app.include_router(books.router)
 app.include_router(collections.router)
 app.include_router(internal.router)

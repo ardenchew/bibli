@@ -12,11 +12,13 @@ def _generate_query_statement(
 ):
     stmt = select(schema.collections.Collection)
     if collections_filter.user_id is not None:
+        on_clause = (schema.collections.Collection.id == schema.collections.CollectionUserLink.collection_id) & \
+            (schema.collections.CollectionUserLink.user_id == collections_filter.user_id)
+        if collections_filter.user_link_type is not None and len(collections_filter.user_link_type) > 0:
+            on_clause = on_clause & (schema.collections.CollectionUserLink.type == collections_filter.user_link_type)
         stmt = stmt.join(
             schema.collections.CollectionUserLink,
-            (schema.collections.Collection.id == schema.collections.CollectionUserLink.collection_id),
-        ).where(
-            schema.collections.CollectionUserLink.user_id == collections_filter.user_id
+            on_clause,
         )
     if collections_filter.type is not None:
         stmt = stmt.where(schema.collections.Collection.type == collections_filter.type)
@@ -141,7 +143,20 @@ def get_collection_book_link(
 def insert_collection_book_link(
     session: Session,
     link: schema.collections.CollectionBookLink,
+    user_id: Optional[int]
 ) -> schema.collections.CollectionBookLink:
+    if user_id:
+        activity = schema.activity.Activity()
+        session.add(activity)
+        session.flush()
+        atc = schema.activity.AddToCollectionActivity(
+            activity_id=activity.id,
+            user_id=user_id,
+            collection_id=link.collection_id,
+            book_id=link.book_id,
+        )
+        session.add(atc)
+
     session.add(link)
     session.commit()
     session.refresh(link)

@@ -8,9 +8,8 @@ import {
   CollectionUserLinkType,
 } from '../../generated/jericho';
 import {Dispatch, SetStateAction} from 'react';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {LightTheme} from '../../styles/themes/LightTheme';
-import {useApi} from '../../api';
 
 interface CollectionsProps {
   collections: CollectionRead[];
@@ -22,7 +21,7 @@ export const NewCollection = ({
   setCollections,
 }: CollectionsProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {collectionsApi} = useApi();
+  const {collectionsApi} = useContext(ApiContext);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [newCollectionName, setNewCollectionName] = useState<string>('');
 

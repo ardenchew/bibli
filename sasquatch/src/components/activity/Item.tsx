@@ -1,38 +1,52 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
-import {Card, Avatar} from 'react-native-paper';
-import {LightTheme} from '../../styles/themes/LightTheme';
+import {ActivityRead} from '../../generated/jericho';
+import {AddToCollectionCard} from './AddToCollection';
+import {ReviewCard} from './Review';
+import {FollowUserCard} from './FollowUser';
 
 interface Props {
-  activity: string;
+  activity: ActivityRead;
+  refresh?: () => void;
+  disableComment?: boolean;
 }
 
-const CardPress = () => {};
+const ActivityItem = ({activity, refresh, disableComment}: Props) => {
+  const {add_to_collection, review, follow_user} = activity;
 
-const ActivityItem = ({activity}: Props) => {
-  return (
-    <Card
-      mode={'contained'}
-      style={styles.container}
-      onPress={CardPress}
-      theme={{
-        colors: {surfaceVariant: LightTheme.colors.surface},
-      }}>
-      <Card.Title
-        title={activity}
-        subtitle={'SUBTITLE'}
-        left={props => <Avatar.Icon {...props} icon="account-outline" />}
+  if (add_to_collection) {
+    return (
+      <AddToCollectionCard
+        activity={activity}
+        subActivity={add_to_collection}
+        refresh={refresh}
+        disableComment={disableComment}
       />
-    </Card>
-  );
-};
+    );
+  }
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 5,
-    marginHorizontal: 10,
-    elevation: 2,
-  },
-});
+  if (review) {
+    return (
+      <ReviewCard
+        activity={activity}
+        subActivity={review}
+        refresh={refresh}
+        disableComment={disableComment}
+      />
+    );
+  }
+
+  if (follow_user) {
+    return (
+      <FollowUserCard
+        activity={activity}
+        subActivity={follow_user}
+        refresh={refresh}
+        disableComment={disableComment}
+      />
+    );
+  }
+
+  return null;
+};
 
 export default ActivityItem;

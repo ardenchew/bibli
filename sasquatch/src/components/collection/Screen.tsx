@@ -17,8 +17,7 @@ import {
 import {List as BooksList} from '../book';
 import {Divider} from 'react-native-paper';
 import {LightTheme} from '../../styles/themes/LightTheme';
-import {useApi} from '../../api';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {TitleButtons} from './Buttons';
 import {useIsFocused} from '@react-navigation/native';
 
@@ -28,11 +27,12 @@ interface ScreenProps {
 
 export const Screen = ({collection}: ScreenProps) => {
   const {user: bibliUser} = useContext(UserContext);
-  const {booksApi, usersApi, collectionsApi, reviewsApi} = useApi();
+  const {booksApi, usersApi} = useContext(ApiContext);
   const [bookPage, setBookPage] = useState<BookPage>();
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [owner, setOwner] = useState<UserRead>();
+  const [ownerBookPage, setOwnerBookPage] = useState<BookPage>();
   const isFocused = useIsFocused();
 
   const owner_id = collection.user_links.find(
@@ -59,26 +59,33 @@ export const Screen = ({collection}: ScreenProps) => {
   }, [bibliUser, owner_id, usersApi]);
 
   const fetchBooks = useCallback(async () => {
-    try {
-      const response = await booksApi.getBooksBooksPost({
-        collection_ids: [collection.id],
-      });
-      setBookPage(response.data);
-      setIsLoaded(true);
-    } catch (error) {
-      console.log(
-        `Error fetching books for collection ${collection.name}:`,
-        error,
-      );
+    if (bibliUser) {
+      try {
+        const response = await booksApi.getUserBooksBooksPost({
+          user_id: bibliUser?.id,
+          collection_ids: [collection.id],
+        });
+        setBookPage(response.data);
+        if (owner && bibliUser?.id !== owner?.id) {
+          const response = await booksApi.getUserBooksBooksPost({
+            user_id: owner?.id,
+            collection_ids: [collection.id],
+          });
+          setOwnerBookPage(response.data);
+        }
+        setIsLoaded(true);
+      } catch (error) {
+        console.log(
+          `Error fetching books for collection ${collection.name}:`,
+          error,
+        );
+      }
     }
-  }, [booksApi, collection.id, collection.name]);
+  }, [bibliUser, booksApi, collection.id, collection.name, owner]);
 
   useEffect(() => {
     if (isFocused) {
-      console.log('focused');
       fetchBooks().catch(error => console.log(error));
-    } else {
-      console.log('not focused');
     }
   }, [isFocused, fetchBooks]);
 
@@ -97,11 +104,7 @@ export const Screen = ({collection}: ScreenProps) => {
           owner={owner}
         />
         {bibliUser && isLoaded && (
-          <TitleButtons
-            collection={collection}
-            collectionsApi={collectionsApi}
-            bibliUser={bibliUser}
-          />
+          <TitleButtons collection={collection} bibliUser={bibliUser} />
         )}
         {isLoaded && (
           <Text style={styles.socialText}>
@@ -121,12 +124,11 @@ export const Screen = ({collection}: ScreenProps) => {
         }>
         <BooksList
           userBooks={bookPage?.books ?? []}
-          booksApi={booksApi}
-          collectionsApi={collectionsApi}
-          reviewsApi={reviewsApi}
           currentOwnedCollection={
             owner?.id === bibliUser?.id ? collection : undefined
           }
+          owner={owner}
+          ownerBooks={ownerBookPage?.books}
         />
       </ScrollView>
     </SafeAreaView>

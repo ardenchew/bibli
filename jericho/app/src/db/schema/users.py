@@ -1,7 +1,8 @@
+from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 
 
 class UserLinkType(str, Enum):
@@ -69,6 +70,7 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     sub: str = Field(unique=True, index=True)
+    avatar_filepath: Optional[str] = Field(unique=True)
 
     parent_user_links: List[UserLink] = Relationship(
         back_populates="child_user",
@@ -89,6 +91,7 @@ class User(UserBase, table=True):
 class UserRead(UserBase):
     id: int
     link: Optional[UserLinkType]
+    avatar_filepath: Optional[str]
 
 
 class UserPut(UserBase):
@@ -103,3 +106,27 @@ class UserPage(SQLModel):
 class TagValidation(SQLModel):
     valid: bool
     warning: Optional[str]
+
+
+class FeedbackBase(SQLModel):
+    user_id: int = Field(foreign_key="user.id")
+    comment: str
+
+
+class Feedback(FeedbackBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        # sa_column=Column(DateTime(timezone=True)),
+        nullable=False,
+        index=True,
+    )
+
+
+class FeedbackRead(FeedbackBase):
+    id: int
+    created_at: datetime
+
+
+class FeedbackWrite(FeedbackBase):
+    pass

@@ -1,22 +1,38 @@
-import React, {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import {StyleSheet, Image, Text, View} from 'react-native';
 import {Card, Avatar, IconButton, Menu} from 'react-native-paper';
 import {
   BooksApi,
-  CollectionBookLink, CollectionRead,
+  CollectionBookLink,
+  CollectionRead,
   CollectionsApi,
   CollectionType,
   Reaction,
-  ReviewRead, ReviewsApi,
-  UserBookRead, UserRead,
+  ReviewRead,
+  ReviewsApi,
+  UserBookRead,
+  UserRead,
 } from '../../generated/jericho';
 import {LightTheme} from '../../styles/themes/LightTheme';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {ReviewModal} from './Review';
-import {ActiveIndicator, CompleteIndicator, RateIndicator, ReviewIndicator, SavedIndicator} from './Indicators';
+import {
+  ActiveIndicator,
+  CompleteIndicator,
+  RateIndicator,
+  ReviewIndicator, ReviewIndicatorText,
+  SavedIndicator,
+} from './Indicators';
 import {MenuButton} from './ItemMenu';
+import CardContent from 'react-native-paper/lib/typescript/components/Card/CardContent';
 
 interface HasCollections {
   hasComplete: boolean;
@@ -35,14 +51,14 @@ export const useHasCollections = (userBook: UserBookRead): HasCollections => {
   const [hasActive, setHasActive] = useState<boolean>(() =>
     userBook.collections
       ? userBook.collections.some(
-          collection => collection.type === CollectionType.Active
+          collection => collection.type === CollectionType.Active,
         )
       : false,
   );
   const [hasSaved, setHasSaved] = useState<boolean>(() =>
     userBook.collections
       ? userBook.collections.some(
-          collection => collection.type === CollectionType.Saved
+          collection => collection.type === CollectionType.Saved,
         )
       : false,
   );
@@ -93,16 +109,12 @@ export const RefreshBook = (
 
 interface IndicatorsProps {
   book: UserBookRead;
-  collectionsApi: CollectionsApi;
-  reviewsApi: ReviewsApi;
   refreshBook: () => void;
   currentOwnedCollection?: CollectionRead;
 }
 
 export const Indicators = ({
   book,
-  collectionsApi,
-  reviewsApi,
   refreshBook,
   currentOwnedCollection,
 }: IndicatorsProps) => {
@@ -123,7 +135,6 @@ export const Indicators = ({
           ) : (
             <SavedIndicator
               bibliUser={bibliUser}
-              collectionsApi={collectionsApi}
               book={book}
               refreshBook={refreshBook}
               hasSaved={hasSaved}
@@ -134,8 +145,6 @@ export const Indicators = ({
       <MenuButton
         bibliUser={bibliUser}
         book={book}
-        collectionsApi={collectionsApi}
-        reviewsApi={reviewsApi}
         hasComplete={hasComplete}
         hasSaved={hasSaved}
         hasActive={hasActive}
@@ -145,6 +154,57 @@ export const Indicators = ({
         }
       />
     </View>
+  ) : null;
+};
+
+interface OwnerContentProps {
+  owner: UserRead;
+  ownerBook: UserBookRead;
+}
+
+const OwnerContent = ({owner, ownerBook}: OwnerContentProps) => {
+  // const {hasComplete, hasActive, hasSaved} = useHasCollections(ownerBook);
+  const [contentText, setContentText] = useState<string>();
+
+  useEffect(() => {
+    if (ownerBook.review && !ownerBook.review?.hide_rank) {
+      setContentText(`${owner.name} awarded a `);
+      // } else if (hasComplete || hasActive || hasSaved) {
+      //   const statuses: string[] = [];
+      //
+      //   if (hasActive) {
+      //     statuses.push('Reading');
+      //   }
+      //   if (hasComplete) {
+      //     statuses.push('Finished');
+      //   }
+      //   if (hasSaved) {
+      //     statuses.push('Bookmarked');
+      //   }
+      //
+      //   setContentText(`${owner.name} marked as ${statuses.join(', ')}`);
+    }
+  }, [
+    // hasActive,
+    // hasComplete,
+    // hasSaved,
+    owner.name,
+    ownerBook.review,
+    ownerBook.review?.hide_rank,
+  ]);
+
+  return contentText ? (
+    <Card.Content style={{flexDirection: 'row', alignItems: 'center'}}>
+      <IconButton
+        icon={'account-circle-outline'}
+        size={16}
+        style={{marginHorizontal: -5}}
+      />
+      <Text>{contentText}</Text>
+      {!ownerBook.review?.hide_rank && (
+        <ReviewIndicatorText review={ownerBook.review} />
+      )}
+    </Card.Content>
   ) : null;
 };
 
@@ -160,19 +220,20 @@ const CardPress = (userBook: UserBookRead) => {
 
 interface Props {
   userBook: UserBookRead;
-  booksApi: BooksApi;
-  collectionsApi: CollectionsApi;
-  reviewsApi: ReviewsApi;
   currentOwnedCollection?: CollectionRead;
+  owner?: UserRead;
+  ownerBook?: UserBookRead;
+  mode?: 'elevated' | 'outlined' | 'contained';
 }
 
 export const Item = ({
   userBook,
-  booksApi,
-  collectionsApi,
-  reviewsApi,
   currentOwnedCollection,
+  owner,
+  ownerBook,
+  mode,
 }: Props) => {
+  const {booksApi} = useContext(ApiContext);
   const [book, setBook] = useState<UserBookRead>(userBook);
   const refreshBook = RefreshBook(booksApi, book, setBook);
   const title = userBook.book.subtitle
@@ -181,7 +242,7 @@ export const Item = ({
 
   return (
     <Card
-      mode={'contained'}
+      mode={mode ?? 'contained'}
       style={styles.container}
       theme={{
         colors: {surfaceVariant: LightTheme.colors.surface},
@@ -204,13 +265,14 @@ export const Item = ({
         right={() => (
           <Indicators
             book={book}
-            collectionsApi={collectionsApi}
-            reviewsApi={reviewsApi}
             refreshBook={refreshBook}
             currentOwnedCollection={currentOwnedCollection}
           />
         )}
       />
+      {owner && ownerBook && (
+        <OwnerContent owner={owner} ownerBook={ownerBook} />
+      )}
     </Card>
   );
 };

@@ -26,6 +26,243 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 /**
  * 
  * @export
+ * @interface ActivityCommentRead
+ */
+export interface ActivityCommentRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityCommentRead
+     */
+    'activity_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityCommentRead
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ActivityCommentRead
+     */
+    'comment': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityCommentRead
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ActivityCommentRead
+     */
+    'created_at': string;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityCommentWrite
+ */
+export interface ActivityCommentWrite {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityCommentWrite
+     */
+    'activity_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityCommentWrite
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ActivityCommentWrite
+     */
+    'comment': string;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityCursor
+ */
+export interface ActivityCursor {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityCursor
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ActivityCursor
+     */
+    'created_at': string;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityFilter
+ */
+export interface ActivityFilter {
+    /**
+     * 
+     * @type {ActivityCursor}
+     * @memberof ActivityFilter
+     */
+    'cursor'?: ActivityCursor;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityFilter
+     */
+    'limit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityFilter
+     */
+    'following_user_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityFilter
+     */
+    'primary_user_id'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityPage
+ */
+export interface ActivityPage {
+    /**
+     * 
+     * @type {ActivityCursor}
+     * @memberof ActivityPage
+     */
+    'next_cursor'?: ActivityCursor;
+    /**
+     * 
+     * @type {Array<ActivityRead>}
+     * @memberof ActivityPage
+     */
+    'activities': Array<ActivityRead>;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityReaction
+ */
+export interface ActivityReaction {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityReaction
+     */
+    'activity_id'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityReaction
+     */
+    'user_id'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityReactionRead
+ */
+export interface ActivityReactionRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityReactionRead
+     */
+    'user_id': number;
+}
+/**
+ * 
+ * @export
+ * @interface ActivityRead
+ */
+export interface ActivityRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityRead
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ActivityRead
+     */
+    'created_at': string;
+    /**
+     * 
+     * @type {AddToCollectionActivityRead}
+     * @memberof ActivityRead
+     */
+    'add_to_collection'?: AddToCollectionActivityRead;
+    /**
+     * 
+     * @type {ReviewActivityRead}
+     * @memberof ActivityRead
+     */
+    'review'?: ReviewActivityRead;
+    /**
+     * 
+     * @type {FollowUserActivityRead}
+     * @memberof ActivityRead
+     */
+    'follow_user'?: FollowUserActivityRead;
+    /**
+     * 
+     * @type {Array<ActivityReactionRead>}
+     * @memberof ActivityRead
+     */
+    'reactions'?: Array<ActivityReactionRead>;
+    /**
+     * 
+     * @type {Array<ActivityCommentRead>}
+     * @memberof ActivityRead
+     */
+    'comments'?: Array<ActivityCommentRead>;
+}
+/**
+ * 
+ * @export
+ * @interface AddToCollectionActivityRead
+ */
+export interface AddToCollectionActivityRead {
+    /**
+     * 
+     * @type {UserRead}
+     * @memberof AddToCollectionActivityRead
+     */
+    'user': UserRead;
+    /**
+     * 
+     * @type {CollectionRead}
+     * @memberof AddToCollectionActivityRead
+     */
+    'collection': CollectionRead;
+    /**
+     * 
+     * @type {BookRead}
+     * @memberof AddToCollectionActivityRead
+     */
+    'book': BookRead;
+}
+/**
+ * 
+ * @export
  * @interface AuthorRead
  */
 export interface AuthorRead {
@@ -64,9 +301,28 @@ export interface BodyPatchCollectionBookLinkCollectionBookLinkPatch {
 /**
  * 
  * @export
+ * @interface BodyPutAvatarUserAvatarUserIdPut
+ */
+export interface BodyPutAvatarUserAvatarUserIdPut {
+    /**
+     * 
+     * @type {File}
+     * @memberof BodyPutAvatarUserAvatarUserIdPut
+     */
+    'file': File;
+}
+/**
+ * 
+ * @export
  * @interface BookFilter
  */
 export interface BookFilter {
+    /**
+     * 
+     * @type {number}
+     * @memberof BookFilter
+     */
+    'user_id': number;
     /**
      * 
      * @type {Array<number>}
@@ -367,6 +623,75 @@ export interface Comparison {
 /**
  * 
  * @export
+ * @interface FeedbackRead
+ */
+export interface FeedbackRead {
+    /**
+     * 
+     * @type {number}
+     * @memberof FeedbackRead
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof FeedbackRead
+     */
+    'comment': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof FeedbackRead
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof FeedbackRead
+     */
+    'created_at': string;
+}
+/**
+ * 
+ * @export
+ * @interface FeedbackWrite
+ */
+export interface FeedbackWrite {
+    /**
+     * 
+     * @type {number}
+     * @memberof FeedbackWrite
+     */
+    'user_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof FeedbackWrite
+     */
+    'comment': string;
+}
+/**
+ * 
+ * @export
+ * @interface FollowUserActivityRead
+ */
+export interface FollowUserActivityRead {
+    /**
+     * 
+     * @type {UserRead}
+     * @memberof FollowUserActivityRead
+     */
+    'follower': UserRead;
+    /**
+     * 
+     * @type {UserRead}
+     * @memberof FollowUserActivityRead
+     */
+    'following': UserRead;
+}
+/**
+ * 
+ * @export
  * @interface HTTPValidationError
  */
 export interface HTTPValidationError {
@@ -395,6 +720,25 @@ export type Reaction = typeof Reaction[keyof typeof Reaction];
 /**
  * 
  * @export
+ * @interface ReviewActivityRead
+ */
+export interface ReviewActivityRead {
+    /**
+     * 
+     * @type {UserRead}
+     * @memberof ReviewActivityRead
+     */
+    'user': UserRead;
+    /**
+     * 
+     * @type {ReviewRead}
+     * @memberof ReviewActivityRead
+     */
+    'review': ReviewRead;
+}
+/**
+ * 
+ * @export
  * @interface ReviewPut
  */
 export interface ReviewPut {
@@ -403,13 +747,13 @@ export interface ReviewPut {
      * @type {number}
      * @memberof ReviewPut
      */
-    'user_id'?: number;
+    'user_id': number;
     /**
      * 
      * @type {number}
      * @memberof ReviewPut
      */
-    'book_id'?: number;
+    'book_id': number;
     /**
      * 
      * @type {string}
@@ -442,19 +786,25 @@ export interface ReviewRead {
      * @type {number}
      * @memberof ReviewRead
      */
-    'user_id'?: number;
+    'user_id': number;
     /**
      * 
      * @type {number}
      * @memberof ReviewRead
      */
-    'book_id'?: number;
+    'book_id': number;
     /**
      * 
      * @type {string}
      * @memberof ReviewRead
      */
     'notes'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReviewRead
+     */
+    'id'?: number;
     /**
      * 
      * @type {number}
@@ -717,6 +1067,12 @@ export interface UserRead {
      * @memberof UserRead
      */
     'link'?: UserLinkType;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserRead
+     */
+    'avatar_filepath'?: string;
 }
 
 
@@ -752,6 +1108,479 @@ export interface ValidationError {
  */
 export interface ValidationErrorLocInner {
 }
+
+/**
+ * ActivityApi - axios parameter creator
+ * @export
+ */
+export const ActivityApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Delete Activity Comment
+         * @param {number} commentId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteActivityCommentActivityCommentCommentIdDelete: async (commentId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'commentId' is not null or undefined
+            assertParamExists('deleteActivityCommentActivityCommentCommentIdDelete', 'commentId', commentId)
+            const localVarPath = `/activity/comment/{comment_id}`
+                .replace(`{${"comment_id"}}`, encodeURIComponent(String(commentId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Activity Reaction
+         * @param {ActivityReaction} activityReaction 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteActivityReactionActivityReactionDelete: async (activityReaction: ActivityReaction, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'activityReaction' is not null or undefined
+            assertParamExists('deleteActivityReactionActivityReactionDelete', 'activityReaction', activityReaction)
+            const localVarPath = `/activity/reaction`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(activityReaction, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Activities
+         * @param {ActivityFilter} activityFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getActivitiesActivitiesPost: async (activityFilter: ActivityFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'activityFilter' is not null or undefined
+            assertParamExists('getActivitiesActivitiesPost', 'activityFilter', activityFilter)
+            const localVarPath = `/activities`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(activityFilter, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Activity
+         * @param {number} activityId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getActivityActivityActivityIdGet: async (activityId: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'activityId' is not null or undefined
+            assertParamExists('getActivityActivityActivityIdGet', 'activityId', activityId)
+            const localVarPath = `/activity/{activity_id}`
+                .replace(`{${"activity_id"}}`, encodeURIComponent(String(activityId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Insert Activity Reaction
+         * @param {ActivityReaction} activityReaction 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        insertActivityReactionActivityReactionPost: async (activityReaction: ActivityReaction, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'activityReaction' is not null or undefined
+            assertParamExists('insertActivityReactionActivityReactionPost', 'activityReaction', activityReaction)
+            const localVarPath = `/activity/reaction`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(activityReaction, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Put Activity Comment
+         * @param {ActivityCommentWrite} activityCommentWrite 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putActivityCommentActivityCommentPut: async (activityCommentWrite: ActivityCommentWrite, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'activityCommentWrite' is not null or undefined
+            assertParamExists('putActivityCommentActivityCommentPut', 'activityCommentWrite', activityCommentWrite)
+            const localVarPath = `/activity/comment`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(activityCommentWrite, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ActivityApi - functional programming interface
+ * @export
+ */
+export const ActivityApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ActivityApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Delete Activity Comment
+         * @param {number} commentId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteActivityCommentActivityCommentCommentIdDelete(commentId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteActivityCommentActivityCommentCommentIdDelete(commentId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Delete Activity Reaction
+         * @param {ActivityReaction} activityReaction 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteActivityReactionActivityReactionDelete(activityReaction: ActivityReaction, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteActivityReactionActivityReactionDelete(activityReaction, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get Activities
+         * @param {ActivityFilter} activityFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getActivitiesActivitiesPost(activityFilter: ActivityFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ActivityPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getActivitiesActivitiesPost(activityFilter, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Get Activity
+         * @param {number} activityId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getActivityActivityActivityIdGet(activityId: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ActivityRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getActivityActivityActivityIdGet(activityId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Insert Activity Reaction
+         * @param {ActivityReaction} activityReaction 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async insertActivityReactionActivityReactionPost(activityReaction: ActivityReaction, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ActivityReactionRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.insertActivityReactionActivityReactionPost(activityReaction, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Put Activity Comment
+         * @param {ActivityCommentWrite} activityCommentWrite 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putActivityCommentActivityCommentPut(activityCommentWrite: ActivityCommentWrite, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ActivityCommentRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putActivityCommentActivityCommentPut(activityCommentWrite, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * ActivityApi - factory interface
+ * @export
+ */
+export const ActivityApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ActivityApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Delete Activity Comment
+         * @param {number} commentId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteActivityCommentActivityCommentCommentIdDelete(commentId: number, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteActivityCommentActivityCommentCommentIdDelete(commentId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Activity Reaction
+         * @param {ActivityReaction} activityReaction 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteActivityReactionActivityReactionDelete(activityReaction: ActivityReaction, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteActivityReactionActivityReactionDelete(activityReaction, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Activities
+         * @param {ActivityFilter} activityFilter 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getActivitiesActivitiesPost(activityFilter: ActivityFilter, options?: any): AxiosPromise<ActivityPage> {
+            return localVarFp.getActivitiesActivitiesPost(activityFilter, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Activity
+         * @param {number} activityId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getActivityActivityActivityIdGet(activityId: number, options?: any): AxiosPromise<ActivityRead> {
+            return localVarFp.getActivityActivityActivityIdGet(activityId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Insert Activity Reaction
+         * @param {ActivityReaction} activityReaction 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        insertActivityReactionActivityReactionPost(activityReaction: ActivityReaction, options?: any): AxiosPromise<ActivityReactionRead> {
+            return localVarFp.insertActivityReactionActivityReactionPost(activityReaction, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Put Activity Comment
+         * @param {ActivityCommentWrite} activityCommentWrite 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putActivityCommentActivityCommentPut(activityCommentWrite: ActivityCommentWrite, options?: any): AxiosPromise<ActivityCommentRead> {
+            return localVarFp.putActivityCommentActivityCommentPut(activityCommentWrite, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ActivityApi - object-oriented interface
+ * @export
+ * @class ActivityApi
+ * @extends {BaseAPI}
+ */
+export class ActivityApi extends BaseAPI {
+    /**
+     * 
+     * @summary Delete Activity Comment
+     * @param {number} commentId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ActivityApi
+     */
+    public deleteActivityCommentActivityCommentCommentIdDelete(commentId: number, options?: AxiosRequestConfig) {
+        return ActivityApiFp(this.configuration).deleteActivityCommentActivityCommentCommentIdDelete(commentId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Activity Reaction
+     * @param {ActivityReaction} activityReaction 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ActivityApi
+     */
+    public deleteActivityReactionActivityReactionDelete(activityReaction: ActivityReaction, options?: AxiosRequestConfig) {
+        return ActivityApiFp(this.configuration).deleteActivityReactionActivityReactionDelete(activityReaction, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Activities
+     * @param {ActivityFilter} activityFilter 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ActivityApi
+     */
+    public getActivitiesActivitiesPost(activityFilter: ActivityFilter, options?: AxiosRequestConfig) {
+        return ActivityApiFp(this.configuration).getActivitiesActivitiesPost(activityFilter, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Activity
+     * @param {number} activityId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ActivityApi
+     */
+    public getActivityActivityActivityIdGet(activityId: number, options?: AxiosRequestConfig) {
+        return ActivityApiFp(this.configuration).getActivityActivityActivityIdGet(activityId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Insert Activity Reaction
+     * @param {ActivityReaction} activityReaction 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ActivityApi
+     */
+    public insertActivityReactionActivityReactionPost(activityReaction: ActivityReaction, options?: AxiosRequestConfig) {
+        return ActivityApiFp(this.configuration).insertActivityReactionActivityReactionPost(activityReaction, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Put Activity Comment
+     * @param {ActivityCommentWrite} activityCommentWrite 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ActivityApi
+     */
+    public putActivityCommentActivityCommentPut(activityCommentWrite: ActivityCommentWrite, options?: AxiosRequestConfig) {
+        return ActivityApiFp(this.configuration).putActivityCommentActivityCommentPut(activityCommentWrite, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
 
 /**
  * BooksApi - axios parameter creator
@@ -829,46 +1658,6 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get Books
-         * @param {BookFilter} bookFilter 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBooksBooksPost: async (bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'bookFilter' is not null or undefined
-            assertParamExists('getBooksBooksPost', 'bookFilter', bookFilter)
-            const localVarPath = `/books`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(bookFilter, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -962,18 +1751,14 @@ export const BooksApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * 
          * @summary Get User Books
-         * @param {number} userId 
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserBooksBooksUserIdPost: async (userId: number, bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userId' is not null or undefined
-            assertParamExists('getUserBooksBooksUserIdPost', 'userId', userId)
+        getUserBooksBooksPost: async (bookFilter: BookFilter, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'bookFilter' is not null or undefined
-            assertParamExists('getUserBooksBooksUserIdPost', 'bookFilter', bookFilter)
-            const localVarPath = `/books/{user_id}`
-                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            assertParamExists('getUserBooksBooksPost', 'bookFilter', bookFilter)
+            const localVarPath = `/books`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1085,17 +1870,6 @@ export const BooksApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get Books
-         * @param {BookFilter} bookFilter 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBooksBooksPost(bookFilter, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * 
          * @summary Get Following User Books
          * @param {number} bookId 
          * @param {number} parentId 
@@ -1121,13 +1895,12 @@ export const BooksApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Get User Books
-         * @param {number} userId 
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserBooksBooksUserIdPost(userId, bookFilter, options);
+        async getUserBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BookPage>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserBooksBooksPost(bookFilter, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1175,16 +1948,6 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
-         * @summary Get Books
-         * @param {BookFilter} bookFilter 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBooksBooksPost(bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
-            return localVarFp.getBooksBooksPost(bookFilter, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get Following User Books
          * @param {number} bookId 
          * @param {number} parentId 
@@ -1208,13 +1971,12 @@ export const BooksApiFactory = function (configuration?: Configuration, basePath
         /**
          * 
          * @summary Get User Books
-         * @param {number} userId 
          * @param {BookFilter} bookFilter 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
-            return localVarFp.getUserBooksBooksUserIdPost(userId, bookFilter, options).then((request) => request(axios, basePath));
+        getUserBooksBooksPost(bookFilter: BookFilter, options?: any): AxiosPromise<BookPage> {
+            return localVarFp.getUserBooksBooksPost(bookFilter, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1264,18 +2026,6 @@ export class BooksApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get Books
-     * @param {BookFilter} bookFilter 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof BooksApi
-     */
-    public getBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig) {
-        return BooksApiFp(this.configuration).getBooksBooksPost(bookFilter, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get Following User Books
      * @param {number} bookId 
      * @param {number} parentId 
@@ -1303,14 +2053,13 @@ export class BooksApi extends BaseAPI {
     /**
      * 
      * @summary Get User Books
-     * @param {number} userId 
      * @param {BookFilter} bookFilter 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof BooksApi
      */
-    public getUserBooksBooksUserIdPost(userId: number, bookFilter: BookFilter, options?: AxiosRequestConfig) {
-        return BooksApiFp(this.configuration).getUserBooksBooksUserIdPost(userId, bookFilter, options).then((request) => request(this.axios, this.basePath));
+    public getUserBooksBooksPost(bookFilter: BookFilter, options?: AxiosRequestConfig) {
+        return BooksApiFp(this.configuration).getUserBooksBooksPost(bookFilter, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1540,11 +2289,12 @@ export const CollectionsApiAxiosParamCreator = function (configuration?: Configu
          * 
          * @summary Get Collections
          * @param {number} [userId] 
+         * @param {CollectionUserLinkType} [userLinkType] 
          * @param {CollectionType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCollectionsCollectionsGet: async (userId?: number, type?: CollectionType, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getCollectionsCollectionsGet: async (userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/collections`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1563,6 +2313,10 @@ export const CollectionsApiAxiosParamCreator = function (configuration?: Configu
 
             if (userId !== undefined) {
                 localVarQueryParameter['user_id'] = userId;
+            }
+
+            if (userLinkType !== undefined) {
+                localVarQueryParameter['user_link_type'] = userLinkType;
             }
 
             if (type !== undefined) {
@@ -1811,12 +2565,13 @@ export const CollectionsApiFp = function(configuration?: Configuration) {
          * 
          * @summary Get Collections
          * @param {number} [userId] 
+         * @param {CollectionUserLinkType} [userLinkType] 
          * @param {CollectionType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getCollectionsCollectionsGet(userId?: number, type?: CollectionType, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CollectionRead>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getCollectionsCollectionsGet(userId, type, options);
+        async getCollectionsCollectionsGet(userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CollectionRead>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCollectionsCollectionsGet(userId, userLinkType, type, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1929,12 +2684,13 @@ export const CollectionsApiFactory = function (configuration?: Configuration, ba
          * 
          * @summary Get Collections
          * @param {number} [userId] 
+         * @param {CollectionUserLinkType} [userLinkType] 
          * @param {CollectionType} [type] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCollectionsCollectionsGet(userId?: number, type?: CollectionType, options?: any): AxiosPromise<Array<CollectionRead>> {
-            return localVarFp.getCollectionsCollectionsGet(userId, type, options).then((request) => request(axios, basePath));
+        getCollectionsCollectionsGet(userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options?: any): AxiosPromise<Array<CollectionRead>> {
+            return localVarFp.getCollectionsCollectionsGet(userId, userLinkType, type, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2052,13 +2808,14 @@ export class CollectionsApi extends BaseAPI {
      * 
      * @summary Get Collections
      * @param {number} [userId] 
+     * @param {CollectionUserLinkType} [userLinkType] 
      * @param {CollectionType} [type] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CollectionsApi
      */
-    public getCollectionsCollectionsGet(userId?: number, type?: CollectionType, options?: AxiosRequestConfig) {
-        return CollectionsApiFp(this.configuration).getCollectionsCollectionsGet(userId, type, options).then((request) => request(this.axios, this.basePath));
+    public getCollectionsCollectionsGet(userId?: number, userLinkType?: CollectionUserLinkType, type?: CollectionType, options?: AxiosRequestConfig) {
+        return CollectionsApiFp(this.configuration).getCollectionsCollectionsGet(userId, userLinkType, type, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2730,6 +3487,95 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Post Feedback
+         * @param {FeedbackWrite} feedbackWrite 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postFeedbackUserFeedbackPost: async (feedbackWrite: FeedbackWrite, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'feedbackWrite' is not null or undefined
+            assertParamExists('postFeedbackUserFeedbackPost', 'feedbackWrite', feedbackWrite)
+            const localVarPath = `/user/feedback`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(feedbackWrite, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Put Avatar
+         * @param {number} userId 
+         * @param {File} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putAvatarUserAvatarUserIdPut: async (userId: number, file: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('putAvatarUserAvatarUserIdPut', 'userId', userId)
+            // verify required parameter 'file' is not null or undefined
+            assertParamExists('putAvatarUserAvatarUserIdPut', 'file', file)
+            const localVarPath = `/user/avatar/{user_id}`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+            if (file !== undefined) { 
+                localVarFormParams.append('file', file as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Put User Link
          * @param {UserLinkPut} userLinkPut 
          * @param {*} [options] Override http request option.
@@ -2977,6 +3823,29 @@ export const UsersApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Post Feedback
+         * @param {FeedbackWrite} feedbackWrite 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postFeedbackUserFeedbackPost(feedbackWrite: FeedbackWrite, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FeedbackRead>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postFeedbackUserFeedbackPost(feedbackWrite, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
+         * @summary Put Avatar
+         * @param {number} userId 
+         * @param {File} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putAvatarUserAvatarUserIdPut(userId: number, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putAvatarUserAvatarUserIdPut(userId, file, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * 
          * @summary Put User Link
          * @param {UserLinkPut} userLinkPut 
          * @param {*} [options] Override http request option.
@@ -3092,6 +3961,27 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          */
         getUserUserCurrentGet(options?: any): AxiosPromise<UserRead> {
             return localVarFp.getUserUserCurrentGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Post Feedback
+         * @param {FeedbackWrite} feedbackWrite 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postFeedbackUserFeedbackPost(feedbackWrite: FeedbackWrite, options?: any): AxiosPromise<FeedbackRead> {
+            return localVarFp.postFeedbackUserFeedbackPost(feedbackWrite, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Put Avatar
+         * @param {number} userId 
+         * @param {File} file 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putAvatarUserAvatarUserIdPut(userId: number, file: File, options?: any): AxiosPromise<string> {
+            return localVarFp.putAvatarUserAvatarUserIdPut(userId, file, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3217,6 +4107,31 @@ export class UsersApi extends BaseAPI {
      */
     public getUserUserCurrentGet(options?: AxiosRequestConfig) {
         return UsersApiFp(this.configuration).getUserUserCurrentGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Post Feedback
+     * @param {FeedbackWrite} feedbackWrite 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public postFeedbackUserFeedbackPost(feedbackWrite: FeedbackWrite, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).postFeedbackUserFeedbackPost(feedbackWrite, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Put Avatar
+     * @param {number} userId 
+     * @param {File} file 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public putAvatarUserAvatarUserIdPut(userId: number, file: File, options?: AxiosRequestConfig) {
+        return UsersApiFp(this.configuration).putAvatarUserAvatarUserIdPut(userId, file, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -1,13 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {SafeAreaView, ScrollView, View} from 'react-native';
 import {Text, TextInput} from 'react-native-paper';
 import LogoutButton from '../../components/header/Logout';
 import Button from '../../components/button/Button';
 import {useAuth0} from 'react-native-auth0';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {UserContext} from '../../context';
-import {useApi} from '../../api';
-import {UserPut, UserRead} from '../../generated/jericho';
+import {ApiContext, UserContext} from '../../context';
+import Toast from 'react-native-simple-toast';
+import {EditAvatarButton} from '../../components/profile/Avatar';
+import {UserRead} from '../../generated/jericho';
 
 interface Props {
   navigation: NativeStackNavigationProp<any>;
@@ -16,125 +17,141 @@ interface Props {
 interface FinishButtonProps {
   firstName: string;
   lastName: string;
+  avatar?: string;
 }
 
-const FinishButton = ({firstName, lastName}: FinishButtonProps) => {
-  const {usersApi} = useApi();
+function displayName(first: string, last: string): string {
+  return `${first.trim()} ${last.trim()}`.trim();
+}
+
+const FinishButton = ({firstName, lastName, avatar}: FinishButtonProps) => {
+  const {usersApi} = useContext(ApiContext);
   const {user: bibliUser, setUser: setBibliUser} = useContext(UserContext);
+  const [name, setName] = useState<string>(displayName(firstName, lastName));
 
-  const fetchUser = async () => {
-    try {
-      const response = await usersApi.getUserUserCurrentGet();
-      setBibliUser(response.data);
-    } catch (error) {
-      console.log('No user found:', error);
-    }
-  };
-
-  const setDisplayName = async (first: string, last: string) => {
-    const displayName = last !== '' ? `${first} ${last}` : first;
-    const updatedUser: UserPut = {
-      name: displayName,
-      tag: bibliUser?.tag,
-      id: bibliUser?.id,
-    };
-    usersApi
-      .putUserUserPut(updatedUser)
-      .then(response => {
-        const responseUser: UserRead = response.data;
-        setBibliUser(responseUser);
-        console.log('User updated:', responseUser);
-      })
-      .catch(createError => {
-        console.error('Error creating user:', createError);
-      });
-  };
+  useEffect(() => {
+    setName(displayName(firstName, lastName));
+  }, [firstName, lastName]);
 
   const onPress = async () => {
-    await fetchUser().catch(error => console.log(error));
-    await setDisplayName(firstName, lastName).catch(error =>
-      console.log(error),
-    );
+    if (!bibliUser || name === '') {
+      return;
+    }
+    try {
+      if (avatar) {
+        await usersApi.putAvatarUserAvatarUserIdPut(bibliUser.id, {
+          uri: avatar,
+          type: 'image/jpeg',
+          name: 'avatar',
+        });
+      }
+      const response = await usersApi.putUserUserPut({
+        ...bibliUser,
+        name: name,
+      });
+      setBibliUser(response.data);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      Toast.showWithGravityAndOffset(
+        'A warm welcome awaits you\n- J.R.R. Tolkien, The Hobbit',
+        Toast.LONG,
+        Toast.BOTTOM,
+        0,
+        -98,
+      );
+    }
   };
 
   return (
     <Button
       onPress={onPress}
       mode="contained"
-      disabled={firstName === ''}
-      style={styles.finishButton}>
+      disabled={firstName.trim() === ''}
+      style={{alignSelf: 'center'}}>
       Finish
     </Button>
   );
 };
 
 const BioScreen = ({navigation}: Props) => {
-  const {user} = useAuth0();
+  const {user: auth0User} = useAuth0();
   const {user: bibliUser} = useContext(UserContext);
-  const [firstName, setFirstName] = useState(
-    user?.givenName ? user.givenName : '',
-  );
-  const [lastName, setLastName] = useState(
-    user?.familyName ? user.familyName : '',
-  );
+  const [firstName, setFirstName] = useState(auth0User?.givenName ?? '');
+  const [lastName, setLastName] = useState(auth0User?.familyName ?? '');
   const [firstNameWarn, setFirstNameWarn] = useState(false);
+  const [avatar, setAvatar] = useState<string>();
+  const [avatarUser, setAvatarUser] = useState<UserRead | null>(bibliUser);
 
   useEffect(() => {
+    const headerLeft = () => <LogoutButton />;
     navigation.setOptions({
-      headerLeft: () => <LogoutButton />,
+      headerLeft: headerLeft,
     });
   }, [navigation]);
 
-  const handleFirstNameChange = (newFirstName: string) => {
+  const onFirstNameChange = (newFirstName: string) => {
     setFirstName(newFirstName);
-    setFirstNameWarn(newFirstName === '');
+    setFirstNameWarn(newFirstName.trim() === '');
   };
 
+  useEffect(() => {
+    setAvatarUser((u: UserRead | null) => {
+      console.log(u);
+      console.log(displayName(firstName, lastName));
+      return u ? {...u, name: displayName(firstName, lastName)} : null;
+    });
+  }, [firstName, lastName]);
+
   return (
-    <View style={styles.container}>
-      <Text variant="headlineSmall" style={styles.headline}>
-        Hey there @{bibliUser?.tag}
-      </Text>
-      <View style={styles.textInputView}>
-        <Text variant="titleMedium">What shall we call you?</Text>
-        <TextInput
-          label={'First name*'}
-          textContentType="name"
-          mode="outlined"
-          defaultValue={firstName}
-          maxLength={20}
-          error={firstNameWarn}
-          onChangeText={handleFirstNameChange}
+    <SafeAreaView style={{margin: 20, flex: 1}}>
+      <ScrollView
+        contentContainerStyle={{gap: 20}}
+        bounces={false}
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps={'handled'}>
+        <Text variant="headlineSmall">
+          Hey there @{bibliUser?.tag}
+        </Text>
+        {avatarUser && (
+          <View>
+            <Text variant="titleMedium" style={{alignSelf: 'center'}}>Profile Picture</Text>
+            <EditAvatarButton
+              user={avatarUser}
+              avatar={avatar}
+              setAvatar={setAvatar}
+              size={100}
+            />
+          </View>
+        )}
+        <View>
+          <Text variant="titleMedium">What shall we call you?</Text>
+          <TextInput
+            label={'First name*'}
+            textContentType="name"
+            mode="outlined"
+            defaultValue={firstName}
+            maxLength={20}
+            error={firstNameWarn}
+            onChangeText={onFirstNameChange}
+          />
+          <TextInput
+            label={'Last name'}
+            textContentType="name"
+            mode="outlined"
+            defaultValue={lastName}
+            maxLength={20}
+            onChangeText={newText => setLastName(newText)}
+          />
+        </View>
+        <FinishButton
+          firstName={firstName}
+          lastName={lastName}
+          avatar={avatar}
         />
-        <TextInput
-          label={'Last name'}
-          textContentType="name"
-          mode="outlined"
-          defaultValue={lastName}
-          maxLength={20}
-          onChangeText={newText => setLastName(newText)}
-        />
-      </View>
-      <FinishButton firstName={firstName} lastName={lastName} />
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    margin: 20,
-  },
-  headline: {
-    flex: 1,
-  },
-  textInputView: {
-    flex: 5,
-    justifyContent: 'flex-start',
-  },
-  finishButton: {
-    alignSelf: 'center',
-  },
-});
 
 export default BioScreen;

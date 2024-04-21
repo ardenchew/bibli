@@ -1,11 +1,9 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {IconButton, Menu} from 'react-native-paper';
 import {
   CollectionRead,
-  CollectionsApi,
   CollectionType,
   ReviewRead,
-  ReviewsApi,
   UserBookRead,
   UserRead,
 } from '../../generated/jericho';
@@ -16,6 +14,7 @@ import {
 } from './Indicators';
 import {ReviewModal} from './Review';
 import {ManageModal} from '../collection/ManageModal';
+import {ApiContext} from '../../context';
 
 interface ManageCollectionsItemProps {
   onPress: () => void;
@@ -33,7 +32,6 @@ const ManageCollectionsItem = ({onPress}: ManageCollectionsItemProps) => {
 
 interface RemoveCollectionItemProps {
   book: UserBookRead;
-  collectionsApi: CollectionsApi;
   closeMenu: () => void;
   refreshBook: () => void;
   removeCollection: CollectionRead;
@@ -41,11 +39,11 @@ interface RemoveCollectionItemProps {
 
 const RemoveCollectionItem = ({
   book,
-  collectionsApi,
   closeMenu,
   refreshBook,
   removeCollection,
 }: RemoveCollectionItemProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const onPress = async () => {
     closeMenu();
 
@@ -71,7 +69,6 @@ const RemoveCollectionItem = ({
 interface ActiveItemProps {
   bibliUser: UserRead;
   book: UserBookRead;
-  collectionsApi: CollectionsApi;
   hasActive: boolean;
   closeMenu: () => void;
   refreshBook: () => void;
@@ -80,11 +77,11 @@ interface ActiveItemProps {
 const ActiveItem = ({
   bibliUser,
   book,
-  collectionsApi,
   hasActive,
   closeMenu,
   refreshBook,
 }: ActiveItemProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const onPress = async () => {
     closeMenu();
 
@@ -108,11 +105,9 @@ const ActiveItem = ({
   );
 };
 
-
 interface CompleteItemProps {
   bibliUser: UserRead;
   book: UserBookRead;
-  collectionsApi: CollectionsApi;
   hasComplete: boolean;
   closeMenu: () => void;
   refreshBook: () => void;
@@ -121,11 +116,11 @@ interface CompleteItemProps {
 const CompleteItem = ({
   bibliUser,
   book,
-  collectionsApi,
   hasComplete,
   closeMenu,
   refreshBook,
 }: CompleteItemProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const onPress = async () => {
     closeMenu();
 
@@ -152,7 +147,6 @@ const CompleteItem = ({
 interface SavedItemProps {
   bibliUser: UserRead;
   book: UserBookRead;
-  collectionsApi: CollectionsApi;
   hasSaved: boolean;
   closeMenu: () => void;
   refreshBook: () => void;
@@ -161,11 +155,11 @@ interface SavedItemProps {
 const SavedItem = ({
   bibliUser,
   book,
-  collectionsApi,
   hasSaved,
   closeMenu,
   refreshBook,
 }: SavedItemProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const onPress = async () => {
     closeMenu();
 
@@ -204,18 +198,17 @@ const AddReviewItem = ({onPress}: AddReviewItemProps) => {
 };
 
 interface DeleteReviewItemProps {
-  reviewsApi: ReviewsApi;
   review: ReviewRead;
   closeMenu: () => void;
   refreshBook: () => void;
 }
 
 const DeleteReviewItem = ({
-  reviewsApi,
   review,
   closeMenu,
   refreshBook,
 }: DeleteReviewItemProps) => {
+  const {reviewsApi} = useContext(ApiContext);
   const onPress = async () => {
     closeMenu();
 
@@ -236,8 +229,6 @@ const DeleteReviewItem = ({
 interface MenuButtonProps {
   bibliUser: UserRead;
   book: UserBookRead;
-  collectionsApi: CollectionsApi;
-  reviewsApi: ReviewsApi;
   refreshBook: () => void;
   hasComplete: boolean;
   hasSaved: boolean;
@@ -248,8 +239,6 @@ interface MenuButtonProps {
 export const MenuButton = ({
   bibliUser,
   book,
-  collectionsApi,
-  reviewsApi,
   refreshBook,
   hasComplete,
   hasSaved,
@@ -282,7 +271,6 @@ export const MenuButton = ({
         {removeCollection && (
           <RemoveCollectionItem
             book={book}
-            collectionsApi={collectionsApi}
             closeMenu={closeMenu}
             refreshBook={refreshBook}
             removeCollection={removeCollection}
@@ -301,7 +289,6 @@ export const MenuButton = ({
                 <ActiveItem
                   bibliUser={bibliUser}
                   book={book}
-                  collectionsApi={collectionsApi}
                   hasActive={hasActive}
                   closeMenu={closeMenu}
                   refreshBook={refreshBook}
@@ -309,7 +296,6 @@ export const MenuButton = ({
                 <SavedItem
                   bibliUser={bibliUser}
                   book={book}
-                  collectionsApi={collectionsApi}
                   hasSaved={hasSaved}
                   closeMenu={closeMenu}
                   refreshBook={refreshBook}
@@ -319,7 +305,6 @@ export const MenuButton = ({
             <CompleteItem
               bibliUser={bibliUser}
               book={book}
-              collectionsApi={collectionsApi}
               hasComplete={hasComplete}
               closeMenu={closeMenu}
               refreshBook={refreshBook}
@@ -334,7 +319,6 @@ export const MenuButton = ({
         ) : (
           // TODO add EditReviewItem
           <DeleteReviewItem
-            reviewsApi={reviewsApi}
             review={book.review}
             closeMenu={closeMenu}
             refreshBook={refreshBook}

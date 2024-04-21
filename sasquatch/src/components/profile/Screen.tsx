@@ -1,24 +1,42 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {UserContext} from '../../context';
+import {ApiContext, UserContext} from '../../context';
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import {Title} from './Title';
 import {UserTabView} from './TabView';
 import {TitleButtons} from './Buttons';
 import {CollectionRead, UserLinkType, UserRead} from '../../generated/jericho';
-import {useApi} from '../../api';
+import {useIsFocused} from '@react-navigation/native';
 
 interface ScreenProps {
   user: UserRead;
 }
 
-export const Screen = ({user}: ScreenProps) => {
-  const {collectionsApi, usersApi} = useApi();
+export const Screen = ({user: defaultUser}: ScreenProps) => {
+  const {collectionsApi, usersApi} = useContext(ApiContext);
   const {user: bibliUser} = useContext(UserContext);
+  const [user, setUser] = useState<UserRead>(defaultUser);
   const isCurrentUser = user.id === bibliUser?.id;
+  const isFocused = useIsFocused();
 
   const [collections, setCollections] = useState<CollectionRead[]>([]);
   const [following, setFollowing] = useState<UserRead[]>([]);
   const [followers, setFollowers] = useState<UserRead[]>([]);
+
+  useEffect(() => {
+    if (isFocused) {
+      const initializeUser = async () => {
+        try {
+          const response = await usersApi.getUserByIdUserUserIdGet(
+            defaultUser.id,
+          );
+          setUser(response.data);
+        } catch (error) {
+          console.log(`Error fetching user ${defaultUser.id}:`, error);
+        }
+      };
+      initializeUser().catch(error => console.log(error));
+    }
+  }, [isFocused, defaultUser, usersApi]);
 
   useEffect(() => {
     const initializeCollections = async () => {
@@ -78,7 +96,6 @@ export const Screen = ({user}: ScreenProps) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Title
-          style={styles.profileBanner}
           user={user}
           isCurrentUser={isCurrentUser}
         />
@@ -89,7 +106,6 @@ export const Screen = ({user}: ScreenProps) => {
             style={styles.profileButtons}
             user={user}
             currentUser={bibliUser}
-            usersApi={usersApi}
           />
         )}
       </View>
@@ -122,9 +138,6 @@ const styles = StyleSheet.create({
   },
   socialText: {
     textAlign: 'center',
-  },
-  profileBanner: {
-    paddingTop: 5,
   },
   profileButtons: {
     padding: 10,

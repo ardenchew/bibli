@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional, List
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column, DateTime
 
 
 class CollectionType(str, Enum):
@@ -43,7 +43,12 @@ class CollectionUserLink(CollectionUserLinkBase, table=True):
         default=None, primary_key=True, foreign_key="collection.id"
     )
     user_id: int = Field(default=None, primary_key=True, foreign_key="user.id")
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        # sa_column=Column(DateTime(timezone=True)),
+        nullable=False,
+        index=True,
+    )
 
     collection: "Collection" = Relationship(back_populates="user_links")
     user: "User" = Relationship(back_populates="collection_links")
@@ -83,4 +88,5 @@ class CollectionPut(CollectionBase):
 
 class CollectionsFilter(SQLModel):
     user_id: Optional[int] = None
+    user_link_type: Optional[CollectionUserLinkType]
     type: Optional[CollectionType]

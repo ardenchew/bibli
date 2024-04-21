@@ -1,7 +1,9 @@
+from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, UploadFile, File
 from sqlmodel import Session
+from pathlib import Path
 
 import src.db.schema as schema
 from resources.exceptions import NotFoundException
@@ -90,13 +92,11 @@ async def put_user(
 
     # Create translation layer.
     # Check that this doesn't erase foreign relationships.
-    db_user = schema.users.User(
-        sub=request.state.user.sub,
-        id=user.id,
-        name=user.name,
-        tag=user.tag,
-        bio=user.bio,
-    )
+    db_user = users.get_user(session, user.id)
+    db_user.name = user.name
+    db_user.tag = user.tag
+    db_user.bio = user.bio
+
     return users.upsert_user(session, db_user)
 
 
@@ -132,6 +132,23 @@ users_router = APIRouter(
     },
     dependencies=[Depends(auth0_middleware)],
 )
+
+
+@user_router.post("/feedback", response_model=schema.users.FeedbackRead)
+async def post_feedback(
+    feedback: schema.users.FeedbackWrite,
+    session: Session = Depends(get_session),
+):
+    return users.insert_feedback(session, feedback)
+
+
+@user_router.put("/avatar/{user_id}", response_model=str)
+async def put_avatar(
+        user_id: int,
+        file: UploadFile = File(...),
+        session: Session = Depends(get_session),
+):
+    return users.upsert_avatar(session, user_id, file)
 
 
 @users_router.get("/linked", response_model=List[schema.users.UserRead])

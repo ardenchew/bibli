@@ -4,9 +4,10 @@ import {StyleProp, ViewStyle} from 'react-native';
 import {UserRead} from '../../generated/jericho';
 import {useState} from 'react';
 import {useLogout} from './Logout';
+import {UserAvatar, UserAvatarCallback} from './Avatar';
+import {LightTheme} from '../../styles/themes/LightTheme';
 
 interface Props {
-  style: StyleProp<ViewStyle>;
   user: UserRead;
   isCurrentUser: boolean;
 }
@@ -30,8 +31,8 @@ const MenuButton = ({isCurrentUser}: {isCurrentUser: boolean}) => {
           title="Log out"
           theme={{
             colors: {
-              onSurface: 'red',
-              onSurfaceVariant: 'red',
+              onSurface: 'firebrick',
+              onSurfaceVariant: 'firebrick',
             },
           }}
         />
@@ -42,18 +43,30 @@ const MenuButton = ({isCurrentUser}: {isCurrentUser: boolean}) => {
   );
 };
 
-export const Title = ({style, user, isCurrentUser}: Props) => {
+export const Title = ({user, isCurrentUser}: Props) => {
+  const left = UserAvatarCallback({user, size: 70});
+  const right = () => <MenuButton isCurrentUser={isCurrentUser} />;
   return (
-    <>
+    <Card
+      mode={'contained'}
+      theme={{
+        colors: {surfaceVariant: LightTheme.colors.onPrimary},
+      }}
+      style={{margin: 10}}>
       <Card.Title
-        style={style}
+        // leftStyle={{borderWidth: 1, width: 80, height: 80}}
         title={user?.name}
         titleVariant={'headlineMedium'}
         subtitle={`@${user?.tag}`}
         subtitleVariant={'labelLarge'}
-        left={props => <Avatar.Icon {...props} icon="account" />}
-        right={() => <MenuButton isCurrentUser={isCurrentUser} />}
+        left={left}
+        leftStyle={{
+          borderWidth: 1,
+          alignItems: 'center',
+          marginRight: 30,
+        }}
+        right={right}
       />
-    </>
+    </Card>
   );
 };

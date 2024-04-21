@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   CollectionBookLink,
   CollectionsApi,
-  CollectionType,
+  CollectionType, CollectionUserLinkType,
   Reaction,
   ReviewRead,
   ReviewsApi,
@@ -13,6 +13,7 @@ import {IconButton, Tooltip} from 'react-native-paper';
 import {StyleSheet, Text, View} from 'react-native';
 import {LightTheme} from '../../styles/themes/LightTheme';
 import {ReviewModal} from './Review';
+import {ApiContext} from '../../context';
 
 export const IdCollectionOnPress = (
   collectionsApi: CollectionsApi,
@@ -53,8 +54,10 @@ export const TypedCollectionOnPress = (
     try {
       const response = await collectionsApi.getCollectionsCollectionsGet(
         bibliUser?.id,
+        CollectionUserLinkType.Owner,
         type,
       );
+
       const collectionId = response.data[0]?.id;
 
       if (!collectionId) {
@@ -163,6 +166,19 @@ interface ReviewIndicatorProps {
   review?: ReviewRead;
 }
 
+export const ReviewIndicatorText = ({review}: ReviewIndicatorProps) => {
+  if (!review) {
+    return null;
+  }
+
+  const color = reactionColorMap[review.reaction];
+  return (
+    <Text style={[styles.ratingIndicatorText, {color}]}>
+      {review.rating.toFixed(1)}
+    </Text>
+  );
+};
+
 export const ReviewIndicator = ({review}: ReviewIndicatorProps) => {
   if (!review) {
     return null;
@@ -185,12 +201,9 @@ export const ReviewIndicator = ({review}: ReviewIndicatorProps) => {
     );
   }
 
-  const color = reactionColorMap[review.reaction];
   return (
     <View style={styles.ratingIndicatorContainer}>
-      <Text style={[styles.ratingIndicatorText, {color}]}>
-        {review.rating.toFixed(1)}
-      </Text>
+      <ReviewIndicatorText review={review} />
     </View>
   );
 };
@@ -219,7 +232,6 @@ export const ActiveIndicator = ({hasActive}: ActiveIndicatorProps) => {
 
 interface SavedIndicatorProps {
   bibliUser: UserRead | null;
-  collectionsApi: CollectionsApi;
   book: UserBookRead;
   hasSaved: boolean;
   refreshBook: () => void;
@@ -227,11 +239,11 @@ interface SavedIndicatorProps {
 
 export const SavedIndicator = ({
   bibliUser,
-  collectionsApi,
   book,
   refreshBook,
   hasSaved,
 }: SavedIndicatorProps) => {
+  const {collectionsApi} = useContext(ApiContext);
   const [icon, setIcon] = useState<string>(
     hasSaved ? 'bookmark' : 'bookmark-outline',
   );
